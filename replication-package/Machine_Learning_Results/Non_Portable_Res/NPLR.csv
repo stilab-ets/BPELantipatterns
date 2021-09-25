@@ -1,0 +1,94 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.Logistic -R 1.0E-8 -M -1 -num-decimal-places 4
+Relation:     NP2
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+Logistic Regression with ridge parameter of 1.0E-8
+Coefficients...
+                           Class
+Variable                       P
+================================
+DeltaSJX                 -0.3356
+dC_max                   -0.4662
+Sequentiality            -4.6407
+Depth                    -0.1077
+CH                       -4.6545
+CYC                      -0.5149
+TS                        0.1946
+PV                         0.002
+PD                       -0.0692
+ IC                       5.8473
+ OC                      -0.5446
+Ma                      -20.1408
+Ms                       -2.4728
+Me                       21.8034
+Intercept                -0.8526
+
+
+Odds Ratios...
+                           Class
+Variable                       P
+================================
+DeltaSJX                  0.7149
+dC_max                    0.6274
+Sequentiality             0.0097
+Depth                     0.8979
+CH                        0.0095
+CYC                       0.5975
+TS                        1.2149
+PV                         1.002
+PD                        0.9331
+ IC                     346.2936
+ OC                       0.5801
+Ma                             0
+Ms                        0.0844
+Me               2944981698.8664
+
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         146               82.0225 %
+Incorrectly Classified Instances        32               17.9775 %
+Kappa statistic                          0.4648
+Mean absolute error                      0.2416
+Root mean squared error                  0.3712
+Relative absolute error                 70.211  %
+Root relative squared error             89.7184 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.564    0.108    0.595      0.564    0.579      0.465    0.789     0.537     P
+                 0.892    0.436    0.879      0.892    0.886      0.465    0.790     0.904     NP
+Weighted Avg.    0.820    0.364    0.817      0.820    0.819      0.465    0.790     0.824     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+  22  17 |   a = P
+  15 124 |   b = NP
+

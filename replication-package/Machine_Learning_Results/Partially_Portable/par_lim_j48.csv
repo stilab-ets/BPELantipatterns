@@ -1,0 +1,71 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     Par_Lim
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+              IC
+              OC
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+Me <= 0.962963: No_Partially_Limted (120.0)
+Me > 0.962963
+|   Ma <= 0.962963
+|   |   CH <= 0.5
+|   |   |   PD <= 3.15
+|   |   |   |   Ms <= 0.951389: Partially_Limted (3.0/1.0)
+|   |   |   |   Ms > 0.951389: No_Partially_Limted (7.0)
+|   |   |   PD > 3.15: Partially_Limted (26.0/1.0)
+|   |   CH > 0.5: No_Partially_Limted (3.0)
+|   Ma > 0.962963: No_Partially_Limted (19.0)
+
+Number of Leaves  : 	6
+
+Size of the tree : 	11
+
+
+Time taken to build model: 0.06 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         166               93.2584 %
+Incorrectly Classified Instances        12                6.7416 %
+Kappa statistic                          0.738 
+Mean absolute error                      0.0696
+Root mean squared error                  0.2475
+Relative absolute error                 26.7407 %
+Root relative squared error             68.953  %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.778    0.040    0.778      0.778    0.778      0.738    0.913     0.784     Partially_Limted
+                 0.960    0.222    0.960      0.960    0.960      0.738    0.913     0.971     No_Partially_Limted
+Weighted Avg.    0.933    0.195    0.933      0.933    0.933      0.738    0.913     0.943     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+  21   6 |   a = Partially_Limted
+   6 145 |   b = No_Partially_Limted
+

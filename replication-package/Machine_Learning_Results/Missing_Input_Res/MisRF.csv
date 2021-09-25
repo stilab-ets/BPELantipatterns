@@ -1,0 +1,58 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.RandomForest -P 100 -I 100 -num-slots 1 -K 0 -M 1.0 -V 0.001 -S 1
+Relation:     missing
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+RandomForest
+
+Bagging with 100 iterations and base learner
+
+weka.classifiers.trees.RandomTree -K 0 -M 1.0 -V 0.001 -S 1 -do-not-check-capabilities
+
+Time taken to build model: 0.03 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         156               87.6404 %
+Incorrectly Classified Instances        22               12.3596 %
+Kappa statistic                          0.5626
+Mean absolute error                      0.1975
+Root mean squared error                  0.3157
+Relative absolute error                 60.7625 %
+Root relative squared error             78.5527 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.965    0.472    0.890      0.965    0.926      0.579    0.873     0.959     NoMissing
+                 0.528    0.035    0.792      0.528    0.633      0.579    0.873     0.669     Missing
+Weighted Avg.    0.876    0.384    0.870      0.876    0.867      0.579    0.873     0.901     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 137   5 |   a = NoMissing
+  17  19 |   b = Missing
+

@@ -1,0 +1,67 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     redundant
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+ OC  <= 0.979167
+|    IC  <= 0.6: NoRedundant (3.0/1.0)
+|    IC  > 0.6: Redundant (55.0/7.0)
+ OC  > 0.979167
+|   PV <= 155.589411: NoRedundant (109.0/14.0)
+|   PV > 155.589411: Redundant (11.0/2.0)
+
+Number of Leaves  : 	4
+
+Size of the tree : 	7
+
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         141               79.2135 %
+Incorrectly Classified Instances        37               20.7865 %
+Kappa statistic                          0.5676
+Mean absolute error                      0.2708
+Root mean squared error                  0.4209
+Relative absolute error                 56.1619 %
+Root relative squared error             85.7302 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.830    0.264    0.822      0.830    0.826      0.568    0.767     0.767     NoRedundant
+                 0.736    0.170    0.746      0.736    0.741      0.568    0.767     0.659     Redundant
+Weighted Avg.    0.792    0.226    0.792      0.792    0.792      0.568    0.767     0.723     
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 88 18 |  a = NoRedundant
+ 19 53 |  b = Redundant
+
