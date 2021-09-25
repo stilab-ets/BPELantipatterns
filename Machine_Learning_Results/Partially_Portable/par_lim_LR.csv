@@ -1,0 +1,94 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.Logistic -R 1.0E-8 -M -1 -num-decimal-places 4
+Relation:     Par_Lim
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+              IC
+              OC
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+Logistic Regression with ridge parameter of 1.0E-8
+Coefficients...
+                                  Class
+Variable               Partially_Limted
+=======================================
+DeltaSJX                        -2.5147
+dC_max                          -2.0969
+Sequentiality                   -6.8657
+Depth                            2.1395
+CH                               4.9238
+CYC                            -11.3521
+TS                              -1.4431
+PV                               0.0058
+PD                                0.182
+IC                              48.5604
+OC                              73.2526
+Ma                            -130.1407
+Ms                             -28.3125
+Me                             366.2375
+Intercept                     -331.4266
+
+
+Odds Ratios...
+                                  Class
+Variable               Partially_Limted
+=======================================
+DeltaSJX                         0.0809
+dC_max                           0.1228
+Sequentiality                     0.001
+Depth                            8.4951
+CH                             137.5195
+CYC                                   0
+TS                               0.2362
+PV                               1.0058
+PD                               1.1996
+IC                1.2289050671916135E21
+OC                6.5044518133350335E31
+Ma                                    0
+Ms                                    0
+Me               1.1348235570710216E159
+
+
+Time taken to build model: 0.02 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         166               93.2584 %
+Incorrectly Classified Instances        12                6.7416 %
+Kappa statistic                          0.738 
+Mean absolute error                      0.0775
+Root mean squared error                  0.2583
+Relative absolute error                 29.7749 %
+Root relative squared error             71.9751 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.778    0.040    0.778      0.778    0.778      0.738    0.906     0.678     Partially_Limted
+                 0.960    0.222    0.960      0.960    0.960      0.738    0.909     0.974     No_Partially_Limted
+Weighted Avg.    0.933    0.195    0.933      0.933    0.933      0.738    0.908     0.929     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+  21   6 |   a = Partially_Limted
+   6 145 |   b = No_Partially_Limted
+

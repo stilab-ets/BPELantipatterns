@@ -1,0 +1,54 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.LibSVM -S 0 -K 2 -D 3 -G 0.0 -R 0.0 -N 0.5 -M 40.0 -C 1.0 -E 0.001 -P 0.1 -model "C:\\Program Files\\Weka-3-8-4" -seed 1
+Relation:     redundant
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+LibSVM wrapper, original code by Yasser EL-Manzalawy (= WLSVM)
+
+Time taken to build model: 0.01 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         119               66.8539 %
+Incorrectly Classified Instances        59               33.1461 %
+Kappa statistic                          0.3313
+Mean absolute error                      0.3315
+Root mean squared error                  0.5757
+Relative absolute error                 68.7548 %
+Root relative squared error            117.2773 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.660    0.319    0.753      0.660    0.704      0.335    0.670     0.699     NoRedundant
+                 0.681    0.340    0.576      0.681    0.624      0.335    0.670     0.522     Redundant
+Weighted Avg.    0.669    0.328    0.681      0.669    0.671      0.335    0.670     0.627     
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 70 36 |  a = NoRedundant
+ 23 49 |  b = Redundant
+

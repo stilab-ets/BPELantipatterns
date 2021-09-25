@@ -1,0 +1,73 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     NP2
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+Me <= 0.97037: NP (132.0/9.0)
+Me > 0.97037
+|   Ma <= 0.962963
+|   |   CH <= 0.192156: P (19.0/1.0)
+|   |   CH > 0.192156
+|   |   |   DeltaSJX <= 0.044615
+|   |   |   |   Ms <= 0.925926: NP (5.0)
+|   |   |   |   Ms > 0.925926: P (4.0/1.0)
+|   |   |   DeltaSJX > 0.044615: P (4.0)
+|   Ma > 0.962963
+|   |   Me <= 0.990232: NP (9.0)
+|   |   Me > 0.990232: P (5.0)
+
+Number of Leaves  : 	7
+
+Size of the tree : 	13
+
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         155               87.0787 %
+Incorrectly Classified Instances        23               12.9213 %
+Kappa statistic                          0.6041
+Mean absolute error                      0.1811
+Root mean squared error                  0.3465
+Relative absolute error                 52.6134 %
+Root relative squared error             83.7504 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.641    0.065    0.735      0.641    0.685      0.606    0.736     0.541     P
+                 0.935    0.359    0.903      0.935    0.919      0.606    0.736     0.864     NP
+Weighted Avg.    0.871    0.295    0.866      0.871    0.868      0.606    0.736     0.793     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+  25  14 |   a = P
+   9 130 |   b = NP
+

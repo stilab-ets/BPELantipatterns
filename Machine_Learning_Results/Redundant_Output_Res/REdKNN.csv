@@ -1,0 +1,56 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.lazy.IBk -K 1 -W 0 -A "weka.core.neighboursearch.LinearNNSearch -A \"weka.core.EuclideanDistance -R first-last\""
+Relation:     redundant
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+IB1 instance-based classifier
+using 1 nearest neighbour(s) for classification
+
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         126               70.7865 %
+Incorrectly Classified Instances        52               29.2135 %
+Kappa statistic                          0.3882
+Mean absolute error                      0.2922
+Root mean squared error                  0.5299
+Relative absolute error                 60.6126 %
+Root relative squared error            107.9492 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.774    0.389    0.745      0.774    0.759      0.389    0.721     0.762     NoRedundant
+                 0.611    0.226    0.647      0.611    0.629      0.389    0.721     0.577     Redundant
+Weighted Avg.    0.708    0.323    0.706      0.708    0.706      0.389    0.721     0.687     
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 82 24 |  a = NoRedundant
+ 28 44 |  b = Redundant
+

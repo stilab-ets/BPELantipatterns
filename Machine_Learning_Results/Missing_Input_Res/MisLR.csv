@@ -1,0 +1,94 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.Logistic -R 1.0E-8 -M -1 -num-decimal-places 4
+Relation:     missing
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+Logistic Regression with ridge parameter of 1.0E-8
+Coefficients...
+                       Class
+Variable           NoMissing
+============================
+DeltaSJX             11.1581
+dC_max                0.1236
+Sequentiality         0.8021
+Depth                -0.2924
+CH                    0.6021
+CYC                  -1.2488
+TS                   -0.1644
+PV                    0.0009
+PD                    0.2395
+ IC                  14.8877
+ OC                   1.7105
+Ma                    -1.654
+Ms                   -1.3073
+Me                    1.8377
+Intercept           -14.9498
+
+
+Odds Ratios...
+                       Class
+Variable           NoMissing
+============================
+DeltaSJX          70128.0239
+dC_max                1.1315
+Sequentiality         2.2302
+Depth                 0.7464
+CH                     1.826
+CYC                   0.2869
+TS                    0.8484
+PV                    1.0009
+PD                    1.2706
+ IC              2921761.631
+ OC                   5.5316
+Ma                    0.1913
+Ms                    0.2705
+Me                    6.2818
+
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         152               85.3933 %
+Incorrectly Classified Instances        26               14.6067 %
+Kappa statistic                          0.483 
+Mean absolute error                      0.2128
+Root mean squared error                  0.3461
+Relative absolute error                 65.4798 %
+Root relative squared error             86.111  %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.951    0.528    0.877      0.951    0.912      0.497    0.807     0.913     NoMissing
+                 0.472    0.049    0.708      0.472    0.567      0.497    0.807     0.550     Missing
+Weighted Avg.    0.854    0.431    0.843      0.854    0.842      0.497    0.807     0.840     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 135   7 |   a = NoMissing
+  19  17 |   b = Missing
+

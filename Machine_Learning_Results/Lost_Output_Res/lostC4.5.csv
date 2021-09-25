@@ -1,0 +1,65 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     lost
+Instances:    178
+Attributes:   15
+              DeltaSJX
+              dC_max
+              Sequentiality
+              Depth
+              CH
+              CYC
+              TS
+              PV
+              PD
+               IC 
+               OC 
+              Ma
+              Ms
+              Me
+              class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+PV <= 330.220023: NoLost (165.0/14.0)
+PV > 330.220023
+|   Ms <= 0.977778: Lost (11.0/1.0)
+|   Ms > 0.977778: NoLost (2.0)
+
+Number of Leaves  : 	3
+
+Size of the tree : 	5
+
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         155               87.0787 %
+Incorrectly Classified Instances        23               12.9213 %
+Kappa statistic                          0.342 
+Mean absolute error                      0.19  
+Root mean squared error                  0.3467
+Relative absolute error                 80.2648 %
+Root relative squared error            101.4443 %
+Total Number of Instances              178     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.955    0.667    0.902      0.955    0.927      0.354    0.568     0.877     NoLost
+                 0.333    0.045    0.533      0.333    0.410      0.354    0.568     0.238     Lost
+Weighted Avg.    0.871    0.583    0.852      0.871    0.858      0.354    0.568     0.791     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 147   7 |   a = NoLost
+  16   8 |   b = Lost
+
