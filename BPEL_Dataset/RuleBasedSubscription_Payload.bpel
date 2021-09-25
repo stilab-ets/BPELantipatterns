@@ -1,0 +1,37 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Thu Mar 31 12:10:09 PST 2005
+  // Author:  lililiu
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="RuleBasedSubscription_Payload" targetNamespace="http://xmlns.oracle.com/RuleBasedSubscription_Payload" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/aq/outbound/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://xmlns.oracle.com/xdb/SCOTT" xmlns:client="http://xmlns.oracle.com/RuleBasedSubscription_Payload" xmlns:ns6="http://xmlns.oracle.com/pcbpel/adapter/aq/inbound/" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/aq/ReadOracleMagazine/" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/aq/MegazineReceived/" xmlns:ns2="http://www.oracle.com/ipdemo" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= --><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= --><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <partnerLinks>
+    <partnerLink myRole="Dequeue_role" name="ReadOracleMagazine" partnerLinkType="ns1:Dequeue_plt"/>
+    <partnerLink name="MagazineReceived" partnerLinkType="ns3:Enqueue_plt" partnerRole="Enqueue_role"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive_1_Dequeue_InputVariable" messageType="ns1:simpleMagazine_msg"/>
+    <variable name="inbound_header" messageType="ns1:Header_msg"/>
+    <variable name="Invoke_1_Enqueue_InputVariable" messageType="ns3:MAGAZINE_TYPE_msg"/>
+    <variable name="outbound_header" messageType="ns4:Header"/>
+  </variables>
+  <sequence name="main">
+    <receive name="Receive_1" createInstance="yes" partnerLink="ReadOracleMagazine" portType="ns1:Dequeue_ptt" operation="Dequeue" variable="Receive_1_Dequeue_InputVariable" bpelx:headerVariable="inbound_header"/>
+    <assign name="Copy_PayloadElement_as_String">
+      <copy>
+        <from expression="ora:getContentAsString(bpws:getVariableData( 'Receive_1_Dequeue_InputVariable', 'simpleMagazine','/ns2:simpleMagazine'))"/>
+        <to variable="Invoke_1_Enqueue_InputVariable" part="MAGAZINE_TYPE" query="/ns5:MAGAZINE_TYPE/CONTENT"/>
+      </copy>
+    </assign>
+    <assign name="Copy_Title">
+      <copy>
+        <from variable="inbound_header" part="Header" query="/ns1:Header/ns1:PayloadHeader/TITLE"/>
+        <to variable="Invoke_1_Enqueue_InputVariable" part="MAGAZINE_TYPE" query="/ns5:MAGAZINE_TYPE/TITLE"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_1" partnerLink="MagazineReceived" portType="ns3:Enqueue_ptt" operation="Enqueue" inputVariable="Invoke_1_Enqueue_InputVariable" bpelx:inputHeaderVariable="outbound_header"/>
+  </sequence>
+</process>

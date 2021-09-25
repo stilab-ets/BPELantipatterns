@@ -1,0 +1,280 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Mon Feb 27 10:46:49 PST 2006
+  Author:  rarangas
+  Purpose: Asynchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="StarLoan" targetNamespace="http://services.otn.com"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:wfcommon="http://xmlns.oracle.com/bpel/workflow/common"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:tns="http://services.otn.com"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:task="http://xmlns.oracle.com/bpel/workflow/task"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:auto="http://www.autoloan.com/ns/autoloan"
+         xmlns:taskservice="http://xmlns.oracle.com/bpel/workflow/taskService"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <partnerLinks>
+        <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+        <partnerLink myRole="LoanServiceProvider" name="client"
+                     partnerRole="LoanServiceRequester"
+                     partnerLinkType="tns:LoanService"/>
+        <partnerLink myRole="TaskServiceCallbackListener" name="TaskService"
+                     partnerRole="TaskService"
+                     partnerLinkType="taskservice:TaskService"/>
+    </partnerLinks>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        VARIABLES                                                        
+        List of messages and XML documents used within this BPEL process 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <variables>
+        <!-- Reference to the message passed as input during initiation -->
+        <variable name="inputVariable"
+                  messageType="tns:LoanServiceRequestMessage"/>
+        <variable name="outputVariable"
+                  messageType="tns:LoanServiceResultMessage"/>
+        <variable name="loan" element="auto:loan"/>
+        <variable name="LoanApproval_globalVariable"
+                  messageType="taskservice:taskMessage"/>
+    </variables>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ORCHESTRATION LOGIC                                               
+       Set of activities coordinating the flow of messages across the    
+       services integrated within this business process                  
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <sequence name="main">
+        <receive name="receiveInput" partnerLink="client"
+                 portType="tns:LoanService" operation="initiate"
+                 variable="inputVariable" createInstance="yes"/>
+        <assign name="setLoan">
+            <copy>
+                <from variable="inputVariable" part="payload"/>
+                <to variable="loan" query="/auto:loan/auto:loanApplication"/>
+            </copy>
+            <copy>
+                <from expression="string('Star Loan')"/>
+                <to variable="outputVariable" part="payload"
+                    query="/auto:loanOffer/auto:providerName"/>
+            </copy>
+            <copy>
+                <from expression="number(5.5)"/>
+                <to variable="outputVariable" part="payload"
+                    query="/auto:loanOffer/auto:APR"/>
+            </copy>
+            <copy>
+                <from variable="outputVariable" part="payload"/>
+                <to variable="loan" query="/auto:loan/auto:loanOffer"/>
+            </copy>
+        </assign>
+        <!-- 
+          Asynchronous callback to the requester. (Note: the callback location and correlation id is transparently handled using WS-addressing.)
+        -->
+        <scope name="LoanApproval"
+               xmlns:wf="http://schemas.oracle.com/bpel/extension/workflow"
+               wf:key="LoanApproval_globalVariable">
+            <bpelx:annotation xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+                <bpelx:pattern patternName="bpelx:workflow"></bpelx:pattern>
+            </bpelx:annotation>
+            <variables>
+                <variable name="initiateTaskInput"
+                          messageType="taskservice:initiateTaskMessage"/>
+                <variable name="initiateTaskResponseMessage"
+                          messageType="taskservice:initiateTaskResponseMessage"/>
+            </variables>
+            <correlationSets>
+                <correlationSet name="WorkflowTaskIdCor"
+                                properties="taskservice:taskId"/>
+            </correlationSets>
+            <sequence>
+                <assign name="LoanApproval_AssignTaskAttributes">
+                    <copy>
+                        <from expression="concat(ora:getProcessURL(), string('/LoanApproval/LoanApproval.task'))"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:taskDefinitionURI"/>
+                    </copy>
+                    <copy>
+                        <from expression="concat(string('Loan application for '),bpws:getVariableData('inputVariable', 'payload', '/auto:loanApplication/auto:customerName'))"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:title"/>
+                    </copy>
+                    <copy>
+                        <from expression="number(3)"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:priority"/>
+                    </copy>
+                    <copy>
+                        <from variable="inputVariable" part="payload"
+                              query="/auto:loanApplication/auto:customerName"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:creator"/>
+                    </copy>
+                    <bpelx:append xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+                        <bpelx:from variable="loan"/>
+                        <bpelx:to variable="initiateTaskInput" part="payload"
+                                  query="/taskservice:initiateTask/task:task/task:payload"/>
+                    </bpelx:append>
+                </assign>
+                <assign name="LoanApproval_AssignSystemTaskAttributes">
+                    <copy>
+                        <from expression="ora:getInstanceId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:instanceId"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processName"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processId"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessVersion()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processVersion"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getDomainId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:domainId"/>
+                    </copy>
+                    <copy>
+                        <from expression="string('BPEL')"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processType"/>
+                    </copy>
+                </assign>
+                <invoke name="initiateTask" partnerLink="TaskService"
+                        portType="taskservice:TaskService"
+                        operation="initiateTask"
+                        inputVariable="initiateTaskInput"
+                        outputVariable="initiateTaskResponseMessage">
+                    <correlations>
+                        <correlation initiate="yes" set="WorkflowTaskIdCor"
+                                     pattern="in"/>
+                    </correlations>
+                </invoke>
+                <receive name="receiveCompletedTask" partnerLink="TaskService"
+                         portType="taskservice:TaskServiceCallback"
+                         operation="onTaskCompleted"
+                         variable="LoanApproval_globalVariable"
+                         createInstance="no">
+                    <correlations>
+                        <correlation initiate="no" set="WorkflowTaskIdCor"/>
+                    </correlations>
+                </receive>
+            </sequence>
+        </scope>
+        <switch name="taskSwitch">
+            <case condition="bpws:getVariableData('LoanApproval_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('LoanApproval_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'REJECT'">
+                <bpelx:annotation>
+                    <bpelx:pattern>Task outcome is REJECT</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                    <assign>
+                        <copy>
+                            <from variable="LoanApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/auto:loan"/>
+                            <to variable="loan" query="/auto:loan"/>
+                        </copy>
+                    </assign>
+                </sequence>
+            </case>
+            <case condition="bpws:getVariableData('LoanApproval_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('LoanApproval_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'APPROVE'">
+                <bpelx:annotation>
+                    <bpelx:pattern>Task outcome is APPROVE</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                    <assign>
+                        <copy>
+                            <from variable="LoanApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/auto:loan"/>
+                            <to variable="loan" query="/auto:loan"/>
+                        </copy>
+                    </assign>
+                </sequence>
+            </case>
+            <otherwise>
+                <bpelx:annotation>
+                    <bpelx:pattern>Task is outcome is EXPIRED, STALE, WITHDRAWN or ERRORED</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                    <assign>
+                        <copy>
+                            <from variable="LoanApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/auto:loan"/>
+                            <to variable="loan" query="/auto:loan"/>
+                        </copy>
+                    </assign>
+                </sequence>
+            </otherwise>
+        </switch>
+        <switch name="setLoanOffer">
+            <case condition="bpws:getVariableData('LoanApproval_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('LoanApproval_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'APPROVE'">
+                <assign>
+                    <copy>
+                        <from variable="loan"
+                              query="/auto:loan/auto:loanOffer"/>
+                        <to variable="outputVariable" part="payload"
+                            query="/auto:loanOffer"/>
+                    </copy>
+                    <copy>
+                        <from expression="string('true')"/>
+                        <to variable="outputVariable" part="payload"
+                            query="/auto:loanOffer/auto:approved"/>
+                    </copy>
+                    <copy>
+                        <from expression="'Star Loan'"/>
+                        <to variable="outputVariable" part="payload"
+                            query="/auto:loanOffer/auto:providerName"/>
+                    </copy>
+                </assign>
+            </case>
+            <otherwise>
+                <assign>
+                    <copy>
+                        <from>
+                            <loanOffer xmlns="http://www.autoloan.com/ns/autoloan">
+                                <providerName>Star Loan</providerName>
+                                <selected>false</selected>
+                                <approved>false</approved>
+                                <APR>100.0</APR>
+                            </loanOffer>
+                        </from>
+                        <to variable="outputVariable" part="payload"/>
+                    </copy>
+                </assign>
+            </otherwise>
+        </switch>
+        <invoke name="replyOutput" partnerLink="client"
+                portType="tns:LoanServiceCallback" operation="onResult"
+                inputVariable="outputVariable"/>
+    </sequence>
+</process>

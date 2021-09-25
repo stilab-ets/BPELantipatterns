@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="AdapterPolicyEngine"
+    targetNamespace="urn:gov:hhs:fha:nhinc:adapters:general:adapterpolicyenginebpel:adapterpolicyengine"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+    xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+    xmlns:sxat="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Attachment"
+    xmlns:sxeh="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/ErrorHandling"
+    xmlns:tns="urn:gov:hhs:fha:nhinc:adapters:general:adapterpolicyenginebpel:adapterpolicyengine" 
+    xmlns:ns0="urn:gov:hhs:fha:nhinc:common:nhinccommonadapter" 
+    xmlns:ns1="urn:oasis:names:tc:xacml:2.0:context:schema:os">
+    <import namespace="urn:gov:hhs:fha:nhinc:adapterpolicyengine" location="Interfaces/wsdl/AdapterPolicyEngine.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:adapterpolicyengineorchestrator" location="Interfaces/wsdl/AdapterPolicyEngineOrchestrator.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+        <partnerLink name="AdapterPolicyEngineOrchestratorPL" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengineorchestrator" partnerLinkType="tns:AdapterPolicyEngineOrchestrator" partnerRole="AdapterPolicyEngineOrchestratorPortTypeRole"/>
+        <partnerLink name="AdapterEnginePL" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengine" partnerLinkType="tns:AdapterPolicyEngine" myRole="AdapterPolicyEnginePortTypeRole"/>
+    </partnerLinks>
+    <variables>
+        <variable name="CheckPolicyOutput" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengine" messageType="tns:CheckPolicyResponseMessage"/>
+        <variable name="CheckPolicyInput" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengine" messageType="tns:CheckPolicyRequestMessage"/>
+    </variables>
+    <sequence name="SequenceOuterAdapterPolicyEngine">
+        <scope name="ScopeAdapterPolicyEngine">
+            <variables>
+                <variable name="InvokeOrchCheckPolicyOutput" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengineorchestrator" messageType="tns:CheckPolicyResponseMessage"/>
+                <variable name="InvokeOrchCheckPolicyInput" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengineorchestrator" messageType="tns:CheckPolicyRequestMessage"/>
+            </variables>
+            <faultHandlers>
+                <catch faultName="sxeh:systemFault" faultVariable="systemFaultVar" faultMessageType="sxeh:faultMessage">
+                    <sequence name="SystemFaultSeq">
+                        <assign name="AssignSystemFaultAdapterPolicyEngine">
+                            <sxt:trace>
+                                <sxt:log level="info" location="onStart">
+                                    <from>"AdapterPolicyEngine::CheckPolicy - An unexpected error has occurred.  Returning 'Deny'."</from>
+                                </sxt:log>
+                                <sxt:log level="warning" location="onStart">
+                                    <from variable="systemFaultVar"/>
+                                </sxt:log>
+                            </sxt:trace>
+                            <copy>
+                                <from>'Deny'</from>
+                                <to>$CheckPolicyOutput.CheckPolicyResponse/ns0:response/ns1:Result/ns1:Decision</to>
+                            </copy>
+                        </assign>
+                    </sequence>
+                </catch>
+                <catchAll>
+                    <sequence name="SequenceFaultCatchAll">
+                        <assign name="AssignFaultAdapterPolicyEngine">
+                            <sxt:trace>
+                                <sxt:log level="warning" location="onStart">
+                                    <from>"AdapterPolicyEngine::CheckPolicy - An unexpected error has occurred.  Returning 'Deny'."</from>
+                                </sxt:log>
+                                <sxt:log level="info" location="onStart">
+                                    <from variable="CheckPolicyInput"/>
+                                </sxt:log>
+                            </sxt:trace>
+                            <copy>
+                                <from>'Deny'</from>
+                                <to>$CheckPolicyOutput.CheckPolicyResponse/ns0:response/ns1:Result/ns1:Decision</to>
+                            </copy>
+                        </assign>
+                    </sequence>
+                </catchAll>
+            </faultHandlers>
+            <sequence name="SequenceAdapterPolicyEngine">
+                <receive name="ReceiveAdapterPolicyEngine" createInstance="yes" partnerLink="AdapterEnginePL" operation="CheckPolicy" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengine" portType="tns:AdapterPolicyEnginePortType" variable="CheckPolicyInput">
+                    <sxt:trace>
+                        <sxt:log level="warning" location="onComplete">
+                            <from>'AdapterPolicyEngine:CheckPolicy Request:'</from>
+                        </sxt:log>
+                        <sxt:log level="info" location="onComplete">
+                            <from variable="CheckPolicyInput"/>
+                        </sxt:log>
+                    </sxt:trace>
+                </receive>
+                <assign name="AssignOrchestratorInput">
+                    <sxt:trace>
+                        <sxt:log level="warning" location="onStart">
+                            <from>$CheckPolicyInput.CheckPolicyRequest/ns0:request</from>
+                        </sxt:log>                        
+                    </sxt:trace>
+                    <copy>
+                        <from variable="CheckPolicyInput" part="CheckPolicyRequest"/>
+                        <to variable="InvokeOrchCheckPolicyInput" part="CheckPolicyRequest"/>
+                    </copy>
+                </assign>
+                <invoke name="InvokeAdapterPolicyEngineOrchestrator" partnerLink="AdapterPolicyEngineOrchestratorPL" operation="CheckPolicy" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengineorchestrator" portType="tns:AdapterPolicyEngineOrchestratorPortType" inputVariable="InvokeOrchCheckPolicyInput" outputVariable="InvokeOrchCheckPolicyOutput"/>
+                <assign name="AssignReplyFromOrch">
+                    <copy>
+                        <from>$InvokeOrchCheckPolicyOutput.CheckPolicyResponse/ns0:response</from>
+                        <to>$CheckPolicyOutput.CheckPolicyResponse/ns0:response</to>
+                    </copy>
+                    
+                </assign>
+            </sequence>
+        </scope>
+        <reply name="ReplyAdapterPolicyEngine" partnerLink="AdapterEnginePL" operation="CheckPolicy" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterpolicyengine" portType="tns:AdapterPolicyEnginePortType" variable="CheckPolicyOutput">
+            <sxt:trace>
+                <sxt:log level="warning" location="onStart">
+                    <from>'AdapterPolicyEngine::CheckPolicy Response:'</from>
+                </sxt:log>
+                <sxt:log level="info" location="onStart">
+                    <from variable="CheckPolicyOutput"/>
+                </sxt:log>
+            </sxt:trace>
+        </reply>
+    </sequence>
+</process>

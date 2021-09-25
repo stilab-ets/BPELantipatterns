@@ -1,0 +1,93 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Jun 23 15:10:22 PDT 2006
+  Author:  mchiocca
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="RefCursor" targetNamespace="http://xmlns.oracle.com/RefCursor"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/EmpQuery/"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/SCOTT/PKG/EMP_QUERY/"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:client="http://xmlns.oracle.com/RefCursor"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="client" partnerLinkType="client:RefCursor"
+                 myRole="RefCursorProvider"/>
+    <partnerLink name="EmpQuery" partnerRole="EmpQuery_role"
+                 partnerLinkType="ns1:EmpQuery_plt"/>
+  </partnerLinks>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable"
+              messageType="client:RefCursorRequestMessage"/>
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable"
+              messageType="client:RefCursorResponseMessage"/>
+    <variable name="Invoke_EmpQuery_InputVariable"
+              messageType="ns1:args_in_msg"/>
+    <variable name="Invoke_EmpQuery_OutputVariable"
+              messageType="ns1:args_out_msg"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <!-- Receive input from requestor. (Note: This maps to operation defined in RefCursor.wsdl) -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="client:RefCursor" operation="process"
+             variable="inputVariable" createInstance="yes"/>
+    <!-- Generate reply to synchronous request -->
+    <assign name="Input">
+      <copy>
+        <from variable="inputVariable" part="payload"
+              query="/client:RefCursorProcessRequest/client:input"/>
+        <to variable="Invoke_EmpQuery_InputVariable" part="InputParameters"
+            query="/ns2:InputParameters/NAME"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke" partnerLink="EmpQuery" portType="ns1:EmpQuery_ptt"
+            operation="EmpQuery" inputVariable="Invoke_EmpQuery_InputVariable"
+            outputVariable="Invoke_EmpQuery_OutputVariable"/>
+    <assign name="Output">
+      <copy>
+        <from variable="Invoke_EmpQuery_OutputVariable" part="OutputParameters"
+              query="/ns2:OutputParameters/LOCATION"/>
+        <to variable="outputVariable" part="payload"
+            query="/client:RefCursorProcessResponse/client:result"/>
+      </copy>
+    </assign>
+    <reply name="replyOutput" partnerLink="client" portType="client:RefCursor"
+           operation="process" variable="outputVariable"/>
+  </sequence>
+</process>

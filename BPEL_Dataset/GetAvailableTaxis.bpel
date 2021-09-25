@@ -1,0 +1,398 @@
+<bpel:process name="GetAvailableTaxis"
+  targetNamespace="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/definitions"
+  suppressJoinFailure="yes"
+  xmlns:tns="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/definitions"
+  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:pns="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/definitions"
+  xmlns:ptns="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+  xmlns:gdTypes="http://maps.googleapis.com/directions/types"
+  xmlns:gbciTypes="http://www.ict-ccast.eu/CMF/ContextBroker/GetBrokerContextInclude/DomInd/types"
+  xmlns:types="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/types">
+
+  <!-- 
+   GetAvailableTaxis is a synchronous BPEL process. It queries available taxicabs, 
+   obtains their current location and calculates time required for each taxicab to 
+   reach customer destination. This domain specific process returns a list containing 
+   up to 5 entries representing available taxicabs next to the customer. This CIP gets 
+   an input parameter that holds customer current location used to find the nearest taxis. 
+   GetAvailableTaxis relies on the System Independent Aggregation CIP 
+   GetRouteDurationForActiveEntities aggregating information obtained from the C-CAST CMF
+   and Google Maps Web services.
+   
+  
+   @Layer: Domain Specific CIPs
+   @Based on: GetRouteDurationForActiveEntities (System Independent Aggregation CIP) 
+
+   @System1: Google Maps Web services
+   @Component: Directions
+   @Interface: directions
+
+   @System2: C-CAST CMF
+   @Component: ContextBroker
+   @Interface: GetContext, GetActiveEntities
+
+
+   @Author: Rodion Hagin
+   @Created: 01.06.2011
+  
+  -->
+  
+  <!-- WSDL IMPORTS -->
+  <bpel:import location="GetRouteDurationForActiveEntititesArtifacts.wsdl"
+    namespace="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <bpel:import location="GetAvailableTaxisArtifacts.wsdl"
+    namespace="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+
+  <!-- PARTNERLINKS -->
+  <bpel:partnerLinks>
+    
+    <!-- Represents the requester of this service. Used for callback. -->
+    <bpel:partnerLink name="Client"
+      partnerLinkType="tns:AvailableTaxisProviderPLT" myRole="AvailableTaxisProvider" />
+	
+	<!-- Represents GetRouteDurationForActiveEntities CIP. -->
+    <bpel:partnerLink name="RouteDurationForActiveEntitiesProvider"
+      partnerLinkType="pns:RouteDurationForActiveEntitiesProviderPLT"
+      partnerRole="RouteDurationForActiveEntitiesProvider" />
+
+  </bpel:partnerLinks>
+
+
+  <!-- VARIABLES -->
+  <bpel:variables>
+    <!-- Business process input -->
+    <bpel:variable name="input"
+      messageType="tns:GetAvailableTaxisRequestMessage" />
+
+    <!-- Business process output -->
+    <bpel:variable name="output"
+      messageType="tns:GetAvailableTaxisResponseMessage" />
+
+    <!-- Business process fault output -->
+    <bpel:variable name="fault"
+      messageType="tns:GetAvailableTaxisFaultMessage" />
+
+    <!-- GetRouteDurationForActiveEntities CIP input -->
+    <bpel:variable name="inputRDFAE"
+      messageType="pns:GetRouteDurationForActiveEntitiesRequestMessage" />
+	
+	<!-- GetRouteDurationForActiveEntities CIP output -->
+    <bpel:variable name="outputRDFAE"
+      messageType="pns:GetRouteDurationForActiveEntitiesResponseMessage" />
+      
+    <bpel:variable name="taxiCounter" type="xsd:int" />
+
+    <bpel:variable name="taxiID" type="xsd:string" />
+    <bpel:variable name="taxiLong" type="xsd:string" />
+    <bpel:variable name="taxiLat" type="xsd:string" />
+    <bpel:variable name="taxiDurValue" type="xsd:string" />
+    <bpel:variable name="taxiDurText" type="xsd:string" />
+
+  </bpel:variables>
+
+  <!-- FAULT HANDLING LOGIC -->
+  <bpel:faultHandlers>
+    
+    <!-- Catch and process faults thrown by GetRouteDurationForActiveEntities CIP -->
+    <bpel:catch faultName="pns:GetRouteDurationForActiveEntitiesFault"
+      faultVariable="faultRDFAE" faultMessageType="pns:GetRouteDurationForActiveEntitiesFaultMessage">
+
+      <bpel:sequence>
+        <bpel:assign validate="no" name="ProcessFaultFromRDFAE">
+          <bpel:copy>
+            <bpel:from>
+                    <![CDATA[$faultRDFAE.payload//ptns:status]]>
+            </bpel:from>
+            <bpel:to part="payload" variable="fault">
+              <bpel:query
+                queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                    <![CDATA[types:status]]>
+              </bpel:query>
+            </bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply name="replyFaultOutput" partnerLink="Client"
+          portType="tns:GetAvailableTaxis" operation="process" variable="fault"
+          faultName="tns:GetAvailableTaxisFault" />
+      </bpel:sequence>
+    </bpel:catch>
+	
+	<!-- Catch all faults during current process execution, generate fault message and 
+         send back to the requester interface 
+        -->
+    <bpel:catchAll>
+      <bpel:sequence>
+        <bpel:assign validate="no" name="CreateNewFault">
+          <bpel:copy>
+            <bpel:from>
+              <bpel:literal>
+                <tn:GetAvailableTaxisFault
+                  xmlns:tn="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/types"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                  <tn:status>GetAvailableTaxis error</tn:status>
+                </tn:GetAvailableTaxisFault>
+              </bpel:literal>
+            </bpel:from>
+            <bpel:to part="payload" variable="fault" />
+          </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply name="replyFaultOutput" partnerLink="Client"
+          portType="tns:GetAvailableTaxis" operation="process" variable="fault"
+          faultName="tns:GetAvailableTaxisFault" />
+      </bpel:sequence>
+    </bpel:catchAll>
+
+  </bpel:faultHandlers>
+
+  
+  <!-- ORCHESTRATION LOGIC -->
+    
+  <!-- Set of activities coordinating the flow of messages across the    
+     services integrated within this business process.  
+     
+     GetAvailableTaxis BPEL process queries available taxicabs, obtains their 
+     current location and calculates time required for each taxicab to reach 
+     customer destination. This domain specific process returns a list 
+     containing up to 5 entries representing available taxicabs next to the 
+     customer. Initially, the requester of the service send its current location. 
+     GetAvailableTaxis process invokes GetRouteDurationForActiveEntities process
+     which obtains a list of currently available taxis (type = imei, location mode = GEO),
+     calculates their current location and route duration to the customer location.
+     As the next step, GetAvailableTaxis process defines amount of the returned available
+     taxi cabs. In this scenario, two taxis should be enough for further processing.
+     Finally, GetAvailableTaxis process iterates over the list of the available taxis
+     and returns two taxi cabs with the minimal route duration to the customer location. 
+    -->
+  <bpel:sequence name="main">
+
+    <bpel:receive name="receiveInput" partnerLink="Client"
+      portType="tns:GetAvailableTaxis" operation="process" variable="input"
+      createInstance="yes" />
+	
+	<!-- To manipulate variable contents it should be pre-initialized. 
+       	   Apache ODE requirement. 
+       	  -->
+    <!-- Taxi cabs are identified through location mode GEO and type imei -->
+    <bpel:assign validate="no" name="PrepareInputToCIPGetRouteDurationForActiveEntities">
+      <bpel:copy>
+        <bpel:from>
+                <![CDATA[$input.payload/types:customerLocation]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputRDFAE">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[ptns:destination]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal><![CDATA[imei]]></bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputRDFAE">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[ptns:entityType]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal>
+            <ptns:contextParameters
+              xmlns:ptns="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+              xmlns:typ1="http://www.ict-ccast.eu/CMF/ContextBroker/GetBrokerContextInclude/DomInd/types">
+              <typ1:parameter>
+                <typ1:name>locMode</typ1:name>
+                <typ1:value>GEO</typ1:value>
+                <typ1:operator>=</typ1:operator>
+              </typ1:parameter>
+            </ptns:contextParameters>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputRDFAE">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[ptns:contextParameters]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal><![CDATA[false]]></bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputRDFAE">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[ptns:routeParameters/gdTypes:sensor]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+
+    </bpel:assign>
+	
+	<!-- Obtain route duration of the available taxis to the customer location -->
+    <bpel:invoke name="GetRouteDurationForAvailableTaxis"
+      partnerLink="RouteDurationForActiveEntitiesProvider" operation="process"
+      portType="pns:GetRouteDurationForActiveEntities" inputVariable="inputRDFAE"
+      outputVariable="outputRDFAE" />
+
+    <bpel:assign validate="no" name="PrepareOutput">
+      
+      <!-- Since there might be no available taxis at the moment, create empty message 
+       	  -->
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal>
+            <tn:GetAvailableTaxisResponse
+              xmlns:tn="http://www.ict-ccast.eu/CMF/GetAvailableTaxis/DomSpec/types"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              <tn:taxiList />
+            </tn:GetAvailableTaxisResponse>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="output"></bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+	
+	<!-- Restrict the size of returned taxi result set to the size of two -->
+    <bpel:if name="CheckAndSetTaxiCounter">
+		<bpel:condition>
+			number(count($outputRDFAE.payload/ptns:entityList/ptns:entity))
+			= number('0')
+		</bpel:condition>
+		<bpel:assign validate="no"
+			name="NoAvailableTaxisSetZero">
+			<bpel:copy>
+				<bpel:from>
+					number('0')
+				</bpel:from>
+				<bpel:to variable="taxiCounter" />
+			</bpel:copy>
+		</bpel:assign>
+		
+      <bpel:elseif>
+      	<bpel:condition>
+        	number(count($outputRDFAE.payload/ptns:entityList/ptns:entity))
+        	&lt; number('2')
+        </bpel:condition>
+      	<bpel:assign validate="no"
+        	name="AvailableTaxisLessThanTwoSetToAmount">
+        	<bpel:copy>
+          		<bpel:from>
+            		number(count($outputRDFAE.payload/ptns:entityList/ptns:entity))
+          		</bpel:from>
+          		<bpel:to variable="taxiCounter" />
+        	</bpel:copy>
+      	</bpel:assign>
+      </bpel:elseif>	
+      
+      <bpel:else>
+        <bpel:assign validate="no" name="SetCounterToMax">
+          <bpel:copy>
+            <bpel:from>
+              number('2')
+                </bpel:from>
+            <bpel:to variable="taxiCounter" />
+          </bpel:copy>
+        </bpel:assign>
+      </bpel:else>
+    </bpel:if>
+	
+	<!-- Identify taxis with the minimum route duration to the customer location -->
+    <bpel:forEach counterName="parameter" parallel="no">
+      <bpel:startCounterValue>1</bpel:startCounterValue>
+      <bpel:finalCounterValue>
+        number($taxiCounter)
+          </bpel:finalCounterValue>
+      <bpel:scope>
+        <bpel:faultHandlers>
+            	
+        	<!-- Propagate faults to process fault handlers -->
+        	<bpel:catchAll>
+        		<bpel:rethrow/>
+        	</bpel:catchAll>
+        </bpel:faultHandlers>
+
+        <bpel:sequence name="AnalyzeRetrievedTaxis">
+		  
+		  <!-- Find taxi with the minimum route duration  -->
+          <bpel:assign validate="no"
+            name="ExtractTaxiInformationWithMinimumDuration">
+
+            <bpel:copy>
+              <bpel:from>
+                      <![CDATA[$outputRDFAE.payload/ptns:entityList/ptns:entity[not(ptns:routeDuration/ptns:durationValue > $outputRDFAE.payload//ptns:entity/ptns:routeDuration/ptns:durationValue)]/ptns:id/node()]]>
+              </bpel:from>
+              <bpel:to variable="taxiID" />
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                      <![CDATA[$outputRDFAE.payload//ptns:entity[not(ptns:routeDuration/ptns:durationValue > $outputRDFAE.payload//ptns:entity/ptns:routeDuration/ptns:durationValue)]/ptns:currentLocation/ptns:longitude/node()]]>
+              </bpel:from>
+              <bpel:to variable="taxiLong" />
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                      <![CDATA[$outputRDFAE.payload//ptns:entity[not(ptns:routeDuration/ptns:durationValue > $outputRDFAE.payload//ptns:entity/ptns:routeDuration/ptns:durationValue)]/ptns:currentLocation/ptns:latitude/node()]]>
+              </bpel:from>
+              <bpel:to variable="taxiLat" />
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                      <![CDATA[$outputRDFAE.payload//ptns:entity[not(ptns:routeDuration/ptns:durationValue > $outputRDFAE.payload//ptns:entity/ptns:routeDuration/ptns:durationValue)]/ptns:routeDuration/ptns:durationValue/node()]]>
+              </bpel:from>
+              <bpel:to variable="taxiDurValue" />
+            </bpel:copy>
+
+            <bpel:copy>
+              <bpel:from>
+                      <![CDATA[$outputRDFAE.payload//ptns:entity[not(ptns:routeDuration/ptns:durationValue > $outputRDFAE.payload//ptns:entity/ptns:routeDuration/ptns:durationValue)]/ptns:routeDuration/ptns:durationText/node()]]>
+              </bpel:from>
+              <bpel:to variable="taxiDurText" />
+            </bpel:copy>
+
+          </bpel:assign>
+			
+		  <!-- Extract this taxi information and store in the process result set -->
+          <bpel:assign validate="no" name="AddNearestTaxiToOutput">
+            <bpel:copy>
+              <bpel:from>bpel:doXslTransform("transform_add_new.xsl",
+                $output.payload, 'taxiID', $taxiID, 'taxiLong',
+                $taxiLong, 'taxiLat', $taxiLat, 'taxiDurValue',
+                $taxiDurValue, 'taxiDurText', $taxiDurText)
+                  </bpel:from>
+              <bpel:to part="payload" variable="output" />
+            </bpel:copy>
+          </bpel:assign>
+		  
+		  <!-- Remove this taxi information from the available taxi set to find in the next iteration 
+		  	another taxi with the minimum route duration-->
+          <bpel:assign validate="no" name="RemoveTaxiFromRetrievedList">
+            <bpel:copy>
+              <bpel:from>bpel:doXslTransform("transform_remove.xsl",
+                $outputRDFAE.payload, 'taxiID', $taxiID)
+                  </bpel:from>
+              <bpel:to part="payload" variable="outputRDFAE" />
+            </bpel:copy>
+          </bpel:assign>
+
+        </bpel:sequence>
+      </bpel:scope>
+    </bpel:forEach>
+	
+	<!-- Return the available taxis with the minimum route duration -->
+    <bpel:reply name="replyOutput" partnerLink="Client"
+      portType="tns:GetAvailableTaxis" operation="process" variable="output" />
+  </bpel:sequence>
+</bpel:process>
+

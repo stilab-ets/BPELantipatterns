@@ -1,0 +1,450 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Wed May 17 15:03:34 PDT 2006
+  Author:  wgstalla
+  Purpose: Asynchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="ExpenseRequest"
+         targetNamespace="http://xmlns.oracle.com/ExpenseRequest"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:wfcommon="http://xmlns.oracle.com/bpel/workflow/common"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:ns4="http://xmlns.oracle.com/bpel"
+         xmlns:ids="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:wf="http://schemas.oracle.com/bpel/extension/workflow"
+         xmlns:client="http://xmlns.oracle.com/ExpenseRequest"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:taskservice="http://xmlns.oracle.com/bpel/workflow/taskService"
+         xmlns:ns1="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:ns3="http://xmlns.oracle.com/ExpenseRequest/DecisionService"
+         xmlns:ns2="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:task="http://xmlns.oracle.com/bpel/workflow/task"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <partnerLinks>
+        <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+        <partnerLink name="client" partnerLinkType="client:ExpenseRequest"
+                     myRole="ExpenseRequestProvider"
+                     partnerRole="ExpenseRequestRequester"/>
+        <partnerLink name="DecisionServicePL"
+                     partnerRole="IDecisionService_Role"
+                     partnerLinkType="ns3:IDecisionService_PL"/>
+        <partnerLink myRole="TaskServiceCallbackListener" name="TaskService"
+                     partnerRole="TaskService"
+                     partnerLinkType="taskservice:TaskService"/>
+    </partnerLinks>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        VARIABLES                                                        
+        List of messages and XML documents used within this BPEL process 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <variables>
+        <!-- Reference to the message passed as input during initiation -->
+        <!-- Reference to the message that will be sent back to the requester during callback -->
+        <variable name="inputVariable"
+                  messageType="client:ExpenseRequestRequestMessage"/>
+        <variable name="outputVariable"
+                  messageType="client:ExpenseRequestResponseMessage"/>
+        <variable name="approvals" element="client:expenseApprovalChain"/>
+        <variable name="ExpenseApproval_1_globalVariable"
+                  messageType="taskservice:taskMessage"/>
+        <variable name="ExpenseApproval_globalVariable"
+                  messageType="taskservice:taskMessage"/>
+    </variables>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ORCHESTRATION LOGIC                                               
+       Set of activities coordinating the flow of messages across the    
+       services integrated within this business process                  
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <sequence name="main">
+        <!-- Receive input from requestor. (Note: This maps to operation defined in ExpenseRequest.wsdl) -->
+        <receive name="receiveInput" partnerLink="client"
+                 portType="client:ExpenseRequest" operation="initiate"
+                 variable="inputVariable" createInstance="yes"/>
+        <!-- 
+          Asynchronous callback to the requester. (Note: the callback location and correlation id is transparently handled using WS-addressing.)
+        -->
+        <assign name="assignDefaultApprovals">
+            <copy>
+                <from expression="ids:getManager(bpws:getVariableData('inputVariable','payload','/client:expenseRequest/client:employeeName'))"/>
+                <to variable="approvals"
+                    query="/client:expenseApprovalChain/client:startingUser"/>
+            </copy>
+            <copy>
+                <from expression="string('1')"/>
+                <to variable="approvals"
+                    query="/client:expenseApprovalChain/client:numberOfLevels"/>
+            </copy>
+            <copy>
+                <from expression="string('Director')"/>
+                <to variable="approvals"
+                    query="/client:expenseApprovalChain/client:highestTitle"/>
+            </copy>
+        </assign>
+        <scope name="DetermineApprovals">
+            <bpelx:annotation>
+                <bpelx:pattern patternName="bpelx:decide"></bpelx:pattern>
+            </bpelx:annotation>
+            <variables>
+                <variable name="expenserequest_ExpenseApprovalChain_i"
+                          element="client:expenseApprovalChain"/>
+                <variable name="expenserequest_ExpenseRequest_i"
+                          element="client:expenseRequest"/>
+                <variable name="expenserequest_ExpenseApprovalChain_o"
+                          element="client:expenseApprovalChain"/>
+                <variable name="dsIn"
+                          messageType="ns3:assertExecuteWatchStatelessMessage"/>
+                <variable name="dsOut"
+                          messageType="ns3:assertExecuteWatchStatelessDecisionMessage"/>
+            </variables>
+            <sequence name="Sequence_1">
+                <assign name="BPEL_Var_To_Rule_Facts">
+                    <copy>
+                        <from variable="approvals"
+                              query="/client:expenseApprovalChain"/>
+                        <to variable="expenserequest_ExpenseApprovalChain_i"
+                            query="/client:expenseApprovalChain"/>
+                    </copy>
+                    <copy>
+                        <from variable="inputVariable" part="payload"
+                              query="/client:expenseRequest"/>
+                        <to variable="expenserequest_ExpenseRequest_i"
+                            query="/client:expenseRequest"/>
+                    </copy>
+                </assign>
+                <assign name="Facts_To_Rule_Service">
+                    <copy>
+                        <from variable="expenserequest_ExpenseApprovalChain_i"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:assertList/client:expenseApprovalChain"/>
+                    </copy>
+                    <copy>
+                        <from variable="expenserequest_ExpenseRequest_i"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:assertList/client:expenseRequest"/>
+                    </copy>
+                </assign>
+                <assign name="BPEL_Header">
+                    <copy>
+                        <from expression="'DecisionService'"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/@name"/>
+                    </copy>
+                    <copy>
+                        <from expression="concat(ora:getProcessURL(), '/decisionservices.decs')"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:configURL"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessId()"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:bpelInstance/ns4:processId"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessVersion()"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:bpelInstance/ns4:processVersion"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getDomainId()"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:bpelInstance/ns4:domainId"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessURL()"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:bpelInstance/ns4:processURL"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getInstanceId()"/>
+                        <to variable="dsIn" part="payload"
+                            query="/ns3:assertExecuteWatchStateless/ns3:bpelInstance/ns4:instanceId"/>
+                    </copy>
+                </assign>
+                <invoke name="Invoke" partnerLink="DecisionServicePL"
+                        portType="ns3:IDecisionService"
+                        operation="assertExecuteWatchStateless"
+                        inputVariable="dsIn" outputVariable="dsOut"/>
+                <assign name="Rule_Service_To_Facts">
+                    <copy>
+                        <from variable="dsOut" part="payload"
+                              query="/ns3:assertExecuteWatchStatelessDecision/ns3:resultList/client:expenseApprovalChain"/>
+                        <to variable="expenserequest_ExpenseApprovalChain_o"/>
+                    </copy>
+                </assign>
+                <assign name="Facts_To_BPEL_Var">
+                    <copy>
+                        <from variable="expenserequest_ExpenseApprovalChain_o"
+                              query="/client:expenseApprovalChain"/>
+                        <to variable="approvals"
+                            query="/client:expenseApprovalChain"/>
+                    </copy>
+                </assign>
+            </sequence>
+        </scope>
+        <scope name="ExpenseApproval"
+               xmlns:wf="http://schemas.oracle.com/bpel/extension/workflow"
+               wf:key="ExpenseApproval_globalVariable">
+            <bpelx:annotation xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+                <bpelx:pattern patternName="bpelx:workflow"></bpelx:pattern>
+            </bpelx:annotation>
+            <variables>
+                <variable name="initiateTaskInput"
+                          messageType="taskservice:initiateTaskMessage"/>
+                <variable name="initiateTaskResponseMessage"
+                          messageType="taskservice:initiateTaskResponseMessage"/>
+            </variables>
+            <correlationSets>
+                <correlationSet name="WorkflowTaskIdCor"
+                                properties="taskservice:taskId"/>
+            </correlationSets>
+            <sequence>
+                <assign name="ExpenseApproval_AssignTaskAttributes">
+                    <copy>
+                        <from expression="concat(ora:getProcessURL(), string('/ExpenseApproval/ExpenseApproval.task'))"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:taskDefinitionURI"/>
+                    </copy>
+                    <copy>
+                        <from expression="concat(bpws:getVariableData('inputVariable','payload','/client:expenseRequest/client:expenseCategory'), ' expense approval for ', bpws:getVariableData('inputVariable','payload','/client:expenseRequest/client:employeeName'))"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:title"/>
+                    </copy>
+                    <copy>
+                        <from expression="bpws:getVariableData('inputVariable','payload','/client:expenseRequest/client:employeeName')"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:creator"/>
+                    </copy>
+                    <copy>
+                        <from expression="number(3)"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:priority"/>
+                    </copy>
+                    <bpelx:append xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+                        <bpelx:from variable="inputVariable" part="payload"
+                                    query="/client:expenseRequest"/>
+                        <bpelx:to variable="initiateTaskInput" part="payload"
+                                  query="/taskservice:initiateTask/task:task/task:payload"/>
+                    </bpelx:append>
+                    <bpelx:append xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+                        <bpelx:from variable="approvals"
+                                    query="/client:expenseApprovalChain"/>
+                        <bpelx:to variable="initiateTaskInput" part="payload"
+                                  query="/taskservice:initiateTask/task:task/task:payload"/>
+                    </bpelx:append>
+                    <bpelx:append>
+                        <bpelx:from expression="ora:genEmptyElem('task:expenseCategory')"/>
+                        <bpelx:to variable="initiateTaskInput" part="payload"
+                                  query="/taskservice:initiateTask/task:task/task:payload"/>
+                    </bpelx:append>
+                    <copy>
+                        <from variable="inputVariable" part="payload"
+                              query="/client:expenseRequest/client:expenseCategory"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:payload/task:expenseCategory"/>
+                    </copy>
+                    <bpelx:append>
+                        <bpelx:from expression="ora:genEmptyElem('task:expenseAmount')"/>
+                        <bpelx:to variable="initiateTaskInput" part="payload"
+                                  query="/taskservice:initiateTask/task:task/task:payload"/>
+                    </bpelx:append>
+                    <copy>
+                        <from variable="inputVariable" part="payload"
+                              query="/client:expenseRequest/client:amount"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:payload/task:expenseAmount"/>
+                    </copy>
+                </assign>
+                <assign name="ExpenseApproval_AssignSystemTaskAttributes">
+                    <copy>
+                        <from expression="ora:getInstanceId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:instanceId"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processName"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processId"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getProcessVersion()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processVersion"/>
+                    </copy>
+                    <copy>
+                        <from expression="ora:getDomainId()"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:domainId"/>
+                    </copy>
+                    <copy>
+                        <from expression="string('BPEL')"/>
+                        <to variable="initiateTaskInput" part="payload"
+                            query="/taskservice:initiateTask/task:task/task:processInfo/task:processType"/>
+                    </copy>
+                </assign>
+                <invoke name="initiateTask_ExpenseApproval"
+                        partnerLink="TaskService"
+                        portType="taskservice:TaskService"
+                        operation="initiateTask"
+                        inputVariable="initiateTaskInput"
+                        outputVariable="initiateTaskResponseMessage">
+                    <correlations>
+                        <correlation initiate="yes" set="WorkflowTaskIdCor"
+                                     pattern="in"/>
+                    </correlations>
+                </invoke>
+                <receive name="receiveCompletedTask_ExpenseApproval"
+                         partnerLink="TaskService"
+                         portType="taskservice:TaskServiceCallback"
+                         operation="onTaskCompleted"
+                         variable="ExpenseApproval_globalVariable"
+                         createInstance="no">
+                    <correlations>
+                        <correlation initiate="no" set="WorkflowTaskIdCor"/>
+                    </correlations>
+                </receive>
+            </sequence>
+        </scope>
+        <switch name="taskSwitch">
+            <case condition="bpws:getVariableData('ExpenseApproval_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('ExpenseApproval_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'REJECT'">
+                <bpelx:annotation>
+                    <bpelx:pattern>Task outcome is REJECT</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                    <assign name="CopyPayloadFromTask">
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/client:expenseRequest"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/client:expenseApprovalChain"/>
+                            <to variable="approvals"
+                                query="/client:expenseApprovalChain"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/task:expenseCategory"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest/client:expenseCategory"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/task:expenseAmount"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest/client:amount"/>
+                        </copy>
+                    </assign>
+                </sequence>
+            </case>
+            <case condition="bpws:getVariableData('ExpenseApproval_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:state') = 'COMPLETED' and bpws:getVariableData('ExpenseApproval_1_globalVariable', 'payload', '/task:task/task:systemAttributes/task:outcome') = 'APPROVE'">
+                <bpelx:annotation>
+                    <bpelx:pattern>Task outcome is APPROVE</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                    <assign name="CopyPayloadFromTask2">
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/client:expenseRequest"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/client:expenseApprovalChain"/>
+                            <to variable="approvals"
+                                query="/client:expenseApprovalChain"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/task:expenseCategory"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest/client:expenseCategory"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/task:expenseAmount"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest/client:amount"/>
+                        </copy>
+                    </assign>
+                </sequence>
+            </case>
+            <otherwise>
+                <bpelx:annotation>
+                    <bpelx:pattern>Task is outcome is EXPIRED, STALE, WITHDRAWN or ERRORED</bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                    <assign name="CopyPayloadFromTask3">
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/client:expenseRequest"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/client:expenseApprovalChain"/>
+                            <to variable="approvals"
+                                query="/client:expenseApprovalChain"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/task:expenseCategory"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest/client:expenseCategory"/>
+                        </copy>
+                        <copy>
+                            <from variable="ExpenseApproval_globalVariable"
+                                  part="payload"
+                                  query="/task:task/task:payload/task:expenseAmount"/>
+                            <to variable="inputVariable" part="payload"
+                                query="/client:expenseRequest/client:amount"/>
+                        </copy>
+                    </assign>
+                </sequence>
+            </otherwise>
+        </switch>
+        <invoke name="callbackClient" partnerLink="client"
+                portType="client:ExpenseRequestCallback" operation="onResult"
+                inputVariable="outputVariable"/>
+    </sequence>
+</process>

@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+
+<process name="SleepBroker"
+    targetNamespace="http://samples.otn.com"
+    suppressJoinFailure="yes"
+    xmlns:tns="http://samples.otn.com"
+    xmlns:services="http://services.otn.com"
+    xmlns:ns1="http://samples.otn.com/SleepBroker"
+    xmlns:ns2="http://services.otn.com/AsyncSleepService"
+    xmlns:al="http://www.autoloan.com/ns/autoloan"
+    xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+    xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+    xmlns:ora="http://schemas.oracle.com/xpath/extension"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!--
+  This process receives a number, creates that number of branches using
+  flowN. In each branch, wait for a period of time based on the index
+  variable.
+  -->
+  <partnerLinks>
+    <partnerLink name="client" partnerLinkType="tns:SleepBroker"
+        myRole="SleepBrokerProvider"
+        partnerRole="SleepBrokerRequestor"/>
+  </partnerLinks>
+  <variables>
+    <variable name="input" messageType="tns:SleepBrokerRequestMessage"/>
+    <variable name="output" messageType="tns:SleepBrokerResponseMessage"/>
+    <variable name="i" type="xsd:integer"/>
+  </variables>
+  <sequence>
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client" portType="tns:SleepBroker"
+      operation="initiate" variable="input" createInstance="yes"/>
+    <bpelx:flowN N="bpws:getVariableData('input', 'payload', '/ns1:SleepInfo/ns1:numberOfBranch')" indexVariable="i">
+      <scope>
+        <partnerLinks>
+          <partnerLink name="sleepService"
+              partnerLinkType="services:AsyncSleepService"
+              myRole="AsyncSleepServiceRequestor"
+              partnerRole="AsyncSleepServiceProvider"/>
+        </partnerLinks>
+
+        <variables>
+          <variable name="req"
+              messageType="services:AsyncSleepServiceRequestMessage"/>
+          <variable name="resp"
+              messageType="services:AsyncSleepServiceResponseMessage"/>
+        </variables>
+
+        <sequence>
+          <assign>
+            <copy>
+              <from variable="input" part="payload" query="/ns1:SleepInfo/ns1:sleepAmount"/>
+              <to variable="req" part="payload" query="/ns2:SleepServiceInput/ns2:sleepAmount"/>
+            </copy>
+            <copy>
+              <from variable="input" part="payload" query="/ns1:SleepInfo/al:LoanApplications/al:LoanApplication[bpws:getVariableData('i')]"/>
+              <to variable="req" part="payload" query="/ns2:SleepServiceInput/al:LoanApplication"/>
+            </copy>
+          </assign>
+          <invoke name="invokeSleepService"
+              partnerLink="sleepService" inputVariable="req"
+              portType="services:AsyncSleepService" operation="process"/>
+          <receive name="invokeSleepSerivce"
+              partnerLink="sleepService" variable="resp"
+              portType="services:AsyncSleepServiceCallback" operation="onResult"/>
+          <assign>
+		<bpelx:append>
+		  <bpelx:from variable="resp" part="payload" query="/al:LoanApplication"/>
+			<bpelx:to variable="output" part="payload" query="/ns1:SleepResult"/> 
+		</bpelx:append>
+          </assign>
+        </sequence>
+      </scope>
+            
+    </bpelx:flowN>
+    <invoke name="doneSleeps" inputVariable="output"
+        portType="tns:SleepBrokerCallback"
+        operation="onResult" partnerLink="client"/>
+  </sequence>
+</process>

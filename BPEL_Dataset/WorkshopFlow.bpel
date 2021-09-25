@@ -1,0 +1,80 @@
+<process name="WorkshopFlow"
+         targetNamespace="http://samples.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://samples.otn.com"
+         xmlns:wws="http://www.openuri.org/"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+  <!-- This process invokes BEA Workshop web service -->
+
+  <partnerLinks>
+    <partnerLink name="client"
+             partnerLinkType="tns:WorkshopFlow"
+             myRole="WorkshopFlowProvider"
+             partnerRole="WorkshopFlowRequester"/>
+    <partnerLink name="CreditRating"
+             partnerLinkType="wws:CreditRating"
+             myRole="CreditRatingRequester"
+             partnerRole="CreditRatingProvider"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="input"
+               messageType="tns:WorkshopFlowRequestMessage"/>
+    <variable name="output"
+               messageType="tns:WorkshopFlowResultMessage"/>
+
+    <variable name="request"
+               messageType="wws:initiateSoapIn"/>
+    <variable name="initiateResponse"
+               messageType="wws:initiateSoapOut"/>
+    <variable name="response"
+               messageType="wws:creditRatingDoneSoapOut"/>
+  </variables>
+
+  <sequence>
+
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:WorkshopFlow"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+
+    <!-- initialize the input of the TerraService -->
+    <assign>
+        <copy>
+        <from variable="input" part="payload"
+        query="/tns:ssn"/>
+        <to variable="request" part="parameters"
+        query="/wws:initiate/wws:ssn"/>
+        </copy>
+    </assign>
+
+    <!--  invoke the remote BEA Workshop web service -->
+    <invoke name="invoke" partnerLink="CreditRating" portType="wws:CreditRatingSoap"
+            operation="initiate" inputVariable="request" outputVariable="initiateResponse"/>
+
+    <!--  receive the result of the remote process -->
+    <receive name="receive_invoke" partnerLink="CreditRating"
+        portType="wws:CreditRatingCallbackSoap"
+        operation="creditRatingDone" variable="response"/>
+
+    <assign>
+        <copy>
+        <from variable="response" part="parameters"
+        query="/wws:creditRatingDone/wws:rating"/>
+        <to variable="output" part="payload"
+        query="/tns:rating"/>
+        </copy>
+    </assign>
+
+     <!-- respond output to requestor -->
+     <invoke name="replyOutput" partnerLink="client"
+             portType="tns:WorkshopFlowCallback"
+            operation="onResult" inputVariable="output"/>
+
+</sequence>
+
+</process>
+

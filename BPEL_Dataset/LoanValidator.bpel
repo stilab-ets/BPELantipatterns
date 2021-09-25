@@ -1,0 +1,87 @@
+<process name="LoanValidator"
+         targetNamespace="http://services.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://services.otn.com"
+         xmlns:auto="http://www.autoloan.com/ns/autoloan"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+  <!-- this process do a switch to return text if value is greater or lower than zero. -->
+
+  <partnerLinks>
+    <partnerLink name="client"
+             partnerLinkType="tns:LoanValidator"
+             myRole="LoanValidatorProvider"
+             partnerRole="LoanValidatorRequester"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="input"
+               messageType="tns:LoanValidatorRequestMessage"/>
+    <variable name="output"
+               messageType="tns:LoanValidatorResultMessage"/>
+    <variable name="exception"
+               messageType="tns:InvalidApplicationExceptionLoanValidatorMessage"/>               
+  </variables>
+
+  <sequence>
+    
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:LoanValidator"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+
+
+    <!-- switch depends on the input value -->
+    <switch>
+        <case condition="bpws:getVariableData('input', 'payload','/auto:loanApplication/auto:creditRating') > 100">
+        	<sequence>
+	            <assign>
+	            <copy>
+	                <from expression="'Loan Application is valid'"/>
+	                <to variable="output" part="payload" 
+	                    query="/auto:result"/>
+	              </copy>
+	            </assign>        	
+	            <!-- respond output to requestor -->
+	            <invoke name="replyOutput" partnerLink="client"
+	                    portType="tns:LoanValidatorCallback"
+	                   operation="onResult" inputVariable="output"/>
+			</sequence>	                       
+        </case>
+        <otherwise>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>
+                            <invalidApplication xmlns="http://www.autoloan.com/ns/autoloan">
+                                <error>Invalid Credit Rating!</error>
+                                <application/>
+                            </invalidApplication>                       
+                        </from>
+                        <to variable="exception" 
+                        part="payload" 
+                        query="/auto:invalidApplication"/>
+                    </copy>
+                    <copy>
+                        <from variable="input" 
+                        part="payload" 
+                        query="/auto:loanApplication"/>
+                        <to variable="exception" 
+                        part="payload" 
+                        query="/auto:invalidApplication/auto:application"/>
+                    </copy>
+                </assign>
+                <!-- respond output to requestor -->
+                <invoke name="replyOutput2" partnerLink="client"
+                        portType="tns:LoanValidatorCallback"
+                       operation="onInvalidApplicationException" 
+                       inputVariable="exception"/>
+            </sequence>                 
+        </otherwise>
+    </switch>  
+
+  </sequence>
+</process>  

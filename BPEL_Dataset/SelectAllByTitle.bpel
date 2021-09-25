@@ -1,0 +1,41 @@
+<process xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" name="SelectAllByTitle" targetNamespace="http://xmlns.oracle.com/SelectAllByTitle" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/SelectAllByTitleService" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/top/SelectAllByTitle" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:client="http://xmlns.oracle.com/SelectAllByTitle" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink name="client" partnerLinkType="client:SelectAllByTitle" myRole="SelectAllByTitleProvider" partnerRole="SelectAllByTitleProvider" plext:wsdlloc="SelectAllByTitle.wsdl"/>
+    <partnerLink name="BPELSamples" partnerRole="SelectAllByTitleService_role" partnerLinkType="ns1:SelectAllByTitleService_plt" plext:wsdlloc="SelectAllByTitleService.wsdl"/>
+  </partnerLinks><!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <variables>
+    <variable name="inputVariable" messageType="client:SelectAllByTitleRequestMessage"/>
+    <variable name="outputVariable" messageType="client:SelectAllByTitleResponseMessage"/>
+    <variable name="SelectAllByTitle_SelectAllByTitleServiceSelect_title_InputVariable" messageType="ns1:SelectAllByTitleServiceSelect_title_inparameters"/>
+    <variable name="SelectAllByTitle_SelectAllByTitleServiceSelect_title_OutputVariable" messageType="ns1:MoviesCollection_msg"/>
+  </variables><!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <sequence name="main">
+    <receive name="receiveInput" partnerLink="client" portType="client:SelectAllByTitle" operation="process" variable="inputVariable" createInstance="yes"/>
+    <assign name="ChangeMessageType">
+      <copy>
+        <from variable="inputVariable" part="payload"/>
+        <to variable="SelectAllByTitle_SelectAllByTitleServiceSelect_title_InputVariable" part="SelectAllByTitleServiceSelect_title_inparameters"/>
+      </copy>
+    </assign>
+    <invoke name="SelectAllByTitle" partnerLink="BPELSamples" portType="ns1:SelectAllByTitleService_ptt" operation="SelectAllByTitleServiceSelect_title" inputVariable="SelectAllByTitle_SelectAllByTitleServiceSelect_title_InputVariable" outputVariable="SelectAllByTitle_SelectAllByTitleServiceSelect_title_OutputVariable"/>
+    <assign name="ChangeMessageTypeBack">
+      <copy>
+        <from variable="SelectAllByTitle_SelectAllByTitleServiceSelect_title_OutputVariable" part="MoviesCollection"/>
+        <to variable="outputVariable" part="payload"/>
+      </copy>
+    </assign>
+    <reply name="replyOutput" partnerLink="client" portType="client:SelectAllByTitle" operation="process" variable="outputVariable"/>
+  </sequence>
+</process>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:evt="http://docs.active-endpoints.com/wsdl/eventing/2008/06/eventing.wsdl" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:loan="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd" xmlns:loanCRM="http://docs.active-endpoints.com/sample/wsdl/loanCRM/2008/02/loanCRM.wsdl" xmlns:loanMessages="http://docs.active-endpoints.com/sample/wsdl/loanMessages/2008/02/loanMessages.wsdl" xmlns:ns="http://NotifyCustomerService/notifycustomerservice" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:linksAreTransitions="yes" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="NotifyCustomerService" suppressJoinFailure="yes" targetNamespace="http://NotifyCustomerService">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132923233068914997" aei:processInitiatorSim="" isHorizontal="true" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923233069715033" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923233069715033"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923235016115603" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923235016115603"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {485,80}" aei:objectId="132923233070115047" aei:type="SEQUENCE" bpmnElement="132923233070115047" isHorizontal="true">
+            <dc:Bounds height="170" width="95" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,25}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Receive Event Data" aei:objectId="132923233070215049" aei:principal="" aei:type="RECEIVE" bpmnElement="132923233070215049">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {26,82}" aei:absoluteSize="DIM {89,26}" aei:anchor.location="1" aei:anchor.objectId="132923233070215049" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923233070415051" aei:relative.location="LOC {-44,47}" aei:text="Receive Event Data" bpmnElement="132923233070215049label">
+               <dc:Bounds height="13" width="89" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {120,29}" aei:absoluteSize="DIM {125,53}" aei:name="Assign Values To Notify Customer Service" aei:objectId="132923239148615701" aei:type="ASSIGN" bpmnElement="132923239148615701">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;loan:loanApprovalResponse xmlns:loan=&quot;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&quot;&gt;&#10;   &lt;loan:responseToLoanRequest&gt;declined&lt;/loan:responseToLoanRequest&gt;&#10;   &lt;!--Optional:--&gt;&#10;   &lt;loan:responseDescription&gt;We are sorry, this application falls out side of our credit risk guidelines.&lt;/loan:responseDescription&gt;&#10;   &lt;!--Optional:--&gt;&#10;   &lt;loan:rejectionReason&gt;&#10;      &lt;loan:reason&gt;{$trigger/NotifyCustomerService/Reason/text()}&lt;/loan:reason&gt;&#10;      &lt;loan:description&gt;low credit score&lt;/loan:description&gt;&#10;   &lt;/loan:rejectionReason&gt;&#10;&lt;/loan:loanApprovalResponse&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133519537421708741" aei:toVariable="loanApprovalResponse" aei:type="ASSIGN_COPY" bpmnElement="133519537421708741"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {270,29}" aei:absoluteSize="DIM {125,53}" aei:name="Notify Customer Service" aei:objectId="132923238271315693" aei:subprocessPath="" aei:text="notify" aei:type="INVOKE" bpmnElement="132923238271315693">
+            <dc:Bounds height="-1" width="-1" x="83" y="110"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {420,25}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="Custom action could be added if necessary" aei:objectId="132923233070415053" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="132923233070415053">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {414,82}" aei:absoluteSize="DIM {103,39}" aei:anchor.location="1" aei:anchor.objectId="132923233070415053" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923233070415055" aei:relative.location="LOC {-19,39}" aei:text="Custom action could be added if necessary" bpmnElement="132923233070415053label">
+               <dc:Bounds height="13" width="103" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://docs.active-endpoints.com/wsdl/eventing/2008/06/eventing.wsdl"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/loanCRM.wsdl" namespace="http://docs.active-endpoints.com/sample/wsdl/loanCRM/2008/02/loanCRM.wsdl"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/loanMessages.wsdl" namespace="http://docs.active-endpoints.com/sample/wsdl/loanMessages/2008/02/loanMessages.wsdl"/>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/NotifyCustomerService.private.wsdl" namespace="http://NotifyCustomerService/notifycustomerservice"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="132923233069715033" myRole="actionProcess" name="eventingPLT" partnerLinkType="evt:eventingPLT"/>
+      <bpel:partnerLink aei:id="132923235016115603" aei:interface="loanCRM:LoanCRM" name="CustomerService" partnerLinkType="ns:LoanCRMLT" partnerRole="Provider"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="evt:trigger" name="trigger"/>
+      <bpel:variable element="loan:loanApprovalResponse" name="loanApprovalResponse"/>
+   </bpel:variables>
+   <bpel:sequence aei:id="132923233070115047">
+      <bpel:receive aei:id="132923233070215049" createInstance="yes" name="Receive_Event_Data" operation="trigger" partnerLink="eventingPLT" variable="trigger"/>
+      <bpel:assign aei:id="132923239148615701" name="Assign_Values_To_Notify_Customer_Service">
+         <bpel:copy aei:id="133519537421708741">
+            <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<loan:loanApprovalResponse xmlns:loan="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd">
+   <loan:responseToLoanRequest>declined</loan:responseToLoanRequest>
+   <!--Optional:-->
+   <loan:responseDescription>We are sorry, this application falls out side of our credit risk guidelines.</loan:responseDescription>
+   <!--Optional:-->
+   <loan:rejectionReason>
+      <loan:reason>{$trigger/NotifyCustomerService/Reason/text()}</loan:reason>
+      <loan:description>low credit score</loan:description>
+   </loan:rejectionReason>
+</loan:loanApprovalResponse>]]></bpel:from>
+            <bpel:to variable="loanApprovalResponse"/>
+         </bpel:copy>
+      </bpel:assign>
+      <bpel:invoke aei:id="132923238271315693" inputVariable="loanApprovalResponse" name="Notify_Customer_Service" operation="notify" partnerLink="CustomerService"/>
+      <bpel:empty aei:id="132923233070415053" name="Custom_action_could_be_added_if_necessary"/>
+   </bpel:sequence>
+</bpel:process>

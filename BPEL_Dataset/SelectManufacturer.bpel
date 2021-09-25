@@ -1,0 +1,77 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Thu Mar 09 18:27:51 PST 2006
+  Author:  rdobrik
+  Purpose: Empty BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="SelectManufacturer"
+         targetNamespace="http://www.globalcompany.com/ns/selectservice"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:ids="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:client="http://www.globalcompany.com/ns/selectservice"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:hwf="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:ns1="http://www.globalcompany.com/ns/selectservice"
+         xmlns:ehdr="http://www.oracle.com/XSL/Transform/java/oracle.tip.esb.server.headers.ESBHeaderFunctions"
+         xmlns:ns2="http://xmlns.oracle.com/bpel/services/IdentityService"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <partnerLink name="SelectService" myRole="SelectServiceProvider"
+                 partnerRole="SelectServiceRequester"
+                 partnerLinkType="client:SelectService_PL"/>
+  </partnerLinks>
+  <variables>
+    <variable name="inputVariable"
+              messageType="ns1:RequestQuote_processRequestQuote"/>
+    <variable name="outputVariable"
+              messageType="ns1:RequestQuote_processRequestQuoteResponse"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <receive name="Receive_1" portType="client:SelectService"
+             partnerLink="SelectService" operation="processRequestQuote"
+             createInstance="yes" variable="inputVariable"/>
+    <assign name="Assign_1">
+      <copy>
+        <from expression="120 * bpws:getVariableData('inputVariable','parameters','/client:processRequestQuoteElement/client:param0/client:quantity')"/>
+        <to variable="outputVariable" part="parameters"
+            query="/client:processRequestQuoteResponseElement/client:return/client:supplierPrice"/>
+      </copy>
+      <copy>
+        <from expression="string('SelectDistributors')"/>
+        <to variable="outputVariable" part="parameters"
+            query="/ns1:processRequestQuoteResponseElement/ns1:return/ns1:supplierName"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_1" portType="client:SelectServiceCallback"
+            operation="processRequestQuoteResponse"
+            inputVariable="outputVariable" partnerLink="SelectService"/>
+  </sequence>
+</process>

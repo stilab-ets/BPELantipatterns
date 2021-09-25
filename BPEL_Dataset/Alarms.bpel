@@ -1,0 +1,117 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Tue May 16 12:10:21 PDT 2006
+  Author:  kmreddy
+  Purpose: Asynchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="Alarms" targetNamespace="http://xmlns.oracle.com/Alarms"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:ns1="http://xmlns.oracle.com/AsyncSubProcess"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:client="http://xmlns.oracle.com/Alarms"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <partnerLinks>
+        <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+        <partnerLink name="client" partnerLinkType="client:Alarms"
+                     myRole="AlarmsProvider" partnerRole="AlarmsRequester"/>
+        <partnerLink myRole="AsyncSubProcessRequester" name="AsyncSubProcess"
+                     partnerRole="AsyncSubProcessProvider"
+                     partnerLinkType="ns1:AsyncSubProcess"/>
+    </partnerLinks>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        VARIABLES                                                        
+        List of messages and XML documents used within this BPEL process 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <variables>
+        <!-- Reference to the message passed as input during initiation -->
+        <variable name="inputVariable"
+                  messageType="client:AlarmsRequestMessage"/>
+        <!-- Reference to the message that will be sent back to the requester during callback -->
+        <variable name="outputVariable"
+                  messageType="client:AlarmsResponseMessage"/>
+        <variable name="asyncInput"
+                  messageType="ns1:AsyncSubProcessRequestMessage"/>
+        <variable name="asyncOutput"
+                  messageType="ns1:AsyncSubProcessResponseMessage"/>
+        <variable name="alarmStatus" type="xsd:string"/>
+    </variables>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ORCHESTRATION LOGIC                                               
+       Set of activities coordinating the flow of messages across the    
+       services integrated within this business process                  
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <sequence name="main">
+        <!-- Receive input from requestor. (Note: This maps to operation defined in Alarms.wsdl) -->
+        <receive name="receiveInput" partnerLink="client"
+                 portType="client:Alarms" operation="initiate"
+                 variable="inputVariable" createInstance="yes"/>
+        <!-- 
+          Asynchronous callback to the requester. (Note: the callback location and correlation id is transparently handled using WS-addressing.)
+        -->
+        <assign name="Assign_1">
+            <copy>
+                <from variable="inputVariable" part="payload"
+                      query="/client:AlarmsProcessRequest/client:input"/>
+                <to variable="asyncInput" part="payload"
+                    query="/ns1:AsyncSubProcessProcessRequest/ns1:input"/>
+            </copy>
+        </assign>
+        <scope>
+            <eventHandlers>
+                <onAlarm bpelx:name="theAlarmName" for="'PT1H'">
+                    <sequence name="Sequence_1">
+                        <assign name="Assign_3">
+                            <copy>
+                                <from expression="'executed'"/>
+                                <to variable="alarmStatus"/>
+                            </copy>
+                        </assign>
+                    </sequence>
+                </onAlarm>
+            </eventHandlers>
+            <sequence>
+                <invoke name="Invoke_1" partnerLink="AsyncSubProcess"
+                        portType="ns1:AsyncSubProcess" operation="initiate"
+                        inputVariable="asyncInput"/>
+                <receive name="Receive_1" partnerLink="AsyncSubProcess"
+                         portType="ns1:AsyncSubProcessCallback"
+                         operation="onResult" variable="asyncOutput"
+                         createInstance="no"/>
+            </sequence>
+        </scope>
+        <assign name="Assign_2">
+            <copy>
+                <from variable="asyncOutput" part="payload"
+                      query="/ns1:AsyncSubProcessProcessResponse/ns1:result"/>
+                <to variable="outputVariable" part="payload"
+                    query="/client:AlarmsProcessResponse/client:result"/>
+            </copy>
+        </assign>
+        <invoke name="callbackClient" partnerLink="client"
+                portType="client:AlarmsCallback" operation="onResult"
+                inputVariable="outputVariable"/>
+    </sequence>
+</process>

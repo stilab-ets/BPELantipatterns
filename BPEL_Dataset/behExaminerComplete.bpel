@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+              xmlns:ns1="http://schemas.active-endpoints.com/sample/ClaimRequest/2008/02/RuntimeParameters.xsd"
+              xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links"
+              xmlns:email="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl"
+              xmlns:abx="http://www.activebpel.org/bpel/extension"
+              xmlns:evt="http://docs.active-endpoints.com/wsdl/eventing/2008/06/eventing.wsdl"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+              xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+              xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling"
+              xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable"
+              aei:editStyle="BPMN"
+              ext1:linksAreTransitions="yes"
+              ext:createTargetXPath="yes"
+              ext:disableSelectionFailure="yes"
+              name="behExaminerComplete"
+              suppressJoinFailure="yes"
+              targetNamespace="http://behExaminerComplete">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                       xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                       aei:bpelDigest=""
+                       aei:editStyle="BPMN"
+                       aei:layoutNeeded="false"
+                       aei:modelVersion="4"
+                       aei:objectId="133459126270133940"
+                       aei:processInitiatorSim=""
+                       isHorizontal="false">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:objectId="133459126270433976"
+                           aei:type="PARTNER_LINK"
+                           aei:visible="false,false,false,false,false,"
+                           bpmnElement="133459126270433976"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:objectId="133459137287134688"
+                           aei:type="PARTNER_LINK"
+                           aei:visible="false,false,false,false,false,"
+                           bpmnElement="133459137287134688"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {145,243}"
+                           aei:objectId="133459126270633990"
+                           aei:type="SEQUENCE"
+                           bpmnElement="133459126270633990"
+                           isHorizontal="false">
+            <dc:Bounds height="170" width="95" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {52,25}" aei:absoluteSize="DIM {70,60}"
+                           aei:attachments=""
+                           aei:name="Receive Event Data"
+                           aei:objectId="133459126270733992"
+                           aei:principal=""
+                           aei:type="RECEIVE"
+                           bpmnElement="133459126270733992">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {105,64}" aei:absoluteSize="DIM {89,26}"
+                              aei:anchor.location="1"
+                              aei:anchor.objectId="133459126270733992"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="133459126270733994"
+                              aei:relative.location="LOC {8,29}"
+                              aei:text="Receive Event Data"
+                              bpmnElement="133459126270733992label">
+               <dc:Bounds height="13" width="89" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,110}" aei:absoluteSize="DIM {125,53}"
+                           aei:attachments=""
+                           aei:name="Email Examiner Alert"
+                           aei:objectId="133459128899534482"
+                           aei:subprocessPath=""
+                           aei:type="INVOKE"
+                           bpmnElement="133459128899534482">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}"
+                           aei:implicitScopeIO="INPUT"
+                           aei:objectId="133459145046134714"
+                           aei:type="ASSIGN"
+                           bpmnElement="133459145046134714">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;aetgt:emailMessage xmlns:aetgt=&#34;http://schemas.active-endpoints.com/email/2007/01/email.xsd&#34;&#xA;                       xmlns:result=&#34;http://saxon.sf.net/xquery-results&#34;&#xA;                       xmlns:aem=&#34;http://schemas.active-endpoints.com/email/2007/01/email.xsd&#34;&#xA;                       xmlns:xs=&#34;http://www.w3.org/2001/XMLSchema&#34;&#xA;                       xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;&gt;&#xA;      &lt;aem:from&gt;{ $runtimeParameters/ns1:emailAddress/text() }&lt;/aem:from&gt;&#xA;      &lt;aem:replyTo&gt;{ $runtimeParameters/ns1:emailAddress/text() }&lt;/aem:replyTo&gt;&#xA;      &lt;aem:to&gt;{ $runtimeParameters/ns1:notificationEmailAddress/text() }&lt;/aem:to&gt;&#xA;      &lt;aem:subject&gt;Examiner Completed: Claim# ({ $trigger/behExaminerComplete/refNumber/text() }) &lt;/aem:subject&gt;&#xA;      &lt;aem:body mimeType=&#34;text/plain&#34;&gt;The assigned Examiner has completed input on Claim # { $trigger/behExaminerComplete/refNumber/text() }&lt;/aem:body&gt;&#xA;   &lt;/aetgt:emailMessage&gt;"
+                           aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0"
+                           aei:fromType="3"
+                           aei:objectId="133459156291735080"
+                           aei:toPart="emailPart"
+                           aei:toVariable="parameters"
+                           aei:type="ASSIGN_COPY"
+                           bpmnElement="133459156291735080"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {52,188}" aei:absoluteSize="DIM {70,60}"
+                           aei:backgroundColor="RGB {226,226,226}"
+                           aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png"
+                           aei:borderColor="RGB {0,0,255}"
+                           aei:bpmNotation="NoneEvent"
+                           aei:collapsed="false"
+                           aei:drawBorder="false"
+                           aei:font="${system.default}"
+                           aei:fontColor="RGB {0,0,0}"
+                           aei:imageDisplay="true"
+                           aei:imageTextGap="4"
+                           aei:joinCondition=""
+                           aei:joinConditionLang=""
+                           aei:name="Terminate"
+                           aei:objectId="133459126270733996"
+                           aei:scaleImage="false"
+                           aei:sizeToFit="true"
+                           aei:text=""
+                           aei:textAlignment="1"
+                           aei:textFormat="1"
+                           aei:textPlacement="16"
+                           aei:transparent="true"
+                           aei:type="NONE_EVENT"
+                           bpmnElement="133459126270733996">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {62,237}" aei:absoluteSize="DIM {51,17}"
+                              aei:anchor.location="1"
+                              aei:anchor.objectId="133459126270733996"
+                              aei:backgroundColor="RGB {255,255,255}"
+                              aei:objectId="133459126270733998"
+                              aei:relative.location="LOC {-35,39}"
+                              aei:text="Terminate"
+                              bpmnElement="133459126270733996label">
+               <dc:Bounds height="17" width="51" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <extensions>
+      <extension mustUnderstand="no"
+                      namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <extension mustUnderstand="yes"
+                      namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <extension mustUnderstand="yes"
+                      namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+   </extensions>
+   <import importType="http://schemas.xmlsoap.org/wsdl/"
+                namespace="http://docs.active-endpoints.com/wsdl/eventing/2008/06/eventing.wsdl"/>
+   <import importType="http://schemas.xmlsoap.org/wsdl/"
+                namespace="http://docs.active-endpoints/wsdl/email/2007/04/email.wsdl"/>
+   <import importType="http://www.w3.org/2001/XMLSchema"
+                location="../schema/RuntimeParameters.xsd"
+                namespace="http://schemas.active-endpoints.com/sample/ClaimRequest/2008/02/RuntimeParameters.xsd"/>
+   <partnerLinks>
+      <partnerLink aei:id="133459126270433976" myRole="actionProcess" name="eventingPLT"
+                        partnerLinkType="evt:eventingPLT"/>
+      <partnerLink aei:id="133459137287134688" myRole="sender" name="Email_Examiner_Alert"
+                        partnerLinkType="email:emailPLT"
+                        partnerRole="sender"/>
+   </partnerLinks>
+   <variables>
+      <variable element="evt:trigger" name="trigger"/>
+      <variable element="email:resultElement" name="emailResultElement"/>
+      <variable element="ns1:runtimeParameters" name="runtimeParameters">
+         <from>abx:getCatalogResource("project:/ClaimProcessing/support/runtimeParameters.xml")</from>
+      </variable>
+   </variables>
+   <sequence aei:id="133459126270633990">
+      <receive aei:id="133459126270733992" createInstance="yes" name="Receive_Event_Data"
+                    operation="trigger"
+                    partnerLink="eventingPLT"
+                    variable="trigger"/>
+      <scope aei:implicit="true" name="Email_Examiner_Alert">
+         <variables>
+            <variable messageType="email:emailMessage" name="parameters"/>
+         </variables>
+         <sequence>
+            <assign aei:id="133459145046134714">
+               <copy aei:id="133459156291735080">
+                  <from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0">&lt;aetgt:emailMessage xmlns:aetgt="http://schemas.active-endpoints.com/email/2007/01/email.xsd"
+                       xmlns:result="http://saxon.sf.net/xquery-results"
+                       xmlns:aem="http://schemas.active-endpoints.com/email/2007/01/email.xsd"
+                       xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+      &lt;aem:from&gt;{ $runtimeParameters/ns1:emailAddress/text() }&lt;/aem:from&gt;
+      &lt;aem:replyTo&gt;{ $runtimeParameters/ns1:emailAddress/text() }&lt;/aem:replyTo&gt;
+      &lt;aem:to&gt;{ $runtimeParameters/ns1:notificationEmailAddress/text() }&lt;/aem:to&gt;
+      &lt;aem:subject&gt;Examiner Completed: Claim# ({ $trigger/behExaminerComplete/refNumber/text() }) &lt;/aem:subject&gt;
+      &lt;aem:body mimeType="text/plain"&gt;The assigned Examiner has completed input on Claim # { $trigger/behExaminerComplete/refNumber/text() }&lt;/aem:body&gt;
+   &lt;/aetgt:emailMessage&gt;</from>
+                  <to part="emailPart" variable="parameters"/>
+               </copy>
+            </assign>
+            <invoke aei:id="133459128899534482" inputVariable="parameters"
+                         name="Email_Examiner_Alert"
+                         operation="send"
+                         outputVariable="emailResultElement"
+                         partnerLink="Email_Examiner_Alert"/>
+         </sequence>
+      </scope>
+      <empty aei:id="133459126270733996" name="Terminate"/>
+   </sequence>
+</process>

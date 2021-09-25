@@ -1,0 +1,498 @@
+<bpel:process 
+	name="GetRouteDurationForActiveEntities"
+	targetNamespace="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/definitions"
+	suppressJoinFailure="yes"
+	xmlns:tns="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/definitions"
+	xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:gddpartnerdef="http://maps.googleapis.com/directions/GetGoogleDirectionsDuration/DomInd/definitions"
+    xmlns:gddpartnertypes="http://maps.googleapis.com/directions/types"
+    xmlns:aecpartnerdef="http://www.ict-ccast.eu/CMF/GetActiveEntitiesBrokerContextInclude/DomIndAgg/definitions"
+    xmlns:aecpartnertypes="http://www.ict-ccast.eu/CMF/GetActiveEntitiesBrokerContextInclude/DomIndAgg/types"
+    xmlns:partnertypes="http://www.ict-ccast.eu/CMF/ContextBroker/types"
+    xmlns:types="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+    xmlns:cbTypes="http://www.ict-ccast.eu/CMF/ContextBroker/types"
+    xmlns:contextML="http://ContextML/1.7" >
+
+	<!-- 
+	   GetRouteDurationForActiveEntities is a synchronous BPEL process. It calculates 
+	   time required for each entity to travel the distance between its current location 
+	   and a specified destination address. This aggregation process can be shared among 
+	   different application domains and relies on domain independent CIPs such as 
+	   GetGoogleDirectionsDuration and GetActiveEntitiesBrokerContextInclude processes. 
+	   GetRouteDurationforActiveEntities expects the destination address and entity type as 
+	   input parameters and returns a list of available entities combined with related route 
+	   duration.
+	  
+	   @Layer: System Independent Aggregation CIPs
+	   @based on: GetGoogleDirectionsDuration (Domain Independent CIP, Google Maps Web services) 
+	   			  GetActiveEntitiesBrokerContextInclude (Domain Independent CIPs, C-CAST CMF)
+	  
+	   @System1: Google Maps Web services
+	   @Component: Directions
+	   @Interface: directions
+	   
+	   @System2: C-CAST CMF
+	   @Component: ContextBroker
+	   @Interface: GetContext, GetActiveEntities
+	  
+	   
+	   @Author: Rodion Hagin
+	   @Created: 01.06.2011
+	  
+	  -->
+	  
+    <!-- WSDL IMPORTS-->
+	<bpel:import 
+        location="GetRouteDurationForActiveEntititesArtifacts.wsdl"
+        namespace="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/definitions"
+        importType="http://schemas.xmlsoap.org/wsdl/" />
+
+	<bpel:import 
+		location="GetGoogleDirectionsDurationArtifacts.wsdl"
+		namespace="http://maps.googleapis.com/directions/GetGoogleDirectionsDuration/DomInd/definitions"
+		importType="http://schemas.xmlsoap.org/wsdl/" />
+    
+    <bpel:import 
+        location="GetActiveEntitiesBrokerContextIncludeArtifacts.wsdl"
+        namespace="http://www.ict-ccast.eu/CMF/GetActiveEntitiesBrokerContextInclude/DomIndAgg/definitions"
+        importType="http://schemas.xmlsoap.org/wsdl/" />
+         
+         
+    <!-- PARTNERLINKS -->
+	<bpel:partnerLinks>
+		
+		<!-- Represents the requester of this service. Used for callback. -->
+		<bpel:partnerLink 
+			name="Client" 
+			partnerLinkType="tns:RouteDurationForActiveEntitiesProviderPLT"
+			myRole="RouteDurationForActiveEntitiesProvider" />
+		
+		<!-- Represents GetGoogleDirectionsDuration CIP. -->	
+		<bpel:partnerLink 
+			name="GoogleDirectionsDurationProvider"
+			partnerLinkType="gddpartnerdef:GoogleDirectionsDurationProviderPLT" 
+			partnerRole="GoogleDirectionsDurationProvider" />
+        
+        <!-- Represents GetActiveEntitiesBrokerContextInclude CIP. -->
+        <bpel:partnerLink 
+            name="ActiveEntitiesBrokerContextIncludeProvider"
+            partnerLinkType="aecpartnerdef:ActiveEntitiesBrokerContextIncludeProviderPLT" 
+            partnerRole="ActiveEntitiesBrokerContextIncludeProvider" />
+            
+	</bpel:partnerLinks>
+  
+  
+    <!-- VARIABLES -->
+	<bpel:variables>
+		<!-- Business process input -->
+		<bpel:variable name="input" messageType="tns:GetRouteDurationForActiveEntitiesRequestMessage" />
+
+		<!-- Business process output -->
+		<bpel:variable name="output" messageType="tns:GetRouteDurationForActiveEntitiesResponseMessage" />
+        
+        <!-- Business process fault output -->
+        <bpel:variable name="fault" messageType="tns:GetRouteDurationForActiveEntitiesFaultMessage" />
+        
+		<!-- GetGoogleDirectionsDuration CIP input-->
+		<bpel:variable name="inputGDD" messageType="gddpartnerdef:GetGoogleDirectionsDurationRequestMessage" />
+
+		<!-- GetGoogleDirectionsDuration CIP output -->
+		<bpel:variable name="outputGDD" messageType="gddpartnerdef:GetGoogleDirectionsDurationResponseMessage" />
+        
+        <!-- GetActiveEntitiesBrokerContextInclude CIP input-->
+        <bpel:variable name="inputAEC" messageType="aecpartnerdef:GetActiveEntitiesBrokerContextIncludeRequestMessage" />
+    
+        <!-- GetActiveEntitiesBrokerContextInclude CIP output -->
+        <bpel:variable name="outputAEC" messageType="aecpartnerdef:GetActiveEntitiesBrokerContextIncludeResponseMessage" />
+        
+        <!--  Temporary variables to store entity id, type, original address as well as destination and duration data -->
+        <bpel:variable name="id" type="xsd:string" />
+        <bpel:variable name="type" type="xsd:string" />
+        <bpel:variable name="durValue" type="xsd:string" />
+        <bpel:variable name="durText" type="xsd:string" />
+        <bpel:variable name="originLat" type="xsd:string" />
+        <bpel:variable name="originLong" type="xsd:string" />
+        <bpel:variable name="destination" type="xsd:string" />
+	</bpel:variables>
+
+
+   <!-- FAULT HANDLING LOGIC --> 
+    <bpel:faultHandlers>
+      
+      <!-- Catch and process faults thrown by GetActiveEntitiesBrokerContextInclude CIP -->
+      <bpel:catch 
+        faultName="aecpartnerdef:GetActiveEntitiesBrokerContextIncludeFault" 
+        faultVariable="faultAEC"
+        faultMessageType="aecpartnerdef:GetActiveEntitiesBrokerContextIncludeFaultMessage">
+        
+        <bpel:sequence>
+          <bpel:assign validate="no" name="ProcessFaultFromAEC">
+              
+              <!-- To manipulate variable contents it should be pre-initiliazed. 
+        	   Apache ODE requirement. 
+        	  -->
+              <bpel:copy>
+                <bpel:from>
+                  <bpel:literal>
+                    <tn:GetRouteDurationForActiveEntitiesFault xmlns:tn="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                      <tn:status></tn:status>
+                    </tn:GetRouteDurationForActiveEntitiesFault>
+                  </bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="fault"></bpel:to>
+              </bpel:copy>
+              <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$faultAEC.payload//contextML:resp/@msg]]>
+                </bpel:from>
+                <bpel:to part="payload" variable="fault">
+                  <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                    <![CDATA[types:status]]>
+                  </bpel:query>
+                </bpel:to>
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+            name="replyFaultOutput" 
+            partnerLink="Client"
+            portType="tns:GetRouteDurationForActiveEntities"
+            operation="process" 
+            variable="fault"
+            faultName="tns:GetRouteDurationForActiveEntitiesFault" />
+        </bpel:sequence>
+      </bpel:catch>
+      
+      <!-- Catch and process faults thrown by GetGoogleDirectionsDuration CIP -->
+      <bpel:catch 
+        faultName="gddpartnerdef:GetGoogleDirectionsDurationFault" 
+        faultVariable="faultGDD"
+        faultMessageType="gddpartnerdef:GetGoogleDirectionsDurationFaultMessage">
+        
+        <bpel:sequence>
+          <bpel:assign validate="no" name="ProcessFaultFromGDD">
+              
+              <!-- To manipulate variable contents it should be pre-initiliazed. 
+        	   Apache ODE requirement. 
+        	  -->
+              <bpel:copy>
+                  <bpel:from>
+                      <bpel:literal>
+                        <tn:GetRouteDurationForActiveEntitiesFault xmlns:tn="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                          <tn:status></tn:status>
+                        </tn:GetRouteDurationForActiveEntitiesFault>
+                      </bpel:literal>
+                  </bpel:from>
+                  <bpel:to part="payload" variable="fault" />
+              </bpel:copy>
+              <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$faultGDD.payload//gddpartnertypes:status]]>
+                </bpel:from>
+                <bpel:to part="payload" variable="fault">
+                  <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                    <![CDATA[types:status]]>
+                  </bpel:query>
+                </bpel:to>
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+            name="replyFaultOutput" 
+            partnerLink="Client"
+            portType="tns:GetRouteDurationForActiveEntities"
+            operation="process" 
+            variable="fault"
+            faultName="tns:GetRouteDurationForActiveEntitiesFault" />
+        </bpel:sequence>
+      </bpel:catch>
+      
+      <!-- Catch all faults during current process execution, generate fault message and 
+         send back to the requester interface 
+        -->
+      <bpel:catchAll>
+        <bpel:sequence>
+          <bpel:assign validate="no" name="CreateNewFault">
+              <bpel:copy>
+                  <bpel:from>
+                    <bpel:literal>
+                      <tn:GetRouteDurationForActiveEntitiesFault xmlns:tn="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+                                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tn:status>GetRouteDurationForActiveEntities process error</tn:status>
+                      </tn:GetRouteDurationForActiveEntitiesFault>
+                    </bpel:literal>
+                  </bpel:from>
+                  <bpel:to part="payload" variable="fault" />
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+            name="replyFaultOutput" 
+            partnerLink="Client"
+            portType="tns:GetRouteDurationForActiveEntities"
+            operation="process" 
+            variable="fault"
+            faultName="tns:GetRouteDurationForActiveEntitiesFault" />
+        </bpel:sequence>
+      </bpel:catchAll> 
+      
+    </bpel:faultHandlers>
+  
+
+    <!-- ORCHESTRATION LOGIC -->
+    
+    <!-- Set of activities coordinating the flow of messages across the    
+       services integrated within this business process.  
+       
+       GetRouteDurationForActiveEntities BPEL process invokes GetActiveEntitiesBrokerContextInclude CIP
+       to obtain the current location of active entities of a specific type. As the next
+       step, GetRouteDurationForActiveEntities invokes GetGoogleDirectionsDuration to
+       calculate route duration between the current location of each entity to the specified 
+       destination location. XSLT transformation is used to process response of
+       GetGoogleDirectionsDuration CIP.
+      -->
+	<bpel:sequence name="main">
+
+		<bpel:receive 
+			name="receiveInput" 
+			partnerLink="Client"
+			portType="tns:GetRouteDurationForActiveEntities" 
+			operation="process" 
+			variable="input"
+			createInstance="yes" />
+        
+        <!-- Set context scope to position to obtain position information of active entities -->
+        <bpel:assign validate="no" name="PrepareInputToCIPGetActiveEntitiesBrokerContextInclude">
+          
+          <!-- To manipulate variable contents it should be pre-initialized. 
+        	   Apache ODE requirement. 
+        	  -->
+          <bpel:copy>
+            <bpel:from>
+              <bpel:literal>
+                <tn:GetActiveEntitiesBrokerContextIncludeRequest xmlns:tn="http://www.ict-ccast.eu/CMF/GetActiveEntitiesBrokerContextInclude/DomIndAgg/types"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                  <tn:entityType></tn:entityType>
+                  <tn:scopeList>
+                    <tn1:scope xmlns:tn1="http://www.ict-ccast.eu/CMF/ContextBroker/types"></tn1:scope>
+                  </tn:scopeList>
+                  <tn:parameterList></tn:parameterList>
+                </tn:GetActiveEntitiesBrokerContextIncludeRequest>
+              </bpel:literal>
+            </bpel:from>
+            <bpel:to part="payload" variable="inputAEC"></bpel:to>
+          </bpel:copy>
+          
+          <bpel:copy>
+            <bpel:from>
+                <![CDATA[$input.payload/types:entityType]]>
+            </bpel:from>
+            <bpel:to part="payload" variable="inputAEC">
+              <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[aecpartnertypes:entityType]]>
+              </bpel:query>
+            </bpel:to>
+          </bpel:copy>
+          
+          <bpel:copy>
+            <bpel:from>
+                <bpel:literal><![CDATA[position]]></bpel:literal>
+            </bpel:from>
+            <bpel:to part="payload" variable="inputAEC">
+              <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[aecpartnertypes:scopeList/cbTypes:scope]]>
+              </bpel:query>
+            </bpel:to>
+          </bpel:copy>
+          
+          <bpel:copy>
+            <bpel:from>
+                <![CDATA[$input.payload/types:contextParameters]]>
+            </bpel:from>
+            <bpel:to part="payload" variable="inputAEC">
+              <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                <![CDATA[aecpartnertypes:parameterList]]>
+              </bpel:query>
+            </bpel:to>
+          </bpel:copy>
+          
+        </bpel:assign>
+    
+    	<!-- Obtain position information of currently active entities -->
+        <bpel:invoke 
+          name="InvokeCIPGetActiveEntitiesBrokerContextInclude" 
+          partnerLink="ActiveEntitiesBrokerContextIncludeProvider" 
+          operation="process" 
+          portType="aecpartnerdef:GetActiveEntitiesBrokerContextInclude" 
+          inputVariable="inputAEC" 
+          outputVariable="outputAEC" />
+        
+        <bpel:assign validate="no" name="PrepareOutput">
+          
+          <!-- To manipulate variable contents it should be pre-initialized. 
+        	   Apache ODE requirement. 
+        	  -->
+          <bpel:copy>
+            <bpel:from>
+              <bpel:literal>
+                <tn:GetRouteDurationForActiveEntitiesResponse xmlns:tn="http://www.ict-ccast.eu/CMF/GetRouteDurationForActiveEntities/Agg/types"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                  <tn:entityList/>
+                </tn:GetRouteDurationForActiveEntitiesResponse>
+              </bpel:literal>
+            </bpel:from>
+            <bpel:to part="payload" variable="output"></bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+        
+        <!-- Iterate over the list of the active entities and invoke GetGoogleDirectionsDuration
+          to calculate route duration for each entity to the specified location.
+       	  -->
+       	<!--  Apache ODE limitation: Apache ODE converts integer numbers to their rational
+       	   representation. Hence, in order to use integer numbers in foreach loops they should
+       	   be explicitly transformed using XPath function number().   
+       	  -->
+        <bpel:forEach counterName="parameter" parallel="no">
+          <bpel:startCounterValue>1</bpel:startCounterValue>
+          <bpel:finalCounterValue>
+            number(count($outputAEC.payload//contextML:ctxEl))
+          </bpel:finalCounterValue>
+          
+          <bpel:scope>
+            <bpel:faultHandlers>
+            	
+            	<!-- Propagate faults to the process fault handlers -->
+            	<bpel:catchAll>
+            		<bpel:rethrow/>
+            	</bpel:catchAll>
+            </bpel:faultHandlers>
+          
+            <bpel:sequence name="CalculateRouteDuration">          
+      		
+      		<!-- First, initialize temporary variables with values of the currently active entity -->
+              
+            <!-- Eclipde BPEL Designer bug: according to the WS-BPEL specification variables defined
+               in foreach scope should not be defined in scope or process. 
+              -->
+            <bpel:assign validate="no" name="PrepareInputToCIPGetGoogleDirectionsDuration">
+                <bpel:copy>
+                  <bpel:from>
+                    <bpel:literal>
+                      <tn:DirectionsRequest xmlns:tn="http://maps.googleapis.com/directions/types" 
+                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+                    </bpel:literal>
+                  </bpel:from>
+                  <bpel:to part="payload" variable="inputGDD"></bpel:to>
+                </bpel:copy>
+                <bpel:copy>
+                  <bpel:from>
+                    <![CDATA[$outputAEC.payload//contextML:ctxEl[number($parameter)]/contextML:dataPart/contextML:par[@n='latitude']/node()]]>
+                  </bpel:from>
+                  <bpel:to variable="originLat" />
+                </bpel:copy>
+                <bpel:copy>
+                  <bpel:from>
+                    <![CDATA[$outputAEC.payload//contextML:ctxEl[number($parameter)]/contextML:dataPart/contextML:par[@n='longitude']/node()]]>
+                  </bpel:from>
+                  <bpel:to variable="originLong" />
+                </bpel:copy>
+                <bpel:copy>
+                  <bpel:from>
+                    <![CDATA[$input.payload/types:destination]]>
+                  </bpel:from>
+                  <bpel:to variable="destination" />
+                </bpel:copy>
+                
+                <!-- Execute XSL transformation to create DirectionsRequest message using 
+  				  input parameters holding origin latitude, longitude and destination information
+  				  of a particular entity 
+                
+                 Eclipse BPEL Designer bug: doXSLTransform cannot parse literal values.
+                -->
+                <bpel:copy>
+                  <bpel:from>bpel:doXslTransform("transform_step_1.xsl", $inputGDD.payload, 'originLat', $originLat, 'originLong', $originLong, 'destination', $destination)
+                  </bpel:from>
+                  <bpel:to part="payload" variable="inputGDD" />
+                </bpel:copy>
+                <bpel:copy>
+                  <bpel:from part="payload" variable="input">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                       <![CDATA[types:routeParameters]]>
+                    </bpel:query>
+                  </bpel:from>
+                  <bpel:to part="payload" variable="inputGDD">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                      <![CDATA[gddpartnertypes:routeParameters]]>
+                    </bpel:query>
+                  </bpel:to>
+                </bpel:copy>
+      		</bpel:assign>
+      		
+      		<!-- Invoke GetGoogleDirectionsDuration to calculate route duration -->
+            <bpel:invoke 
+            	name="InvokeCIPGetGoogleDirectionsDuration" 
+            	partnerLink="GoogleDirectionsDurationProvider" 
+            	operation="process" 
+            	portType="gddpartnerdef:GetGoogleDirectionsDuration" 
+            	inputVariable="inputGDD" 
+            	outputVariable="outputGDD" />
+             
+             <!-- Store route duration information to temporary variables -->
+             <!-- Eclipde BPEL Designer bug: according to the WS-BPEL specification variables defined
+               in foreach scope should not be defined in scope or process. 
+              -->
+             <bpel:assign validate="no" name="ProcessOutputFromCIPGetGoogleDirectionsDuration">
+              <bpel:copy>
+                <bpel:from>
+                  <![CDATA[$outputAEC.payload//contextML:ctxEl[number($parameter)]/contextML:entity/@id]]>
+                </bpel:from>
+                <bpel:to variable="id" />
+              </bpel:copy>
+              <bpel:copy>
+                <bpel:from>
+                  <![CDATA[$outputAEC.payload//contextML:ctxEl[number($parameter)]/contextML:entity/@type]]>
+                </bpel:from>
+                <bpel:to variable="type" />
+              </bpel:copy>
+              <bpel:copy>
+                <bpel:from>
+                  <![CDATA[$outputGDD.payload/gddpartnertypes:value]]>
+                </bpel:from>
+                <bpel:to variable="durValue" />
+              </bpel:copy>
+              <bpel:copy>
+                <bpel:from>
+                  <![CDATA[$outputGDD.payload/gddpartnertypes:text]]>
+                </bpel:from>
+                <bpel:to variable="durText" />
+              </bpel:copy>
+              
+               <!-- Execute XSL transformation to create GetRouteDurationForActiveEntities 
+  					response message. New values are added to the output list.
+                
+                 Eclipse BPEL Designer bug: doXSLTransform cannot parse literal values.
+                -->
+              <bpel:copy>
+                <bpel:from>bpel:doXslTransform("transform_step_2.xsl", $output.payload, 'id', $id, 'type', $type, 'originLat', $originLat, 'originLong', $originLong, 'durValue', $durValue, 'durText', $durText)
+                </bpel:from>
+                <bpel:to part="payload" variable="output" />
+              </bpel:copy>
+             </bpel:assign>
+             
+            </bpel:sequence>
+          </bpel:scope>
+        </bpel:forEach>
+        
+        <!-- Send calculated route duration for active entities -->
+        <bpel:reply 
+        	name="replyOutput" 
+        	partnerLink="Client"
+			portType="tns:GetRouteDurationForActiveEntities" 
+			operation="process" 
+			variable="output" />
+    </bpel:sequence>
+</bpel:process>
+

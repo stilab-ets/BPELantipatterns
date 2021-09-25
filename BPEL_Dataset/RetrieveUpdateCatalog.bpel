@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:Catalog="http://www.example.org/Catalog/" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext2="http://www.activebpel.org/2011/08/bpel/extension/script" xmlns:ns="http://UpdateCatalog/updatecatalog/public" xmlns:ns1="Invalid Document" xmlns:param="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:linksAreTransitions="yes" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="RetrieveUpdateCatalog" suppressJoinFailure="yes" targetNamespace="http://UpdateCatalog">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132951281678311073" aei:processInitiatorSim="" isHorizontal="true" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132951287537911529" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132951287537911529"/>
+         <bpmndi:BPMNShape aei:objectId="133072719048007841" aei:type="FLOW" bpmnElement="133072719048007841">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {429,267}" aei:objectId="132951288765711557" aei:type="SEQUENCE" bpmnElement="132951288765711557" isHorizontal="true">
+            <dc:Bounds height="267" width="429" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="133113922210602081" aei:sourceTerminal="SV" bpmnElement="133113922210602081"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,118}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Catalog" aei:objectId="132951288761011553" aei:principal="" aei:text="Catalog" aei:type="RECEIVE" bpmnElement="132951288761011553">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {52,175}" aei:absoluteSize="DIM {37,13}" aei:anchor.location="1" aei:anchor.objectId="132951288761011553" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132951288766011559" aei:relative.location="LOC {-18,47}" aei:text="Catalog" bpmnElement="132951288761011553label">
+               <dc:Bounds height="13" width="37" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {120,25}" aei:absoluteSize="DIM {314,247}" aei:objectId="133072611398400925" aei:type="IF" bpmnElement="133072611398400925" isHorizontal="true">
+            <dc:Bounds height="247" width="314" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {129,124}" aei:absoluteSize="DIM {92,13}" aei:anchor.location="4" aei:anchor.objectId="133072611398400925" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133072611398600927" aei:relative.location="LOC {2,-23}" aei:text="Conditional Pattern" bpmnElement="133072611398400925label">
+               <dc:Bounds height="13" width="92" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$PutCatalog/in &gt;=0" aei:IF_EXPR_LANG="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0" aei:absoluteLocation="LOC {190,25}" aei:absoluteSize="DIM {184,111}" aei:objectId="133072611398600929" aei:type="ELSE_IF" bpmnElement="133072611398400925ifDef">
+            <dc:Bounds height="111" width="184" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {191,77}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="133072611398600929" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133072611398700931" aei:relative.location="LOC {-54,-30}" aei:text="If Condition" bpmnElement="133072611398400925ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {239,54}" aei:absoluteSize="DIM {125,53}" aei:name="Copy to the Catalog Resource" aei:objectId="133011741989607163" aei:type="ASSIGN" bpmnElement="133011741989607163">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {229,44}" aei:absoluteSize="DIM {145,73}" aei:actySimState="1" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133072611398800933" aei:type="Sequence" bpmnElement="133011741989607163wrappingSequence" isHorizontal="true">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {190,161}" aei:absoluteSize="DIM {184,111}" aei:objectId="133072611398900935" aei:type="ELSE" bpmnElement="133072611398400925elseDef">
+            <dc:Bounds height="111" width="184" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {210,213}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="133072611398900935" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133072611399100937" aei:relative.location="LOC {-34,-1}" aei:text="Else" bpmnElement="133072611398400925elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {239,190}" aei:absoluteSize="DIM {125,53}" aei:name="Get from the Catalog Resource" aei:objectId="133072618099100961" aei:type="ASSIGN" bpmnElement="133072618099100961">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="data(abx:getCatalogResource(&quot;project:/CustomerService/runtimeParameters/approvalParameters.xml&quot;)/param:amountRequiresHumanApproval)" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133072768672909143" aei:toQuery="in" aei:toVariable="PutCatalog" aei:type="ASSIGN_COPY" bpmnElement="133072768672909143"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {229,180}" aei:absoluteSize="DIM {145,73}" aei:actySimState="1" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133072611399100939" aei:type="Sequence" bpmnElement="133072618099100961wrappingSequence" isHorizontal="true">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {550,120}" aei:absoluteSize="DIM {70,60}" aei:name="Catalog-Reply" aei:objectId="132951288765611555" aei:text="Catalog-Reply" aei:type="REPLY" bpmnElement="132951288765611555">
+            <dc:Bounds height="60" width="70" x="390" y="620"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {561,177}" aei:absoluteSize="DIM {68,13}" aei:anchor.location="1" aei:anchor.objectId="132951288765611555" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132951288766111561" aei:relative.location="LOC {-34,47}" aei:text="Catalog-Reply" bpmnElement="132951288765611555label">
+               <dc:Bounds height="13" width="68" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:backgroundColor="RGB {226,226,226}" aei:borderColor="RGB {0,0,255}" aei:implicitScopeIO="INPUT" aei:objectId="133011761890510779" aei:type="ASSIGN" bpmnElement="133011761890510779">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$PutCatalog/in" aei:fromType="3" aei:objectId="133011762406610821" aei:toPart="parameters" aei:toQuery="out" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133011762406610821"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {540,110}" aei:absoluteSize="DIM {90,80}" aei:actySimState="1" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133072719053507853" aei:type="Sequence" bpmnElement="132951288765611555wrappingSequence" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="530" y="100"/>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2011/08/bpel/extension/script"/>
+   </bpel:extensions>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/RetrieveUpdateCatalog.public.wsdl" namespace="http://UpdateCatalog/updatecatalog/public"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/Catalog.wsdl" namespace="http://www.example.org/Catalog/"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="132951287537911529" aei:interface="Catalog:Catalog" myRole="Provider" name="Process_Consumer" partnerLinkType="ns:CatalogPLT"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="Catalog:PutCatalog" name="PutCatalog"/>
+   </bpel:variables>
+   <bpel:flow aei:id="133072719048007841">
+      <bpel:links>
+         <bpel:link aei:id="133113922210602081" name="L1"/>
+      </bpel:links>
+      <bpel:sequence aei:id="132951288765711557">
+         <bpel:sources>
+            <bpel:source linkName="L1"/>
+         </bpel:sources>
+         <bpel:receive aei:id="132951288761011553" createInstance="yes" name="Catalog" operation="PutCatalog" partnerLink="Process_Consumer" variable="PutCatalog"/>
+         <bpel:if aei:id="133072611398400925">
+            <bpel:documentation>By default, when the process request form is launched, we would get the resource from the catalog and show it to the user. It takes the Else path in the process. Otherwise, when a user inputs any value &gt; 0, then we update it to the catalog.  </bpel:documentation>
+            <bpel:condition>$PutCatalog/in &gt;=0</bpel:condition>
+            <bpel:assign aei:id="133011741989607163" name="Copy_to_the_Catalog_Resource">
+               <bpel:extensionAssignOperation>
+                  <ext2:script expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[abx:putCatalogResource("project:/CustomerService/runtimeParameters/approvalParameters.xml",<param:approvalParameters xmlns:param="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd">
+  <param:amountRequiresHumanApproval>{ $PutCatalog/in/text() }</param:amountRequiresHumanApproval>
+</param:approvalParameters>)]]></ext2:script>
+               </bpel:extensionAssignOperation>
+            </bpel:assign>
+            <bpel:else aei:id="133072611398900935">
+               <bpel:assign aei:id="133072618099100961" name="Get_from_the_Catalog_Resource">
+                  <bpel:copy aei:id="133072768672909143">
+                     <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[data(abx:getCatalogResource("project:/CustomerService/runtimeParameters/approvalParameters.xml")/param:amountRequiresHumanApproval)]]></bpel:from>
+                     <bpel:to variable="PutCatalog">
+                        <bpel:query>in</bpel:query>
+                     </bpel:to>
+                  </bpel:copy>
+               </bpel:assign>
+            </bpel:else>
+         </bpel:if>
+      </bpel:sequence>
+      <bpel:scope aei:implicit="true" name="Catalog-Reply">
+         <bpel:targets>
+            <bpel:target linkName="L1"/>
+         </bpel:targets>
+         <bpel:variables>
+            <bpel:variable messageType="Catalog:PutCatalogResponse" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="133011761890510779">
+               <bpel:copy aei:id="133011762406610821">
+                  <bpel:from>$PutCatalog/in</bpel:from>
+                  <bpel:to part="parameters" variable="parameters">
+                     <bpel:query>out</bpel:query>
+                  </bpel:to>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:reply aei:id="132951288765611555" name="Catalog-Reply" operation="PutCatalog" partnerLink="Process_Consumer" variable="parameters"/>
+         </bpel:sequence>
+      </bpel:scope>
+   </bpel:flow>
+</bpel:process>

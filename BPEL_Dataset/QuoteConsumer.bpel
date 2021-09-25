@@ -1,0 +1,105 @@
+<!-- QuoteConsumer BPEL Process -->
+<process name="QuoteConsumer"
+         targetNamespace="http://samples.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://samples.otn.com"
+         xmlns:services="http://services.otn.com"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+    <!-- List of services participating in this BPEL process -->
+    <partnerLinks>
+        <!--
+        The 'client' role represents the requester of this service. It is
+        used for callback. The location and correlation information associated
+        with the client role are automatically set using WS-Addressing.
+        -->
+        <partnerLink name="client"
+                     partnerLinkType="tns:QuoteConsumer"
+                     myRole="QuoteConsumerProvider"
+                     partnerRole="QuoteConsumerRequester"
+                     />
+
+        <partnerLink name="StockQuoteService"
+                     partnerLinkType="services:StockQuoteService"
+                     partnerRole="StockQuoteServiceProvider"/>
+     </partnerLinks>
+
+    <!-- List of messages and XML documents used as part of this
+         BPEL process
+         -->
+    <variables>
+        <!-- Reference to the message passed as input during initiation -->
+        <variable name="input"
+                  messageType="tns:QuoteConsumerRequestMessage"/>
+
+        <!-- Reference to the message that will be sent back to the
+             requestor during callback
+             -->
+        <variable name="output"
+                  messageType="tns:QuoteConsumerResultMessage"/>
+
+        <variable name="request"
+                  messageType="services:StockQuoteServiceRequest"/>
+
+        <variable name="response"
+                  messageType="services:StockQuoteServiceResponse"/>
+    </variables>
+
+    <!-- Orchestration Logic -->
+
+    <sequence>
+
+        <!-- Receive input from requestor.
+             Note: This maps to operation defined in QuoteConsumer.wsdl
+             -->
+        <receive name="receiveInput" partnerLink="client"
+                 portType="tns:QuoteConsumer"
+                 operation="initiate" variable="input"
+                 createInstance="yes"/>
+
+        <assign>
+            <copy>
+                <from variable="input"
+                      part="payload"
+                      query="/tns:symbol"/>
+                <to variable="request"
+                    part="symbol"
+                    query="/symbol"/>
+            </copy>
+        </assign>
+
+        <invoke name="invokeStockQuoteService"
+                partnerLink="StockQuoteService"
+                portType="services:StockQuoteService"
+                operation="process"
+                inputVariable="request"
+                outputVariable="response"/>
+
+        <!-- Generate content of output message based on the content of the
+             input message.
+             -->
+        <assign>
+              <copy>
+                <from variable="response"
+                      part="result"
+                      query="/result"/>
+                <to variable="output"
+                    part="payload"
+                    query="/tns:result"/>
+              </copy>
+        </assign>
+
+         <!-- Asynchronous callback to the requester.
+             Note: the callback location and correlation id is transparently handled
+             using WS-addressing.
+             -->
+        <invoke name="replyOutput"
+                partnerLink="client"
+                 portType="tns:QuoteConsumerCallback"
+                operation="onResult"
+                inputVariable="output"
+                />
+    </sequence>
+</process>
+

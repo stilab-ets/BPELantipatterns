@@ -1,0 +1,75 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Fri Jun 17 11:36:43 PDT 2005
+  // Author:  lililiu
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="Simple_XMLType_Payload"
+         targetNamespace="http://xmlns.oracle.com/Simple_XMLType_Payload"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/aq/inbound/"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns5="http://xmlns.oracle.com/pcbpel/adapter/aq/outbound/"
+         xmlns:client="http://xmlns.oracle.com/Simple_XMLType_Payload"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/aq/dequeue/"
+         xmlns:ns3="http://www.oracle.com/AqAdapter/tutorial/"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/aq/enqueue/"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!-- ================================================================= -->
+  <!-- PARTNERLINKS                                                      -->
+  <!-- List of services participating in this BPEL process               -->
+  <!-- ================================================================= -->
+  <partnerLinks>
+    <partnerLink myRole="Dequeue_role" name="dequeue"
+                 partnerLinkType="ns1:Dequeue_plt"/>
+    <partnerLink name="enqueue" partnerRole="Enqueue_role"
+                 partnerLinkType="ns2:Enqueue_plt"/>
+  </partnerLinks>
+  <!-- ================================================================= -->
+  <!-- VARIABLES                                                         -->
+  <!-- List of messages and XML documents used within this BPEL process  -->
+  <!-- ================================================================= -->
+  <variables>
+    <variable name="Receive_1_Dequeue_InputVariable"
+              messageType="ns1:simpleXMLType_msg"/>
+    <variable name="input_header" messageType="ns4:Header"/>
+    <variable name="Invoke_1_Enqueue_InputVariable"
+              messageType="ns2:simpleXMLType_msg"/>
+    <variable name="output_header" messageType="ns5:Header"/>
+  </variables>
+  <!-- ================================================================= -->
+  <!-- ORCHESTRATION LOGIC                                               -->
+  <!-- Set of activities coordinating the flow of messages across the    -->
+  <!-- services integrated within this business process                  -->
+  <!-- ================================================================= -->
+  <sequence name="main">
+    <receive name="Receive_1" partnerLink="dequeue" portType="ns1:Dequeue_ptt"
+             operation="Dequeue" variable="Receive_1_Dequeue_InputVariable"
+             createInstance="yes" bpelx:headerVariable="input_header"/>
+    <assign name="Assign_1">
+      <copy>
+        <from variable="Receive_1_Dequeue_InputVariable" part="simpleXMLType"
+              query="/ns3:simpleXMLType"/>
+        <to variable="Invoke_1_Enqueue_InputVariable" part="simpleXMLType"
+            query="/ns3:simpleXMLType"/>
+      </copy>
+      <copy>
+        <from variable="input_header" part="Header"
+              query="/ns4:Header/ns4:Priority"/>
+        <to variable="output_header" part="Header"
+            query="/ns5:Header/ns5:Priority"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_1" partnerLink="enqueue" portType="ns2:Enqueue_ptt"
+            operation="Enqueue" inputVariable="Invoke_1_Enqueue_InputVariable"
+            bpelx:inputHeaderVariable="output_header"/>
+  </sequence>
+</process>

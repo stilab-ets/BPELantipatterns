@@ -1,0 +1,44 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Tue May 10 18:21:39 IST 2005
+  // Author:  nedatata
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="DynamicSyncRead" targetNamespace="http://xmlns.oracle.com/DynamicSyncRead" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns4="http://xmlns.oracle.com/DynamicSyncRead/Trigger" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://xmlns.oracle.com/pcbpel/adapter/file/FileWrite/" xmlns:client="http://xmlns.oracle.com/DynamicSyncRead" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/file/ReadTrigger/" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/ftp/" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/ftp/SyncRead/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= -->
+  <partnerLinks>
+    <partnerLink myRole="Read_role" name="FileReadPL" partnerLinkType="ns1:Read_plt"/>
+    <partnerLink name="SyncReadPL" partnerRole="SynchronousRead_role" partnerLinkType="ns2:SynchronousRead_plt"/>
+    <partnerLink name="FileWritePL" partnerRole="Write_role" partnerLinkType="ns5:Write_plt"/>
+  </partnerLinks><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= -->
+  <variables>
+    <variable name="Receive_Trigger_Read_InputVariable" messageType="ns1:trigger_msg"/>
+    <variable name="Invoke_SyncRead_SynchronousRead_InputVariable" messageType="ns2:Empty_msg"/>
+    <variable name="Invoke_SyncRead_SynchronousRead_OutputVariable" messageType="ns2:Root-Element_msg"/>
+    <variable name="header" messageType="ns3:OutboundHeader_msg"/>
+    <variable name="Invoke_Write_Write_InputVariable" messageType="ns5:Root-Element_msg"/>
+  </variables><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <sequence name="main">
+    <receive name="Receive_Trigger" partnerLink="FileReadPL" portType="ns1:Read_ptt" operation="Read" variable="Receive_Trigger_Read_InputVariable" createInstance="yes"/>
+    <assign name="Assign_Header">
+      <copy>
+        <from variable="Receive_Trigger_Read_InputVariable" part="trigger" query="/ns4:trigger/ns4:fileName"/>
+        <to variable="header" part="outboundHeader" query="/ns3:OutboundFTPHeaderType/ns3:fileName"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_SyncRead" partnerLink="SyncReadPL" portType="ns2:SynchronousRead_ptt" operation="SynchronousRead" inputVariable="Invoke_SyncRead_SynchronousRead_InputVariable" outputVariable="Invoke_SyncRead_SynchronousRead_OutputVariable" bpelx:inputHeaderVariable="header"/>
+    <assign name="Transform_CSV_FixedLength">
+      <bpelx:annotation>
+        <bpelx:pattern>transformation
+        </bpelx:pattern>
+      </bpelx:annotation>
+      <copy>
+        <from expression="ora:processXSLT('Transformation_1.xsl',bpws:getVariableData('Invoke_SyncRead_SynchronousRead_OutputVariable','Root-Element'))"/>
+        <to variable="Invoke_Write_Write_InputVariable" part="Root-Element"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_Write" partnerLink="FileWritePL" portType="ns5:Write_ptt" operation="Write" inputVariable="Invoke_Write_Write_InputVariable"/>
+  </sequence>
+</process>

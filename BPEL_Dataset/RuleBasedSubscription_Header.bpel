@@ -1,0 +1,35 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Wed Mar 30 19:16:31 PST 2005
+  // Author:  lililiu
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="RuleBasedSubscription_Header" targetNamespace="http://xmlns.oracle.com/RuleBasedSubscription_Header" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/aq/outbound/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://xmlns.oracle.com/pcbpel/adapter/opaque/" xmlns:client="http://xmlns.oracle.com/RuleBasedSubscription_Header" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/aq/DequeuePriority1/" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/aq/EnqueueMessageReceived/" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/aq/inbound/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= -->
+  <partnerLinks>
+    <partnerLink myRole="Dequeue_role" name="DequeuePriority1" partnerLinkType="ns1:Dequeue_plt"/>
+    <partnerLink name="EnqueueMessageReceived" partnerRole="Enqueue_role" partnerLinkType="ns3:Enqueue_plt"/>
+  </partnerLinks><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= -->
+  <variables>
+    <variable name="Receive_1_Dequeue_InputVariable" messageType="ns1:Dequeue_msg"/>
+    <variable name="inbound_header" messageType="ns2:Header"/>
+    <variable name="Invoke_1_Enqueue_InputVariable" messageType="ns3:Enqueue_msg"/>
+    <variable name="outbound_header" messageType="ns4:Header"/>
+  </variables><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <sequence name="main">
+    <receive name="Receive_1" partnerLink="DequeuePriority1" portType="ns1:Dequeue_ptt" operation="Dequeue" variable="Receive_1_Dequeue_InputVariable" createInstance="yes" bpelx:headerVariable="inbound_header"/>
+    <assign name="Assign_1">
+      <copy>
+        <from variable="Receive_1_Dequeue_InputVariable" part="opaque" query="/ns5:opaqueElement"/>
+        <to variable="Invoke_1_Enqueue_InputVariable" part="opaque" query="/ns5:opaqueElement"/>
+      </copy>
+      <copy>
+        <from variable="inbound_header" part="Header" query="/ns2:Header/ns2:Priority"/>
+        <to variable="outbound_header" part="Header" query="/ns4:Header/ns4:Priority"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_1" partnerLink="EnqueueMessageReceived" portType="ns3:Enqueue_ptt" operation="Enqueue" inputVariable="Invoke_1_Enqueue_InputVariable" bpelx:inputHeaderVariable="outbound_header"/>
+  </sequence>
+</process>

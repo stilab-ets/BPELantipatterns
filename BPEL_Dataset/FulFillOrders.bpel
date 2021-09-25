@@ -1,0 +1,98 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Wed Feb 09 14:32:09 EST 2005
+  // Author:  ssondur
+  // Purpose: Asynchronous BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="FulFillOrders"
+         targetNamespace="http://xmlns.oracle.com/FulFillOrders"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:ns1="http://www.globalcompany.com/ns/sales"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns3="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/WriteDBRecord"
+         xmlns:client="http://xmlns.oracle.com/FulFillOrders"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink name="client" partnerLinkType="client:FulFillOrders"
+                 myRole="FulFillOrdersProvider"
+                 partnerRole="FulFillOrdersRequester"/>
+    <partnerLink name="WriteDBRecord" partnerRole="WriteDBRecord_role"
+                 partnerLinkType="ns2:WriteDBRecord_plt"
+                 plext:inbport="WriteDBRecord_ptt" plext:inbound="false"/>
+  </partnerLinks>
+  <variables>
+    <variable name="inputVariable"
+              messageType="client:FulFillOrdersRequestMessage"/>
+    <variable name="outputVariable"
+              messageType="client:FulFillOrdersResponseMessage"/>
+    <variable name="Invoke_DBWrite_merge_InputVariable"
+              messageType="ns2:OrdersCollection_msg"/>
+    <variable name="dbStatus" type="ns3:boolean"/>
+  </variables>
+  <sequence name="main">
+    <receive name="receiveInput" partnerLink="client"
+             portType="client:FulFillOrders" operation="initiate"
+             variable="inputVariable" createInstance="yes"/>
+    <assign name="Assign_InitialValue">
+      <copy>
+        <from expression="'0'"/>
+        <to variable="dbStatus"/>
+      </copy>
+    </assign>
+    <assign name="Transform_1">
+      <bpelx:annotation>
+        <bpelx:pattern>transformation
+        </bpelx:pattern>
+      </bpelx:annotation>
+      <copy>
+        <from expression="ora:processXSLT('Transformation_1.xsl',bpws:getVariableData('inputVariable','payload'))"/>
+        <to variable="Invoke_DBWrite_merge_InputVariable"
+            part="OrdersCollection"/>
+      </copy>
+    </assign>
+    <while name="While_1" condition="bpws:getVariableData('dbStatus') &lt; 5">
+      <scope name="Scope_1">
+        <faultHandlers>
+          <catchAll>
+            <sequence name="Sequence_2">
+              <assign name="assign_DB_retry">
+                <copy>
+                  <from expression="bpws:getVariableData('dbStatus') + 1"/>
+                  <to variable="dbStatus"/>
+                </copy>
+              </assign>
+              <wait name="Wait_30_sec" for="'PT31S'"/>
+            </sequence>
+          </catchAll>
+        </faultHandlers>
+        <sequence name="Sequence_1">
+          <invoke name="Write_DBWrite" partnerLink="WriteDBRecord"
+                  portType="ns2:WriteDBRecord_ptt" operation="insert"
+                  inputVariable="Invoke_DBWrite_merge_InputVariable"/>
+          <assign name="Assign_dbComplete">
+            <copy>
+              <from expression="'10'"/>
+              <to variable="dbStatus"/>
+            </copy>
+          </assign>
+        </sequence>
+      </scope>
+    </while>
+    <invoke name="callbackClient" partnerLink="client"
+            portType="client:FulFillOrdersCallback" operation="onResult"
+            inputVariable="outputVariable"/>
+  </sequence>
+</process>
+
+
+
+

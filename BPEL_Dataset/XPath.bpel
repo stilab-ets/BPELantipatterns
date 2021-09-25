@@ -1,0 +1,204 @@
+<process name="XPath"
+         targetNamespace="http://samples.otn.com/xpath"
+         suppressJoinFailure="yes"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:tns="http://samples.otn.com/xpath"
+         xmlns:autoloan="http://samples.otn.com/xpath/autoloan"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+
+  <!--
+    This process receives an InvalidApplication, does a couple of copies
+    in xpath, and then asynchronously returns the Application.
+    -->
+
+  <partnerLinks>
+    <partnerLink name="client" partnerLinkType="tns:XPath"
+             myRole="XPathProvider" partnerRole="XPathRequester"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="input" messageType="tns:XPathRequestMessage"/>
+    <variable name="output" messageType="tns:XPathResultMessage"/>
+               
+    <variable name="loanApp" element="tns:loanApplication"/>
+    <variable name="loanAmount" type="xsd:double" />
+    <variable name="application" element="tns:loanApplication"/>
+    <variable name="customer" element="tns:customerProfile"/>
+    <variable name="address" element="tns:customerAddress"/>
+    <variable name="street1" type="xsd:string"/>
+    <variable name="street2" type="xsd:string"/>
+    <variable name="custId"  type="xsd:string"/>
+  </variables>
+
+  <sequence>
+    
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client" portType="tns:XPath"
+             operation="initiate" variable="input" createInstance="yes"/>
+    
+    <assign>  
+      <!-- get the loanAmount and assign to variable loanAmount -->
+      <copy>
+        <from variable="input" part="payload" query="/tns:invalidLoanApplication/autoloan:application/autoloan:loanAmount"/>
+        <to variable="loanAmount"/>
+      </copy>
+    </assign>
+    
+    <assign>
+      <!-- get the loan application and assign to variable application -->
+      <copy>
+        <from variable="input" part="payload" 
+            query="/tns:invalidLoanApplication/autoloan:application"/>
+        <to variable="application"/>
+      </copy>
+    </assign>
+    
+    <assign>  
+      <!-- get the customer and assign to variable customer -->
+      <copy>
+        <from variable="input" part="payload" 
+            query="/tns:invalidLoanApplication/autoloan:application/autoloan:customer"/>
+        <to variable="customer"/>
+      </copy>
+    </assign>
+    
+    <assign>
+      <!-- get the first address and assign to variable address -->
+      <copy>
+        <from variable="input" part="payload" 
+            query="/tns:invalidLoanApplication/autoloan:application/autoloan:customer/autoloan:addresses[1]"/>
+        <to variable="address"/>
+      </copy>
+    </assign>
+    
+    <assign>
+      <!-- get the second address's street and assign to street2 -->
+      <copy>
+        <from variable="input" part="payload" 
+            query="/tns:invalidLoanApplication/autoloan:application/autoloan:customer/autoloan:addresses[position() = 1]/autoloan:street"/>
+        <to variable="street1"/>
+      </copy>
+    </assign>
+    
+     <!-- get the custId attribute and assign to variable custId -->      
+    
+    <assign>
+       <copy>
+        <from variable="input" part="payload" 
+            query="/tns:invalidLoanApplication/autoloan:application/autoloan:customer/@custId"/>
+        <to variable="custId"/>
+      </copy>
+    </assign>
+    
+    <scope>
+      <variables>
+        <variable name="loanApp" element="tns:loanApplication"/>
+      </variables>
+
+      <sequence>
+        <assign>
+          <!-- copy "child of part" to "variable"-->
+          <copy>
+            <from variable="input" part="payload"
+                query="/tns:invalidLoanApplication/autoloan:application"/>
+            <to variable="loanApp"/>
+          </copy>
+        </assign>
+
+        <assign>
+          <!-- copy "literal" to "child of part"-->
+          <copy>
+            <from>
+              <xp:loanApp xmlns:xp="http://samples.otn.com/XPath" 
+                xmlns:auto="http://samples.otn.com/XPath/autoloan">
+                <auto:customer auto:custId="88888">
+                  <auto:name>Hoo Huu</auto:name>
+                  <auto:age type="int">32</auto:age>
+                  <auto:birthDate>1888-8-18</auto:birthDate>
+                  <auto:email>gee@goo.com</auto:email>
+                  <auto:SSN>888-88-8888</auto:SSN>
+                  <auto:addresses>
+                    <auto:street>88 Road</auto:street>
+                    <auto:state>AA</auto:state>
+                    <auto:city>AACity</auto:city>
+                    <auto:zipCode>8888</auto:zipCode>
+                  </auto:addresses>
+                </auto:customer>
+                <auto:loanAmount>88888.0</auto:loanAmount>
+                <auto:carModel>jamba</auto:carModel>
+                <auto:carYear>3005</auto:carYear>
+                <auto:creditRating>88</auto:creditRating>
+              </xp:loanApp>
+            </from>
+            <to variable="output" part="payload"
+                query="/tns:loanApplication"/>
+          </copy>
+            
+          <!-- copy "variable" to "child of part"-->
+          <copy>
+            <from variable="loanApp"/>
+            <to variable="output" part="payload"
+                query="/tns:loanApplication"/>
+          </copy>
+        </assign>
+
+        <assign>
+          <copy>
+            <from variable="loanAmount"/>
+            <to variable="output" part="payload"
+                query="/tns:loanApplication/autoloan:loanAmount"/>
+          </copy>
+        </assign>
+       </sequence>
+    </scope>
+
+    <assign>
+      <!-- copy simple type literal -->
+      <copy>
+        <from>
+          <year xmlns="someURL"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xsi:type="xsd:double">123456.00</year>
+        </from>
+        <to variable="output" part="payload"
+            query="/tns:loanApplication/autoloan:loanAmount"/>
+      </copy>
+    </assign>
+    
+    <assign>
+      <!-- copy xpath expression to "child of part" -->
+      <copy>
+        <from expression="concat(bpws:getVariableData('input', 'payload', '/tns:invalidLoanApplication/autoloan:application/autoloan:customer/autoloan:name'), ' some thing')"/>
+        <to variable="output" part="payload"
+            query="/tns:loanApplication/autoloan:customer/autoloan:name"/>
+      </copy>
+
+      <copy>
+        <from variable="input" part="payload" query="/tns:invalidLoanApplication/autoloan:application/autoloan:customer/autoloan:name"/>
+        <to variable="output" part="payload"
+              query="/tns:loanApplication/autoloan:customer/autoloan:name"/>
+      </copy>
+      
+      <copy>
+        <from variable="input" part="payload" query="/tns:invalidLoanApplication/autoloan:application/autoloan:customer/@custId"/>
+        <to variable="output" part="payload"
+              query="/tns:loanApplication/autoloan:customer/@custId"/>
+      </copy>
+      
+      <copy>
+        <from expression="concat(bpws:getVariableData('input', 'payload', '/tns:invalidLoanApplication/autoloan:application/autoloan:customer/@custId'), ' huhuhuhu')" />
+        <to variable="output" part="payload"
+        query="/tns:loanApplication/autoloan:customer/@custId"/>
+      </copy>
+    </assign>
+    
+    <!-- respond output to requestor -->
+    <invoke name="replyOutput" partnerLink="client"
+            portType="tns:XPathCallback"
+            operation="onResult" inputVariable="output"/>
+
+  </sequence>
+
+</process>

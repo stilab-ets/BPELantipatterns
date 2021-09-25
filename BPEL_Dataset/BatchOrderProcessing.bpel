@@ -1,0 +1,29 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Thu Feb 03 21:45:22 EST 2005
+  // Author:  ssondur
+  // Purpose: Asynchronous BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="BatchOrderProcessing" targetNamespace="http://xmlns.oracle.com/BatchOrderProcessing" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/jms/readQueue/" xmlns:ns1="http://www.globalcompany.com/ns/sales" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns3="http://xmlns.oracle.com/OrderBooking" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/file/FileRead/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:client="http://xmlns.oracle.com/BatchOrderProcessing" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="Read_role" name="FileReadAdapter" partnerLinkType="ns2:Read_plt" plext:wsdlloc="FileRead.wsdl" plext:inbport="Read_ptt" plext:inbound="true"/>
+    <partnerLink myRole="OrderBookingRequester" name="OrderBooking" partnerRole="OrderBookingProvider" partnerLinkType="ns3:OrderBooking" plext:wsdlloc="http://yin-8afafad92c9.gateway.2wire.net:9700/orabpel/default/OrderBooking/OrderBooking?wsdl"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive_FileIn_Read_InputVariable" messageType="ns2:PurchaseOrder_msg"/>
+    <variable name="Invoke_OrderBooking_initiate_InputVariable" messageType="ns3:OrderBookingRequestMessage"/>
+  </variables>
+  <sequence name="main">
+    <receive name="Receive_File" partnerLink="FileReadAdapter" portType="ns2:Read_ptt" operation="Read" variable="Receive_FileIn_Read_InputVariable" createInstance="yes"/>
+    <assign name="AssignFileReadOrder">
+      <copy>
+        <from variable="Receive_FileIn_Read_InputVariable" part="PurchaseOrder"/>
+        <to variable="Invoke_OrderBooking_initiate_InputVariable" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_OrderBooking" partnerLink="OrderBooking" portType="ns3:OrderBooking" operation="initiate" inputVariable="Invoke_OrderBooking_initiate_InputVariable"/>
+  </sequence>
+</process>

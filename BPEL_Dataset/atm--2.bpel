@@ -1,0 +1,189 @@
+
+<process name="ATM" 
+         targetNamespace="urn:samples:ATMService"
+         xmlns:tns="urn:samples:ATMService"
+         xmlns:support="urn:samples:ATMSupportService/"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+
+  <variables>
+    <variable name="connectReq" messageType="tns:connectRequest"/>
+    <variable name="sessionMsg" messageType="tns:sessionMessage"/>
+    <variable name="statusRsp" messageType="tns:statusResponse"/>
+    <variable name="logonReq" messageType="tns:logonRequest"/>
+    <variable name="logoffReq" messageType="tns:logoffRequest"/>
+    <variable name="operationReq" messageType="tns:operationRequest"/>
+    <variable name="operationRsp" messageType="tns:operationResponse"/>
+    <variable name="connected" type="xsd:boolean"/>
+    <variable name="newSessionReq" messageType="support:sessionRequest"/>
+    <variable name="newSessionRsp" messageType="support:sessionResponse"/> 
+  </variables>
+
+  <partnerLinks>
+    <partnerLink name="atmFrontEnd" 
+		 partnerLinkType="atmFrontEndPLT" myRole="service"/>
+    <partnerLink name="atmSupport" 
+		 partnerLinkType="atmSupportPLT" partnerRole="service"/>
+  </partnerLinks>
+
+  <correlationSets>
+    <correlationSet name="atmInteraction" properties="tns:sessionid"/>
+  </correlationSets>
+
+  <eventHandlers>
+    <onMessage partnerLink="atmFrontEnd" portType="tns:atmServicePT"
+	       operation="status" variable="sessionMsg"
+	       name="StatusEventHandler">
+      <correlations>
+        <correlation set="atmInteraction" initiate="no"/>
+      </correlations>
+       <sequence>
+         <assign>
+           <copy>
+             <from expression="'ok'"/>
+             <to variable="statusRsp" part="status"/>
+           </copy>
+         </assign>
+         <reply partnerLink="atmFrontEnd" portType="tns:atmServicePT"
+		operation="status" variable="statusRsp"/>
+       </sequence>
+     </onMessage>
+     <onAlarm for="'PT2M'">
+       <terminate/>
+     </onAlarm>
+   </eventHandlers>
+
+   <sequence name="ATMMainSequence">
+     <receive name="ATMConnectReceive"
+               partnerLink="atmFrontEnd" portType="tns:atmServicePT" 
+	      operation="connect" variable="connectReq"
+	      createInstance="yes" />
+     <invoke partnerLink="atmSupport" portType="support:atmSupportServicePT"
+	     operation="nextSessionID" inputVariable="newSessionReq"
+	     outputVariable="newSessionRsp"/>
+     <assign>
+       <copy>
+         <from variable="newSessionRsp" part="sessionID"/>
+         <to variable="sessionMsg" part="sessionID"/>
+       </copy>
+     </assign>
+     <reply partnerLink="atmFrontEnd" portType="tns:atmServicePT"
+	    operation="connect" variable="sessionMsg"
+	    name="ATMConnectReply">
+       <correlations>
+         <correlation set="atmInteraction" initiate="yes"/>
+       </correlations>
+     </reply>
+     <assign>
+       <copy>
+         <from expression="true()"/>
+         <to variable="connected"/>
+       </copy>
+     </assign>
+     <!-- Is this condition correct? -->
+     <while>
+       
+         <condition> 
+            bpws:getVariableData('connected', ‘props:price’)
+         </condition> 
+       <scope variableAccessSerializable="no">
+         <correlationSets>
+           <correlationSet name="customerInteraction"
+			   properties="tns:customerid"/>
+         </correlationSets>
+         <pick createInstance="no">
+           <onMessage partnerLink="atmFrontEnd" portType="tns:atmServicePT"
+		      operation="disconnect" variable="sessionMsg">
+             <correlations>
+               <correlation set="atmInteraction" initiate="no"/>
+             </correlations>
+             <assign>
+               <copy>
+                 <from expression="false()"/>
+                 <to variable="connected"/>
+               </copy>
+             </assign>
+           </onMessage>
+           <onMessage partnerLink="atmFrontEnd" portType="tns:atmServicePT"
+	       operation="logon" variable="logonReq">
+             <correlations>
+               <correlation set="atmInteraction" initiate="no"/>
+               <correlation set="customerInteraction" initiate="yes"/>
+             </correlations>
+             <scope variableAccessSerializable="no">
+               <variables>
+                 <variable name="loggedon" type="xsd:boolean"/>
+               </variables>
+               <sequence>
+                 <assign>
+                   <copy>
+                     <from expression="true()"/>
+                     <to variable="loggedon"/>
+                   </copy>
+                 </assign>
+                 <while> 
+                 <condition>
+                  bpws:getVariableData('loggedon',‘props:price’)
+                   </condition>
+                   <pick createInstance="no">
+                     <onMessage partnerLink="atmFrontEnd"
+			 portType="tns:atmServicePT"
+			 operation="logoff" variable="logoffReq">
+                       <correlations>
+                         <correlation set="customerInteraction" initiate="no"/>
+                       </correlations>
+                       <assign>
+                         <copy>
+                           <from expression="false()"/>
+                           <to variable="loggedon"/>
+                         </copy>
+                       </assign>
+                     </onMessage>
+                     <onMessage partnerLink="atmFrontEnd"
+			 portType="tns:atmServicePT"
+			 operation="deposit" variable="operationReq">
+                       <correlations>
+                         <correlation set="customerInteraction" initiate="no"/>
+                       </correlations>
+                       <sequence>
+                         <assign>
+                           <copy>
+                             <from expression="20"/>
+                             <to variable="operationRsp" part="balance"/>
+                           </copy>
+                         </assign>
+                         <reply partnerLink="atmFrontEnd"
+				portType="tns:atmServicePT"
+				operation="deposit" variable="operationRsp"/>
+                       </sequence>
+                     </onMessage>
+                     <onMessage partnerLink="atmFrontEnd"
+			 portType="tns:atmServicePT"
+			 operation="withdraw" variable="operationReq">
+                       <correlations>
+                         <correlation set="customerInteraction" initiate="no"/>
+                       </correlations>
+                       <sequence>
+                         <assign>
+                           <copy>
+                             <from expression="10"/>
+                             <to variable="operationRsp" part="balance"/>
+                           </copy>
+                         </assign>
+                         <reply partnerLink="atmFrontEnd"
+				portType="tns:atmServicePT"
+				operation="withdraw" variable="operationRsp"/>
+                       </sequence>
+                     </onMessage>
+                   </pick>
+                 </while>
+               </sequence>
+             </scope>
+           </onMessage>
+         </pick>
+       </scope>
+     </while>
+     <terminate/>
+  </sequence>
+</process>

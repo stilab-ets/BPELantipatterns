@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:createTargetXPath="yes" name="AutoClaimsAdjudicationProcess" suppressJoinFailure="yes" targetNamespace="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel">
+   <bpel:documentation>The Automobile Claims Adjudication Workflow describes the steps needed to review, and ultimately approve or deny a customer claim.</bpel:documentation>
+   <b4p:humanInteractions xmlns:ext="http://www.example.org/WS-HT" xmlns:ext1="http://schemas.active-endpoints.com/b4p/wshumantask/2007/12/aeb4p-task-custom-notification.xsd" xmlns:ns="http://www.example.org/BPEL4People" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <ext:logicalPeopleGroups>
+         <ext:logicalPeopleGroup name="Account_Manager"/>
+         <ext:logicalPeopleGroup name="ClaimsProcessorGroup"/>
+         <ext:logicalPeopleGroup name="ClaimsAdjusterGroup"/>
+         <ext:logicalPeopleGroup name="ClaimsExaminerGroup"/>
+      </ext:logicalPeopleGroups>
+      <ext:tasks>
+         <ext:task name="Initial_Claims_Review_Task">
+            <ext:interface operation="InvokeEstimationHTOperation" portType="ns1:EstimationHumanTaskPortType"/>
+            <ext:priority>1</ext:priority>
+            <ext:peopleAssignments>
+               <ext:potentialOwners>
+                  <ext:from logicalPeopleGroup="ClaimsProcessorGroup"/>
+               </ext:potentialOwners>
+               <ext:taskStakeholders>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:taskStakeholders>
+               <ext:businessAdministrators>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:businessAdministrators>
+            </ext:peopleAssignments>
+            <ext:presentationElements>
+               <ext:name>New Automobile Claim</ext:name>
+               <ext:presentationParameters>
+                  <ext:presentationParameter name="ModelName" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:model</ext:presentationParameter>
+                  <ext:presentationParameter name="ModelYear" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:year</ext:presentationParameter>
+                  <ext:presentationParameter name="Refnum" type="xsd:string">htd:getInput('Document')/qreqd:refNumber</ext:presentationParameter>
+               </ext:presentationParameters>
+               <ext:subject>Claim Number: {$Refnum} New Claim for a {$ModelYear} {$ModelName}.</ext:subject>
+               <ext:description/>
+            </ext:presentationElements>
+            <ext:renderings>
+               <ext:rendering type="ns4:AjaxForm">
+                  <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" developmentMode="false" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.example.org/WS-HT" xmlns:ext1="http://schemas.active-endpoints.com/b4p/wshumantask/2007/12/aeb4p-task-custom-notification.xsd" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.example.org/BPEL4People" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                           <avcform:location>project:/ClaimProcessing/form/task/Initial_Claims_Review_Task.html</avcform:location>
+                        </avcform:ajaxFormRendering>
+               </ext:rendering>
+            </ext:renderings>
+         </ext:task>
+         <ext:task name="Final_Adjudication_Decision_Task">
+            <ext:interface operation="InvokeFinalEstimationHTOperation" portType="ns1:EstimationHumanTaskPortType"/>
+            <ext:priority>1</ext:priority>
+            <ext:peopleAssignments>
+               <ext:potentialOwners>
+                  <ext:from logicalPeopleGroup="ClaimsProcessorGroup"/>
+               </ext:potentialOwners>
+               <ext:taskStakeholders>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:taskStakeholders>
+               <ext:businessAdministrators>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:businessAdministrators>
+            </ext:peopleAssignments>
+            <ext:presentationElements>
+               <ext:name>Final Adjudication Decision</ext:name>
+               <ext:presentationParameters>
+                  <ext:presentationParameter name="ModelName" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:model</ext:presentationParameter>
+                  <ext:presentationParameter name="ModelYear" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:year</ext:presentationParameter>
+                  <ext:presentationParameter name="Refnum" type="xsd:string">htd:getInput('Document')/qreqd:refNumber</ext:presentationParameter>
+               </ext:presentationParameters>
+               <ext:subject>Claim Number: {$Refnum} Final adjudication for repairing a {$ModelYear} {$ModelName}.</ext:subject>
+               <ext:description/>
+            </ext:presentationElements>
+            <ext:renderings>
+               <ext:rendering type="ns4:AjaxForm">
+                  <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" developmentMode="false" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.example.org/WS-HT" xmlns:ext1="http://schemas.active-endpoints.com/b4p/wshumantask/2007/12/aeb4p-task-custom-notification.xsd" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.example.org/BPEL4People" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                           <avcform:location>project:/ClaimProcessing/form/task/Final_Adjudication_Decision_Task.html</avcform:location>
+                        </avcform:ajaxFormRendering>
+               </ext:rendering>
+            </ext:renderings>
+         </ext:task>
+         <ext:task name="Field_Examiner_Estimation_Task">
+            <ext:interface operation="InvokeEstimationHTOperation" portType="ns1:EstimationHumanTaskPortType"/>
+            <ext:priority>1</ext:priority>
+            <ext:peopleAssignments>
+               <ext:potentialOwners>
+                  <ext:from logicalPeopleGroup="ClaimsExaminerGroup"/>
+               </ext:potentialOwners>
+               <ext:taskStakeholders>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:taskStakeholders>
+               <ext:businessAdministrators>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:businessAdministrators>
+            </ext:peopleAssignments>
+            <ext:presentationElements>
+               <ext:name>Estimate of repair</ext:name>
+               <ext:presentationParameters>
+                  <ext:presentationParameter name="ModelName" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:model</ext:presentationParameter>
+                  <ext:presentationParameter name="ModelYear" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:year</ext:presentationParameter>
+                  <ext:presentationParameter name="Refnum" type="xsd:string">htd:getInput('Document')/qreqd:refNumber</ext:presentationParameter>
+               </ext:presentationParameters>
+               <ext:subject>Claim Number: {$Refnum} Estimate to repair a  {$ModelYear} {$ModelName}.</ext:subject>
+               <ext:description/>
+            </ext:presentationElements>
+            <ext:renderings>
+               <ext:rendering type="ns4:AjaxForm">
+                  <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" developmentMode="false" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.example.org/WS-HT" xmlns:ext1="http://schemas.active-endpoints.com/b4p/wshumantask/2007/12/aeb4p-task-custom-notification.xsd" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.example.org/BPEL4People" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                           <avcform:location>project:/ClaimProcessing/form/task/Field_Examiner_Estimation_Task.html</avcform:location>
+                        </avcform:ajaxFormRendering>
+               </ext:rendering>
+            </ext:renderings>
+            <ext:deadlines>
+               <ext:startDeadline>
+                  <ext:for expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">'PT2M'</ext:for>
+                  <ext:escalation name="unclaimedByFieldExaminer">
+                     <ext:toParts>
+                        <ext:toPart expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0" name="parameters">'go cowboys'</ext:toPart>
+                     </ext:toParts>
+                     <ext:notification name="unclaimedByExaminer">
+                        <ext:interface xmlns:ns5="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" operation="sendNotification" portType="ns5:wshtNotifpt"/>
+                        <ext:priority>1</ext:priority>
+                        <ext:peopleAssignments>
+                           <ext:businessAdministrators>
+                              <ext:from logicalPeopleGroup="Account_Manager"/>
+                           </ext:businessAdministrators>
+                           <ext:recipients>
+                              <ext:from logicalPeopleGroup="Account_Manager"/>
+                           </ext:recipients>
+                        </ext:peopleAssignments>
+                        <ext:presentationElements>
+                           <ext:presentationParameters>
+                              <ext:presentationParameter name="claim" type="xsd:string">htd:getInput('Document', 'Field_Examiner_Estimation_Task')/qreqd:refNumber</ext:presentationParameter>
+                           </ext:presentationParameters>
+                           <ext:subject>Claim {$claim} has not been assigned a field examiner.</ext:subject>
+                        </ext:presentationElements>
+                        <ext:renderings>
+                           <ext:rendering type="ns4:AjaxForm">
+                              <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" developmentMode="false" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.example.org/WS-HT" xmlns:ext1="http://schemas.active-endpoints.com/b4p/wshumantask/2007/12/aeb4p-task-custom-notification.xsd" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.example.org/BPEL4People" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                                       <avcform:location>project:/ClaimProcessing/form/task/unclaimedExaminerNotification.html</avcform:location>
+                                    </avcform:ajaxFormRendering>
+                           </ext:rendering>
+                        </ext:renderings>
+                     </ext:notification>
+                  </ext:escalation>
+               </ext:startDeadline>
+            </ext:deadlines>
+         </ext:task>
+         <ext:task name="Determine_Auto_Value_Task">
+            <ext:interface operation="InvokeEstimationHTOperation" portType="ns1:EstimationHumanTaskPortType"/>
+            <ext:priority>1</ext:priority>
+            <ext:peopleAssignments>
+               <ext:potentialOwners>
+                  <ext:from logicalPeopleGroup="ClaimsAdjusterGroup"/>
+               </ext:potentialOwners>
+               <ext:taskStakeholders>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:taskStakeholders>
+               <ext:businessAdministrators>
+                  <ext:from logicalPeopleGroup="Account_Manager"/>
+               </ext:businessAdministrators>
+            </ext:peopleAssignments>
+            <ext:presentationElements>
+               <ext:name>Automobile Value Assessment</ext:name>
+               <ext:presentationParameters>
+                  <ext:presentationParameter name="ModelName" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:model</ext:presentationParameter>
+                  <ext:presentationParameter name="ModelYear" type="xsd:string">htd:getInput('Document')/qreqd:claimRequest/qreqd:year</ext:presentationParameter>
+                  <ext:presentationParameter name="Refnum" type="xsd:string">htd:getInput('Document')/qreqd:refNumber</ext:presentationParameter>
+               </ext:presentationParameters>
+               <ext:subject>Claim Number: {$Refnum} Determine market value for a  {$ModelYear} {$ModelName}.</ext:subject>
+               <ext:description/>
+            </ext:presentationElements>
+            <ext:renderings>
+               <ext:rendering type="ns4:AjaxForm">
+                  <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" developmentMode="false" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.example.org/WS-HT" xmlns:ext1="http://schemas.active-endpoints.com/b4p/wshumantask/2007/12/aeb4p-task-custom-notification.xsd" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.example.org/BPEL4People" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                           <avcform:location>project:/ClaimProcessing/form/task/Determine_Auto_Value_Task.html</avcform:location>
+                        </avcform:ajaxFormRendering>
+               </ext:rendering>
+            </ext:renderings>
+         </ext:task>
+      </ext:tasks>
+      <ext:notifications/>
+   </b4p:humanInteractions>
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="133001769573103395" aei:processInitiatorSim="" isHorizontal="true" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="133001769573703489" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="133001769573703489"/>
+         <bpmndi:BPMNShape aei:objectId="133001769574003521" aei:type="FLOW" bpmnElement="133001769574003521">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,201}" aei:absoluteSize="DIM {430,80}" aei:objectId="133001769574203535" aei:type="SEQUENCE" bpmnElement="133001769574203535" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="5" y="191"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="133001769574103523" aei:xtnCondition="count($EstimationResponse/types1:Workflow_Flag[text()='adjuster']) &gt; 0 and $EstimationResponse/qreqd:claimStatus != 'DENIED'" bpmnElement="133001769574103523"/>
+         <bpmndi:BPMNEdge aei:objectId="133001769574203525" aei:xtnCondition="count($EstimationResponse/types1:Workflow_Flag[text()='examiner']) &gt; 0  and $EstimationResponse/qreqd:claimStatus != 'DENIED'" bpmnElement="133001769574203525"/>
+         <bpmndi:BPMNEdge aei:objectId="133001769574203527" aei:xtnCondition="$EstimationResponse/qreqd:claimStatus = 'DENIED'" bpmnElement="133001769574203527">
+            <di:waypoint weight="0.5" x="400" y="60"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,211}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Claim Request" aei:objectId="133001769574303537" aei:principal="" aei:type="RECEIVE" bpmnElement="133001769574303537">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {16,259}" aei:absoluteSize="DIM {71,13}" aei:anchor.location="1" aei:anchor.objectId="133001769574303537" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001769574403539" aei:relative.location="LOC {-54,38}" aei:text="Claim Request" bpmnElement="133001769574303537label">
+               <dc:Bounds height="13" width="71" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {120,211}" aei:absoluteSize="DIM {70,60}" aei:name="Send acknowledgement" aei:objectId="133001769574403541" aei:type="REPLY" bpmnElement="133001769574403541">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {97,208}" aei:absoluteSize="DIM {115,13}" aei:anchor.location="1" aei:anchor.objectId="133001769574403541" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001769574403543" aei:relative.location="LOC {-72,-18}" aei:text="Send acknowledgement" bpmnElement="133001769574403541label">
+               <dc:Bounds height="13" width="115" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {215,215}" aei:absoluteSize="DIM {125,53}" aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Initial Review by Processor" aei:objectId="133001769574403545" aei:paSimulationFaultName="" aei:paSimulationOutput="" aei:paSimulationOutputAttachments="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="133001769574403545">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001769574603553" aei:type="ASSIGN" bpmnElement="133001769574603553">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="abx:copyAllAttachments( 'EstimationRequest' , '_peopleActivityAttachments' )" aei:fromType="3" aei:objectId="133001769574603555" aei:toPart="Document" aei:toQuery="qreqd:refNumber" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001769574603555"/>
+         <bpmndi:BPMNShape aei:fromExpression="$EstimationRequest" aei:fromType="3" aei:objectId="133001769574703557" aei:toPart="Document" aei:toQuery="." aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001769574703557"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {365,211}" aei:absoluteSize="DIM {70,60}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:gatewayType="0" aei:name="Allow workflow to continue" aei:objectId="133001769574703559" aei:parallelImageLocation="icons/bpmn/activity/large/paletteExclusiveGatewayLarge.png" aei:type="GATEWAY" bpmnElement="133001769574703559">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {427,234}" aei:absoluteSize="DIM {137,13}" aei:anchor.location="7" aei:anchor.objectId="133001769574703559" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001769574803561" aei:relative.location="LOC {17,13}" aei:text="Allow workflow to continue" bpmnElement="133001769574703559label">
+               <dc:Bounds height="13" width="137" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {465,320}" aei:absoluteSize="DIM {125,53}" aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Field Examiner's Estimate" aei:objectId="133001769574803563" aei:paSimulationFaultName="" aei:paSimulationOutput="" aei:paSimulationOutputAttachments="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="133001769574803563">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="133001769574203529" bpmnElement="133001769574203529"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {455,310}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001769574803565" aei:type="Sequence" bpmnElement="133001769574803563wrappingSequence" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="445" y="300"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {460,120}" aei:absoluteSize="DIM {125,53}" aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Determine Value and Writeoff Amounts" aei:objectId="133001769574903567" aei:paSimulationFaultName="" aei:paSimulationOutput="" aei:paSimulationOutputAttachments="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="133001769574903567">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="133001769574203531" bpmnElement="133001769574203531"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {450,110}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="133001769574903569" aei:type="Sequence" bpmnElement="133001769574903567wrappingSequence" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="440" y="100"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {800,20}" aei:absoluteSize="DIM {240,80}" aei:objectId="133001769575003573" aei:type="SEQUENCE" bpmnElement="133001769575003573" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="790" y="10"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {810,34}" aei:absoluteSize="DIM {125,53}" aei:name="Final Adjudication Response" aei:objectId="133001769575003571" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="133001769575003571">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {960,30}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="133373391294201281" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="133373391294201281">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {610,206}" aei:absoluteSize="DIM {240,80}" aei:objectId="133001769575203577" aei:type="SEQUENCE" bpmnElement="133001769575203577" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="600" y="196"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNEdge aei:objectId="133001769574203533" bpmnElement="133001769574203533">
+            <di:waypoint weight="0.5" x="872" y="246"/>
+         </bpmndi:BPMNEdge>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {620,216}" aei:absoluteSize="DIM {70,60}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:gatewayType="0" aei:objectId="133001769575203579" aei:parallelImageLocation="icons/bpmn/activity/large/paletteExclusiveGatewayLarge.png" aei:type="GATEWAY" bpmnElement="133001769575203579">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {670,228}" aei:absoluteSize="DIM {43,13}" aei:anchor.location="7" aei:anchor.objectId="133001769575203579" aei:backgroundColor="RGB {255,255,255}" aei:objectId="133001769575303581" aei:relative.location="LOC {5,2}" aei:text="Gateway" bpmnElement="133001769575203579label">
+               <dc:Bounds height="13" width="43" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {715,220}" aei:absoluteSize="DIM {125,53}" aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Final Adjudication Decision" aei:objectId="133001769575303583" aei:paSimulationFaultName="" aei:paSimulationOutput="" aei:paSimulationOutputAttachments="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="133001769575303583">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="133001769575403589" aei:type="ASSIGN" bpmnElement="133001769575403589">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;types1:FinalEstimationRequest xmlns:qreqd=&quot;http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd&quot; xmlns:types1=&quot;http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd&quot;&gt;&#10;   &lt;qreqd:refNumber&gt;{ $EstimationRequest/qreqd:refNumber/text() }&lt;/qreqd:refNumber&gt;&#10;   { $EstimationRequest/qreqd:claimRequest }&#10;   &lt;types1:PowerTrainCost&gt;{ $AdjusterEstimationResponse/types1:TotalCost/text() }&lt;/types1:PowerTrainCost&gt;&#10;   &lt;types1:ExteriorCost&gt;{ $ExteriorEstimationResponse/types1:TotalCost/text() }&lt;/types1:ExteriorCost&gt;&#10;   &lt;types1:InteriorCost&gt;{ $ExaminerEstimationResponse/types1:TotalCost/text() }&lt;/types1:InteriorCost&gt;&#10;   &lt;types1:PowerPartList&gt;{ $AdjusterEstimationResponse/types1:PartList/types1:part }&lt;/types1:PowerPartList&gt;&#10;   &lt;types1:ExteriorPartList&gt;{ $ExteriorEstimationResponse/types1:PartList/types1:part }&lt;/types1:ExteriorPartList&gt;&#10;   &lt;types1:InteriorPartList&gt;{ $ExaminerEstimationResponse/types1:PartList/types1:part }&lt;/types1:InteriorPartList&gt;&#10;&lt;/types1:FinalEstimationRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="133001769575403591" aei:toPart="Document" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="133001769575403591"/>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/BPEL4People"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/WS-HT"/>
+      <bpel:extension mustUnderstand="no" namespace="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/Estimation.wsdl" namespace="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/Estimation.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd"/>
+   <bpel:import importType="res:/text/html" location="../form/task/Initial_Claims_Review_Task.html" namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <bpel:import importType="res:/text/html" location="../form/task/Field_Examiner_Estimation_Task.html" namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <bpel:import importType="res:/text/html" location="../form/task/Determine_Auto_Value_Task.html" namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <bpel:import importType="res:/text/html" location="../form/task/Final_Adjudication_Decision_Task.html" namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/AutoClaimsAdjudicationProcess.private.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel/autoclaimsadjudicationprocess"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/NotificationInterface.wsdl" namespace="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/"/>
+   <bpel:import importType="res:/text/html" location="../form/task/unclaimedExaminerNotification.html" namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="133001769573703489" myRole="estimator" name="Requestor" partnerLinkType="ns1:EstimationPLT" partnerRole="EstimationRequestInitiator"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="types1:EstimationRequest" name="EstimationRequest"/>
+      <bpel:variable element="types1:EstimationResponse" name="EstimationResponse"/>
+      <bpel:variable element="types1:EstimationRequestAck" name="EstimationAck">
+         <bpel:from>
+            <bpel:literal>
+               <types1:EstimationRequestAck>Request is being processed</types1:EstimationRequestAck>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+      <bpel:variable element="types1:EstimationResponse" name="AdjusterEstimationResponse">
+         <bpel:from>
+            <bpel:literal>
+               <types1:EstimationResponse>
+                  <qreqd:refNumber>string</qreqd:refNumber>
+                  <qreqd:claimStatus>string</qreqd:claimStatus>
+                  <types1:WorkCompletionDate>2009-03-12</types1:WorkCompletionDate>
+                  <types1:TotalCost>0</types1:TotalCost>
+                  <qreqd:link>
+                     <qreqd:URL>string</qreqd:URL>
+                     <qreqd:description>string</qreqd:description>
+                  </qreqd:link>
+                  <types1:Workflow_Flag>string</types1:Workflow_Flag>
+                  <types1:PartList/>
+               </types1:EstimationResponse>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+      <bpel:variable element="types1:EstimationResponse" name="ExteriorEstimationResponse">
+         <bpel:from>
+            <bpel:literal>
+               <types1:EstimationResponse>
+                  <qreqd:refNumber>string</qreqd:refNumber>
+                  <qreqd:claimStatus>string</qreqd:claimStatus>
+                  <types1:WorkCompletionDate>2009-03-12</types1:WorkCompletionDate>
+                  <types1:TotalCost>0</types1:TotalCost>
+                  <qreqd:link>
+                     <qreqd:URL>string</qreqd:URL>
+                     <qreqd:description>string</qreqd:description>
+                  </qreqd:link>
+                  <types1:Workflow_Flag>string</types1:Workflow_Flag>
+                  <types1:PartList/>
+               </types1:EstimationResponse>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+      <bpel:variable element="types1:EstimationResponse" name="ExaminerEstimationResponse">
+         <bpel:from>
+            <bpel:literal>
+               <types1:EstimationResponse>
+                  <qreqd:refNumber>string</qreqd:refNumber>
+                  <qreqd:claimStatus>string</qreqd:claimStatus>
+                  <types1:WorkCompletionDate>2009-03-11</types1:WorkCompletionDate>
+                  <types1:TotalCost>0</types1:TotalCost>
+                  <qreqd:link>
+                     <qreqd:URL>string</qreqd:URL>
+                     <qreqd:description>string</qreqd:description>
+                  </qreqd:link>
+                  <types1:Workflow_Flag>string</types1:Workflow_Flag>
+                  <types1:PartList/>
+               </types1:EstimationResponse>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+   </bpel:variables>
+   <bpel:flow aei:id="133001769574003521">
+      <bpel:links>
+         <bpel:link aei:id="133001769574103523" name="L3"/>
+         <bpel:link aei:id="133001769574203525" name="L4"/>
+         <bpel:link aei:id="133001769574203527" name="L10"/>
+         <bpel:link aei:id="133001769574203529" name="L11"/>
+         <bpel:link aei:id="133001769574203531" name="L6"/>
+         <bpel:link aei:id="133001769574203533" name="L8"/>
+      </bpel:links>
+      <bpel:sequence aei:id="133001769574203535">
+         <bpel:documentation/>
+         <bpel:sources>
+            <bpel:source linkName="L3">
+               <bpel:transitionCondition>count($EstimationResponse/types1:Workflow_Flag[text()='adjuster']) &gt; 0 and $EstimationResponse/qreqd:claimStatus != 'DENIED'</bpel:transitionCondition>
+            </bpel:source>
+            <bpel:source linkName="L4">
+               <bpel:transitionCondition>count($EstimationResponse/types1:Workflow_Flag[text()='examiner']) &gt; 0  and $EstimationResponse/qreqd:claimStatus != 'DENIED'</bpel:transitionCondition>
+            </bpel:source>
+            <bpel:source linkName="L10">
+               <bpel:transitionCondition>$EstimationResponse/qreqd:claimStatus = 'DENIED'</bpel:transitionCondition>
+            </bpel:source>
+         </bpel:sources>
+         <bpel:receive aei:id="133001769574303537" createInstance="yes" name="Claim_Request" operation="InvokeEstimation" partnerLink="Requestor" variable="EstimationRequest">
+            <bpel:documentation>The original request-for-claim message and process-instance-id are passed along as the input message for the estimation sub-process&#13;
+</bpel:documentation>
+         </bpel:receive>
+         <bpel:reply aei:id="133001769574403541" name="Send_acknowledgement" operation="InvokeEstimation" partnerLink="Requestor" variable="EstimationAck">
+            <bpel:documentation>A response is sent back to the calling process to acknowledge that the human workflow is in progress.</bpel:documentation>
+         </bpel:reply>
+         <bpel:scope aei:implicit="true" name="Initial_Review_by_Processor">
+            <bpel:variables>
+               <bpel:variable messageType="ns1:InvokeEstimationRequest" name="parameters"/>
+            </bpel:variables>
+            <bpel:sequence>
+               <bpel:assign aei:id="133001769574603553">
+                  <bpel:copy aei:id="133001769574603555">
+                     <bpel:from>abx:copyAllAttachments( 'EstimationRequest' , '_peopleActivityAttachments' )</bpel:from>
+                     <bpel:to part="Document" variable="parameters">
+                        <bpel:query>qreqd:refNumber</bpel:query>
+                     </bpel:to>
+                  </bpel:copy>
+                  <bpel:copy aei:id="133001769574703557">
+                     <bpel:from>$EstimationRequest</bpel:from>
+                     <bpel:to part="Document" variable="parameters">
+                        <bpel:query>.</bpel:query>
+                     </bpel:to>
+                  </bpel:copy>
+               </bpel:assign>
+               <bpel:extensionActivity>
+                  <b4p:peopleActivity aei:id="133001769574403545" inputVariable="parameters" name="Initial_Review_by_Processor" outputVariable="EstimationResponse">
+                     <b4p:localTask reference="Initial_Claims_Review_Task" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                        <htd:peopleAssignments/>
+                     </b4p:localTask>
+                     <b4p:attachmentPropagation fromProcess="all" toProcess="newOnly" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+                  </b4p:peopleActivity>
+               </bpel:extensionActivity>
+            </bpel:sequence>
+         </bpel:scope>
+         <bpel:empty aei:gateway="0" aei:id="133001769574703559" name="Allow_workflow_to_continue">
+            <bpel:documentation>Should the loan-processor Deny the claim, or allow the workflow to continue?</bpel:documentation>
+         </bpel:empty>
+      </bpel:sequence>
+      <bpel:extensionActivity>
+         <b4p:peopleActivity aei:id="133001769574803563" inputVariable="EstimationRequest" name="Field_Examiners_Estimate" outputVariable="ExaminerEstimationResponse">
+            <bpel:documentation>The field-examiner will examine the automobile and determine the amount of repair work that will be covered under the policy.  This detailed report will be forwarded to the loan-processor for final review and ultimately forwarded to the customer via mail or email.</bpel:documentation>
+            <b4p:localTask reference="Field_Examiner_Estimation_Task" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+               <htd:peopleAssignments/>
+            </b4p:localTask>
+            <b4p:attachmentPropagation fromProcess="all" toProcess="newOnly" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+            <abxb4p:comments expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">abxb4p:getComments("Initial_Review_By_Processor")</abxb4p:comments>
+            <bpel:sources>
+               <bpel:source linkName="L11"/>
+            </bpel:sources>
+            <bpel:targets>
+               <bpel:target linkName="L4"/>
+            </bpel:targets>
+         </b4p:peopleActivity>
+      </bpel:extensionActivity>
+      <bpel:extensionActivity>
+         <b4p:peopleActivity aei:id="133001769574903567" inputVariable="EstimationRequest" name="Determine_Value_and_Writeoff_Amounts" outputVariable="AdjusterEstimationResponse">
+            <bpel:documentation>An adjuster will determine the fair market value of the automobile based on blue-book and other means.  This is essentially the 'write-off' amount to determine if the car should be repaired or totalled.  This info will be forwarded to the loan-processor and made available for his/her final review of this claim.</bpel:documentation>
+            <b4p:localTask reference="Determine_Auto_Value_Task" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+               <htd:peopleAssignments/>
+            </b4p:localTask>
+            <b4p:attachmentPropagation fromProcess="all" toProcess="newOnly" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+            <abxb4p:comments expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">abxb4p:getComments("Initial_Review_By_Processor")</abxb4p:comments>
+            <bpel:sources>
+               <bpel:source linkName="L6"/>
+            </bpel:sources>
+            <bpel:targets>
+               <bpel:target linkName="L3"/>
+            </bpel:targets>
+         </b4p:peopleActivity>
+      </bpel:extensionActivity>
+      <bpel:sequence aei:id="133001769575003573">
+         <bpel:targets>
+            <bpel:target linkName="L10"/>
+            <bpel:target linkName="L8"/>
+         </bpel:targets>
+         <bpel:invoke aei:id="133001769575003571" aei:implicit="true" inputVariable="EstimationResponse" name="Final_Adjudication_Response" operation="SendEstimationResult" partnerLink="Requestor">
+            <bpel:documentation>The final decision and supporting details are returned to the calling process.</bpel:documentation>
+         </bpel:invoke>
+         <bpel:empty aei:id="133373391294201281"/>
+      </bpel:sequence>
+      <bpel:sequence aei:id="133001769575203577">
+         <bpel:targets>
+            <bpel:target linkName="L11"/>
+            <bpel:target linkName="L6"/>
+         </bpel:targets>
+         <bpel:sources>
+            <bpel:source linkName="L8"/>
+         </bpel:sources>
+         <bpel:empty aei:gateway="0" aei:id="133001769575203579">
+            <bpel:documentation>wait for all upstream activities to be completed before notifying the loan-processor for final review</bpel:documentation>
+         </bpel:empty>
+         <bpel:scope aei:implicit="true" name="Final_Adjudication_Decision">
+            <bpel:variables>
+               <bpel:variable messageType="ns1:FinalEstimationRequestMessage" name="parameters"/>
+            </bpel:variables>
+            <bpel:sequence>
+               <bpel:assign aei:id="133001769575403589">
+                  <bpel:copy aei:id="133001769575403591">
+                     <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<types1:FinalEstimationRequest xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd">
+   <qreqd:refNumber>{ $EstimationRequest/qreqd:refNumber/text() }</qreqd:refNumber>
+   { $EstimationRequest/qreqd:claimRequest }
+   <types1:PowerTrainCost>{ $AdjusterEstimationResponse/types1:TotalCost/text() }</types1:PowerTrainCost>
+   <types1:ExteriorCost>{ $ExteriorEstimationResponse/types1:TotalCost/text() }</types1:ExteriorCost>
+   <types1:InteriorCost>{ $ExaminerEstimationResponse/types1:TotalCost/text() }</types1:InteriorCost>
+   <types1:PowerPartList>{ $AdjusterEstimationResponse/types1:PartList/types1:part }</types1:PowerPartList>
+   <types1:ExteriorPartList>{ $ExteriorEstimationResponse/types1:PartList/types1:part }</types1:ExteriorPartList>
+   <types1:InteriorPartList>{ $ExaminerEstimationResponse/types1:PartList/types1:part }</types1:InteriorPartList>
+</types1:FinalEstimationRequest>]]></bpel:from>
+                     <bpel:to part="Document" variable="parameters"/>
+                  </bpel:copy>
+               </bpel:assign>
+               <bpel:extensionActivity>
+                  <b4p:peopleActivity aei:id="133001769575303583" inputVariable="parameters" name="Final_Adjudication_Decision" outputVariable="EstimationResponse">
+                     <b4p:localTask reference="Final_Adjudication_Decision_Task" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                        <htd:peopleAssignments/>
+                     </b4p:localTask>
+                     <b4p:attachmentPropagation fromProcess="all" toProcess="newOnly" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+                     <abxb4p:comments expressionLanguage="urn:active-endpoints:expression-language:xquery1.0" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:avc="http://www.active-endpoints.com/avoscentral/wsdl/avc-notify/" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ext1="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Estimation/2010/02/Estimation.bpel" xmlns:ns1="http://www.active-endpoints.com/demo/wsdl/Estimation/2010/02/Estimation.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd" xmlns:ns3="http://example.org/WhatsPlaying2/1" xmlns:ns4="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:qreqd="http://schemas.active-endpoints.com/demo/claimRequest/2010/02/ClaimRequest.xsd" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Estimation/2010/02/Estimation.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">declare namespace abxb4p = "http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p";&#13;
+declare namespace htapi = "http://www.example.org/WS-HT/api";&#13;
+declare namespace trt = "http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd";&#13;
+&lt;trt:comments xmlns:htapi="http://www.example.org/WS-HT/api" &#13;
+	xmlns:trt="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/aeb4p-task-rt.xsd"&#13;
+  xmlns:abxb4p="http://schemas.active-endpoints.com/b4p/wshumantask/2007/10/abxb4p"&gt;&#13;
+	{&#13;
+    let $c1 := abxb4p:getComments("Initial_Review_By_Processor")&#13;
+	let $comments :=  abxb4p:getComments("Field_Examiners_Estimate")/htapi:comment[trt:commentId!=$c1/htapi:comment/trt:commentId] |&#13;
+	abxb4p:getComments("Determine_Value_and_Writeoff_Amts")/htapi:comment[trt:commentId!=$c1/htapi:comment/trt:commentId] &#13;
+  return $comments | $c1/*&#13;
+  }&#13;
+&lt;/trt:comments&gt;</abxb4p:comments>
+                  </b4p:peopleActivity>
+               </bpel:extensionActivity>
+            </bpel:sequence>
+         </bpel:scope>
+      </bpel:sequence>
+   </bpel:flow>
+</bpel:process>

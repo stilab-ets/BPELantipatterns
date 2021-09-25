@@ -1,0 +1,73 @@
+<process name="TerraFlow"
+         targetNamespace="http://samples.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://samples.otn.com"
+         xmlns:tws="http://terraserver-usa.com/terraserver/"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+ >
+
+  <!-- This process invokes Microsoft .Net web service -->
+  
+  <partnerLinks>
+    <partnerLink name="client"
+             partnerLinkType="tns:TerraFlow"
+             myRole="TerraFlowProvider"
+             partnerRole="TerraFlowRequester"/>
+    <partnerLink name="TerraService"
+             partnerLinkType="tws:TerraService"
+             partnerRole="TerraServiceProvider"/>
+  </partnerLinks>
+  
+  <variables>
+    <variable name="input"
+               messageType="tns:terraFlowRequestMessage"/>
+    <variable name="output"
+               messageType="tns:terraFlowResultMessage"/>
+               
+    <variable name="request"
+               messageType="tws:GetPlaceFactsSoapIn"/>
+    <variable name="response"
+               messageType="tws:GetPlaceFactsSoapOut"/>               
+  </variables>
+
+  <sequence>
+    
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:TerraFlow"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+             
+    <!-- initialize the input of the TerraService -->
+    <assign>
+        <copy>
+        <from variable="input" part="parameters"
+        query="/tns:terraFlowRequest/tns:xmlRequest"/>
+        <to variable="request" part="parameters"
+        query="/tws:GetPlaceFacts/tws:place"/>
+        </copy>
+    </assign>              
+
+    <!--  invoke the remote .Net web service -->
+    <invoke name="invoke" partnerLink="TerraService" portType="tws:TerraServiceSoap"
+            operation="GetPlaceFacts" inputVariable="request"
+            outputVariable="response"/>
+            
+    <assign>
+        <copy>
+            <from variable="response" part="parameters"
+            query="/tws:GetPlaceFactsResponse/tws:GetPlaceFactsResult"/>
+            <to variable="output" part="parameters"
+            query="/tns:terraFlowResult/tns:result"/>
+        </copy>
+    </assign>               
+            
+     <!-- respond output to requestor -->
+     <invoke name="replyOutput" partnerLink="client"
+             portType="tns:TerraFlowCallback"
+            operation="onResult" inputVariable="output"/>
+
+</sequence>
+
+</process>
+

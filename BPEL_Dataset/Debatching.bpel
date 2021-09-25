@@ -1,0 +1,58 @@
+<process xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/file/FileInbound/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:ns3="http://xmlns.oracle.com/pcbpel/demoSchema/container" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/file/Outbound/" xmlns:client="http://xmlns.oracle.com/Debatching" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc" name="Debatching" targetNamespace="http://xmlns.oracle.com/Debatching">
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="Read_role" name="InboundPL" plext:wsdlloc="FileInbound.wsdl" plext:inbport="Read_ptt" plext:inbound="true" partnerLinkType="ns1:Read_plt"/>
+    <partnerLink name="OutboundPL" partnerRole="Write_role" plext:wsdlloc="Outbound.wsdl" plext:inbport="Write_ptt" plext:inbound="false" partnerLinkType="ns2:Write_plt"/>
+  </partnerLinks>
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <variables>
+    <variable name="receive_Read_InputVariable" messageType="ns1:container_msg"/>
+    <variable name="invoke_Write_InputVariable" messageType="ns2:po_msg"/>
+  </variables>
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <sequence name="main">
+    <receive name="receive" partnerLink="InboundPL" portType="ns1:Read_ptt" operation="Read" variable="receive_Read_InputVariable" createInstance="yes"/>
+    <switch name="Switch_1">
+      <case condition="starts-with(local-name(ora:getNodes('receive_Read_InputVariable','container','/ns3:container/child::*[position()=1]')),'invoice')">
+             <assign name="InvToPo">
+          <bpelx:annotation>
+            <bpelx:pattern>transformation
+            </bpelx:pattern>
+          </bpelx:annotation>
+          <copy>
+            <from expression="ora:processXSLT('InvToPo.xsl',bpws:getVariableData('receive_Read_InputVariable','container'))"/>
+            <to variable="invoke_Write_InputVariable" part="po"/>
+          </copy>
+        </assign>
+       </case> 
+     <otherwise>
+        <assign name="PoToPo">
+          <bpelx:annotation>
+            <bpelx:pattern>transformation
+            </bpelx:pattern>
+          </bpelx:annotation>
+          <copy>
+            <from expression="ora:processXSLT('PoToPo.xsl',bpws:getVariableData('receive_Read_InputVariable','container'))"/>
+            <to variable="invoke_Write_InputVariable" part="po"/>
+          </copy>
+        </assign>
+      </otherwise>
+    </switch>
+    <invoke name="invoke" partnerLink="OutboundPL" portType="ns2:Write_ptt" operation="Write" inputVariable="invoke_Write_InputVariable"/>
+  </sequence>
+</process>

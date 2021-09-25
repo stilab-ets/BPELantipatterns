@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="NhincComponentInternalDocQueryOrch"
+    targetNamespace="urn:gov:hhs:fha:nhinc:gateway:nhincinternalorchbpel:nhinccomponentinternaldocqueryorch"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+    xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+    xmlns:sxeh="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/ErrorHandling"
+    xmlns:tns="urn:gov:hhs:fha:nhinc:gateway:nhincinternalorchbpel:nhinccomponentinternaldocqueryorch" xmlns:ns0="urn:oasis:names:tc:ebxml-regrep:xsd:rs:3.0" xmlns:ns1="urn:gov:hhs:fha:nhinc:common:propertyaccess" xmlns:ns2="urn:gov:hhs:fha:nhinc:common:connectionmanagerinfo" xmlns:ns3="urn:gov:hhs:fha:nhinc:common:nhinccommon" xmlns:ns4="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:ns5="urn:gov:hhs:fha:nhinc:common:eventcommon" xmlns:ns6="urn:oasis:names:tc:ebxml-regrep:xsd:query:3.0" xmlns:ns7="urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0" xmlns:ns8="urn:gov:hhs:fha:nhinc:common:policyenginedte" xmlns:ns9="urn:oasis:names:tc:xacml:2.0:context:schema:os" xmlns:ns10="urn:gov:hhs:fha:nhinc:common:nhinccommonadapter" xmlns:ns11="urn:gov:hhs:fha:nhinc:common:nhinccommoninternalorch">
+    <import namespace="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" location="Interfaces/wsdl/NhincComponentInternalDocQueryOrch.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:nhinccomponentpropaccessor" location="Interfaces/wsdl/NhincComponentPropAccessor.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" location="Interfaces/wsdl/NhincComponentConnectionManager.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:adapterdocquery" location="Interfaces/wsdl/AdapterDocQuery.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:NhincComponentInternalPolicyEngineFacade" location="Interfaces/wsdl/NhincComponentInternalPolicyEngineFacade.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+        <partnerLink name="PolicyEngineFacadePL" xmlns:tns="urn:gov:hhs:fha:nhinc:NhincComponentInternalPolicyEngineFacade" partnerLinkType="tns:NhincComponentInternalPolicyEngineFacade" partnerRole="NhincComponentInternalPolicyEngineFacadePortTypeRole"/>
+        <partnerLink name="NhincComponentPropAccessorPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentpropaccessor" partnerLinkType="tns:NhincComponentPropAccessor" partnerRole="NhincComponentPropAccessorPortTypeRole"/>
+        <partnerLink name="NhincComponentConnectionManagerPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" partnerLinkType="tns:NhincComponentConnectionManager" partnerRole="NhincComponentConnectionManagerPortTypeRole"/>
+        <partnerLink name="AdapterDocQueryPL" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterdocquery" partnerLinkType="tns:AdapterDocQuery" partnerRole="AdapterDocQueryPortTypeRole"/>
+        <partnerLink name="NhincComponentInternalDocQueryOrchPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" partnerLinkType="tns:NhincComponentInternalDocQueryOrch" myRole="NhincComponentInternalDocQueryOrchPortTypeRole"/>
+    </partnerLinks>
+    <variables>
+        <variable name="RespondingGateway_CrossGatewayQueryOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" messageType="tns:RespondingGateway_CrossGatewayQueryResponseMessage"/>
+        <variable name="RespondingGateway_CrossGatewayQueryIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" messageType="tns:RespondingGateway_CrossGatewayQueryRequestMessage"/>
+    </variables>
+    <sequence>
+        <receive name="ReceiveNhincComponentInternalDocQueryOrch" createInstance="yes" partnerLink="NhincComponentInternalDocQueryOrchPL" operation="RespondingGateway_CrossGatewayQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" portType="tns:NhincComponentInternalDocQueryOrchPortType" variable="RespondingGateway_CrossGatewayQueryIn"/>
+        <scope name="NhincComponentInternalDocQueryOrchScope">
+            <variables>
+                <variable name="CheckPolicyAdhocQueryOut" xmlns:tns="urn:gov:hhs:fha:nhinc:NhincComponentInternalPolicyEngineFacade" messageType="tns:CheckPolicyResponseMessage"/>
+                <variable name="CheckPolicyAdhocQueryIn" xmlns:tns="urn:gov:hhs:fha:nhinc:NhincComponentInternalPolicyEngineFacade" messageType="tns:CheckPolicyAdhocQueryRequestMessage"/>
+                <variable name="AdapterDocQueryOut" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterdocquery" messageType="tns:RespondingGateway_CrossGatewayQueryResponseMessage"/>
+                <variable name="AdapterDocQueryIn" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterdocquery" messageType="tns:RespondingGateway_CrossGatewayQueryRequestMessage"/>
+                <variable name="GetAdapterQueryEndpointOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" messageType="tns:GetConnectionInfoEndpointByServiceNameResponseMessage"/>
+                <variable name="GetAdapterQueryEndpointIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" messageType="tns:GetConnectionInfoEndpointByServiceNameRequestMessage"/>
+                <variable name="GetPropertyHomeCommunityIdOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentpropaccessor" messageType="tns:GetPropertyResponseMessage"/>
+                <variable name="GetPropertyHomeCommunityIdIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentpropaccessor" messageType="tns:GetPropertyRequestMessage"/>
+            </variables>
+            <faultHandlers>
+                <catch faultName="sxeh:systemFault" faultVariable="systemFaultVar" faultMessageType="sxeh:faultMessage">
+                    <sequence name="SystemFaultSeq">
+                        <assign name="AssignFaultInfo">
+                            <sxt:trace>
+                                <sxt:log level="info" location="onStart">
+                                    <ns4:from>'NhincComponentInternalDocQueryOrch.bpel - System fault encountered processing an AdhocQuery request. Fault detials follow...'</ns4:from>
+                                </sxt:log>
+                                <sxt:log level="warning" location="onStart">
+                                    <ns4:from variable="systemFaultVar"/>
+                                </sxt:log>
+                            </sxt:trace>
+                            <copy>
+                                <from>'Nhinc Component Internal Doc Query Orch Processing'</from>
+                                <to>$RespondingGateway_CrossGatewayQueryOut.RespondingGateway_CrossGatewayQueryResponse/ns0:RegistryErrorList/ns0:RegistryError/@codeContext</to>
+                            </copy>
+                            <copy>
+                                <from>'XDSRegistryError'</from>
+                                <to>$RespondingGateway_CrossGatewayQueryOut.RespondingGateway_CrossGatewayQueryResponse/ns0:RegistryErrorList/ns0:RegistryError/@errorCode</to>
+                            </copy>
+                            <copy>
+                                <from>'Error'</from>
+                                <to>$RespondingGateway_CrossGatewayQueryOut.RespondingGateway_CrossGatewayQueryResponse/ns0:RegistryErrorList/ns0:RegistryError/@severity</to>
+                            </copy>
+                            <copy>
+                                <from>'urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Failure'</from>
+                                <to>$RespondingGateway_CrossGatewayQueryOut.RespondingGateway_CrossGatewayQueryResponse/@status</to>
+                            </copy>
+                            <copy>
+                                <from>0</from>
+                                <to>$RespondingGateway_CrossGatewayQueryOut.RespondingGateway_CrossGatewayQueryResponse/@totalResultCount</to>
+                            </copy>
+                        </assign>
+                        <reply name="ReplyNhincComponentInternalDocQueryOrchFault" partnerLink="NhincComponentInternalDocQueryOrchPL" operation="RespondingGateway_CrossGatewayQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" portType="tns:NhincComponentInternalDocQueryOrchPortType" variable="RespondingGateway_CrossGatewayQueryOut"/>
+                        <exit name="ExitAfterFaultReturn"/>
+                    </sequence>
+                </catch>
+            </faultHandlers>
+            <sequence name="NhincComponentInternalDocQueryOrchSequence">
+                <assign name="AssignPolicyEngineInput">
+                    <copy>
+                        <from>'Inbound'</from>
+                        <to>$CheckPolicyAdhocQueryIn.CheckPolicyAdhocQueryRequest/ns5:direction</to>
+                    </copy>
+                    <copy>
+                        <from>$RespondingGateway_CrossGatewayQueryIn.RespondingGateway_CrossGatewayQueryRequest/ns6:AdhocQueryRequest/ns7:AdhocQuery/@id</from>
+                        <to>$CheckPolicyAdhocQueryIn.CheckPolicyAdhocQueryRequest/ns5:sendingHomeCommunity/ns3:homeCommunityId</to>
+                    </copy>
+                    <copy>
+                        <from>$RespondingGateway_CrossGatewayQueryIn.RespondingGateway_CrossGatewayQueryRequest/ns6:AdhocQueryRequest</from>
+                        <to>$CheckPolicyAdhocQueryIn.CheckPolicyAdhocQueryRequest/ns5:message/ns6:AdhocQueryRequest</to>
+                    </copy>
+                    <copy>
+                        <from>$RespondingGateway_CrossGatewayQueryIn.RespondingGateway_CrossGatewayQueryRequest/ns11:assertion</from>
+                        <to>$CheckPolicyAdhocQueryIn.CheckPolicyAdhocQueryRequest/ns5:message/ns5:assertion</to>
+                    </copy>
+                </assign>
+                <invoke name="InvokePolicyEngine" partnerLink="PolicyEngineFacadePL" operation="CheckPolicyAdhocQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:NhincComponentInternalPolicyEngineFacade" portType="tns:NhincComponentInternalPolicyEngineFacadePortType" inputVariable="CheckPolicyAdhocQueryIn" outputVariable="CheckPolicyAdhocQueryOut"/>
+                <if name="IfCheckPolicy">
+                    <condition>'Permit' = $CheckPolicyAdhocQueryOut.CheckPolicyResponse/ns10:response/ns9:Result/ns9:Decision</condition>
+                    <sequence name="CheckPolicytrueSequence">
+                        <assign name="AssignGetPropHomeCommunityId">
+                            <copy>
+                                <from>'gateway'</from>
+                                <to>$GetPropertyHomeCommunityIdIn.GetPropertyRequest/ns1:propertyFile</to>
+                            </copy>
+                            <copy>
+                                <from>'localHomeCommunityId'</from>
+                                <to>$GetPropertyHomeCommunityIdIn.GetPropertyRequest/ns1:propertyName</to>
+                            </copy>
+                        </assign>
+                        <invoke name="InvokeGetHomeCommunityId" partnerLink="NhincComponentPropAccessorPL" operation="GetProperty" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentpropaccessor" portType="tns:NhincComponentPropAccessorPortType" inputVariable="GetPropertyHomeCommunityIdIn" outputVariable="GetPropertyHomeCommunityIdOut"/>
+                        <assign name="AssignGetConnectionDocQueryEndpoint">
+                            <copy>
+                                <from>$GetPropertyHomeCommunityIdOut.GetPropertyResponse/ns1:propertyValue</from>
+                                <to>$GetAdapterQueryEndpointIn.GetConnectionInfoEndpointByServiceNameRequest/ns2:homeCommunityWithServiceName/ns2:homeCommunity/ns3:homeCommunityId</to>
+                            </copy>
+                            <copy>
+                                <from>'adapterdocquery'</from>
+                                <to>$GetAdapterQueryEndpointIn.GetConnectionInfoEndpointByServiceNameRequest/ns2:homeCommunityWithServiceName/ns2:serviceName</to>
+                            </copy>
+                        </assign>
+                        <invoke name="InvokeGetConnectionAdapterDocQuery" partnerLink="NhincComponentConnectionManagerPL" operation="GetConnectionInfoEndpointByServiceName" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" portType="tns:NhincComponentConnectionManagerPortType" inputVariable="GetAdapterQueryEndpointIn" outputVariable="GetAdapterQueryEndpointOut"/>
+                        <assign name="AssignAdapterDocQueryInput">
+                            <copy>
+                                <from variable="RespondingGateway_CrossGatewayQueryIn" part="RespondingGateway_CrossGatewayQueryRequest"/>
+                                <to variable="AdapterDocQueryIn" part="RespondingGateway_CrossGatewayQueryRequest"/>
+                            </copy>
+                            <copy>
+                                <from>ns4:doXslTransform('urn:stylesheets:wrap2serviceref.xsl', $GetAdapterQueryEndpointOut.ConnectionInfoEndpoint/ns2:serviceConnectionInfoEndpoints/ns2:serviceConnectionInfoEndpoint/ns3:EPR/ns3:EndpointReference)</from>
+                                <to partnerLink="AdapterDocQueryPL"/>
+                            </copy>
+                        </assign>
+                        <invoke name="InvokeAdapterDocQuery" partnerLink="AdapterDocQueryPL" operation="RespondingGateway_CrossGatewayQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:adapterdocquery" portType="tns:AdapterDocQueryPortType" inputVariable="AdapterDocQueryIn" outputVariable="AdapterDocQueryOut"/>
+                        <assign name="AssignAdapterQueryOutput">
+                            <copy>
+                                <from variable="AdapterDocQueryOut" part="RespondingGateway_CrossGatewayQueryResponse"/>
+                                <to variable="RespondingGateway_CrossGatewayQueryOut" part="RespondingGateway_CrossGatewayQueryResponse"/>
+                            </copy>
+                        </assign>
+                    </sequence>
+                </if>
+            </sequence>
+        </scope>
+        <reply name="ReplyNhincComponentInternalDocQueryOrch" partnerLink="NhincComponentInternalDocQueryOrchPL" operation="RespondingGateway_CrossGatewayQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentinternaldocqueryorch" portType="tns:NhincComponentInternalDocQueryOrchPortType" variable="RespondingGateway_CrossGatewayQueryOut">
+            <sxt:trace>
+                <sxt:log level="info" location="onStart">
+                    <ns4:from variable="RespondingGateway_CrossGatewayQueryOut"/>
+                </sxt:log>
+                <sxt:log level="warning" location="onStart">
+                    <ns4:from>'### Reply from NhincComponentInternalDocQueryOrch BPEL ...'</ns4:from>
+                </sxt:log>
+            </sxt:trace>
+        </reply>
+    </sequence>
+</process>

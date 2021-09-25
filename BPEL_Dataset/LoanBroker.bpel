@@ -1,0 +1,79 @@
+<process name="LoanBroker"
+         targetNamespace="http://samples.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://samples.otn.com"
+         xmlns:services="http://services.otn.com"
+         xmlns:autoloan="http://www.autoloan.com/ns/autoloan"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+  <!-- This process invokes the asynchronous LoanService. -->
+
+  <partnerLinks>
+    <partnerLink name="client"
+             partnerLinkType="tns:LoanBroker"
+             myRole="LoanBrokerProvider"
+             partnerRole="LoanBrokerRequester"/>
+
+    <partnerLink name="LoanService"
+             partnerLinkType="services:LoanService"
+             myRole="LoanServiceRequester"
+             partnerRole="LoanServiceProvider"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="input"
+               messageType="tns:LoanBrokerRequestMessage"/>
+    <variable name="output"
+               messageType="tns:LoanBrokerResultMessage"/>
+
+    <variable name="request"
+               messageType="services:LoanServiceRequestMessage"/>
+    <variable name="response"
+               messageType="services:LoanServiceResultMessage"/>
+  </variables>
+
+  <sequence>
+
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:LoanBroker"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+
+    <!-- initialize the input of LoanService -->
+    <assign>
+
+    <copy>
+        <from variable="input" part="payload"/>
+        <to variable="request" part="payload"/>
+    </copy>
+    </assign>
+
+    <!--  initiate the remote process -->
+    <invoke name="invoke" partnerLink="LoanService"
+        portType="services:LoanService"
+        operation="initiate" inputVariable="request"/>
+
+    <!--  receive the result of the remote process -->
+    <receive name="receive_invoke" partnerLink="LoanService"
+        portType="services:LoanServiceCallback"
+        operation="onResult" variable="response"/>
+
+    <assign>
+        <copy>
+            <from variable="response" part="payload"/>
+            <to variable="output" part="payload"/>
+        </copy>
+    </assign>
+
+
+    <!-- respond output to requestor -->
+    <invoke name="replyOutput" partnerLink="client"
+            portType="tns:LoanBrokerCallback"
+            operation="onResult" inputVariable="output"/>
+
+  </sequence>
+
+</process>
+

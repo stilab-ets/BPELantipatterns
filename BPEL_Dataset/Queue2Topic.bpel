@@ -1,0 +1,38 @@
+<process xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/jms/InQueue/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/jms/OutTopic/" xmlns:ns2="http://xmlns.oracle.com/pcbpel/samples/expense" xmlns:client="http://xmlns.oracle.com/pcbpel/Queue2Topic" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc" name="Queue2Topic" targetNamespace="http://xmlns.oracle.com/pcbpel/Queue2Topic">
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="Consume_Message_role" name="InQueue" plext:wsdlloc="InQueue.wsdl" plext:inbport="Consume_Message_ptt" plext:inbound="true" partnerLinkType="ns1:Consume_Message_plt"/>
+    <partnerLink name="OutTopic" partnerRole="Produce_Message_role" plext:wsdlloc="OutTopic.wsdl" plext:inbport="Produce_Message_ptt" plext:inbound="false" partnerLinkType="ns3:Produce_Message_plt"/>
+  </partnerLinks>
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <variables>
+    <variable name="receive_Consume_Message_InputVariable" messageType="ns1:ExpenseRecord_msg"/>
+    <variable name="invoke_Produce_Message_InputVariable" messageType="ns3:ExpenseRecord_msg"/>
+  </variables>
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <sequence name="main">
+    <receive name="receive" partnerLink="InQueue" portType="ns1:Consume_Message_ptt" operation="Consume_Message" variable="receive_Consume_Message_InputVariable" createInstance="yes"/>
+    <assign name="assign">
+      <copy>
+        <from variable="receive_Consume_Message_InputVariable" part="ExpenseRecord" query="/ns2:ExpenseRecord"/>
+        <to variable="invoke_Produce_Message_InputVariable" part="ExpenseRecord" query="/ns2:ExpenseRecord"/>
+      </copy>
+    </assign>
+    <invoke name="invoke" partnerLink="OutTopic" portType="ns3:Produce_Message_ptt" operation="Produce_Message" inputVariable="invoke_Produce_Message_InputVariable"/>
+  </sequence>
+</process>

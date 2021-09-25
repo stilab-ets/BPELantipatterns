@@ -1,0 +1,44 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Wed Apr 13 23:14:39 PDT 2005
+  // Author:  lililiu
+  // Purpose: Asynchronous BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="RawQueuePayloadUsingNativeFormat" targetNamespace="http://xmlns.oracle.com/RawQueuePayloadUsingNativeFormat" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/aq/outbound/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://xmlns.oracle.com/pcbpel/adapter/aq/inbound/" xmlns:client="http://xmlns.oracle.com/RawQueuePayloadUsingNativeFormat" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/aq/Dequeue/" xmlns:ns3="http://TargetNamespace.com/Dequeue" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/aq/Enqueue/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= -->
+  <partnerLinks><!-- 
+    The 'client' role represents the requester of this service. It is 
+    used for callback. The location and correlation information associated
+    with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink myRole="Dequeue_role" name="Dequeue" partnerLinkType="ns1:Dequeue_plt"/>
+    <partnerLink name="Enqueue" partnerRole="Enqueue_role" partnerLinkType="ns2:Enqueue_plt"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive_1_Dequeue_InputVariable" messageType="ns1:Root-Element_msg"/>
+    <variable name="Invoke_1_Enqueue_InputVariable" messageType="ns2:Root-Element_msg"/>
+    <variable name="output_header" messageType="ns4:Header"/>
+    <variable name="input_header" messageType="ns5:Header"/>
+  </variables><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= --><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <sequence name="main"><!-- Receive input from requestor. 
+    Note: This maps to operation defined in RawQueuePayloadUsingNativeFormat.wsdl
+    --><!-- Asynchronous callback to the requester.
+     Note: the callback location and correlation id is transparently handled 
+     using WS-addressing.
+     -->
+    <receive name="Receive_1" partnerLink="Dequeue" portType="ns1:Dequeue_ptt" operation="Dequeue" variable="Receive_1_Dequeue_InputVariable" createInstance="yes" bpelx:headerVariable="input_header"/>
+    <assign name="Transform_1">
+      <bpelx:annotation>
+        <bpelx:pattern>transformation
+        </bpelx:pattern>
+      </bpelx:annotation>
+      <copy>
+        <from expression="ora:processXSLT('Transformation_1.xsl',bpws:getVariableData('Receive_1_Dequeue_InputVariable','Root-Element'))"/>
+        <to variable="Invoke_1_Enqueue_InputVariable" part="Root-Element"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_1" partnerLink="Enqueue" portType="ns2:Enqueue_ptt" operation="Enqueue" inputVariable="Invoke_1_Enqueue_InputVariable" bpelx:inputHeaderVariable="output_header"/>
+  </sequence>
+</process>

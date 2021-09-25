@@ -1,0 +1,73 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Jun 23 10:53:08 PDT 2006
+  Author:  mchiocca
+  Purpose: Empty BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="File2StoredProcedure"
+         targetNamespace="http://xmlns.oracle.com/File2StoredProcedure"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/StoredProcedureOutbound/"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/db/SCOTT/ADDEMPLOYEES/"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/file/FileInbound/"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:client="http://xmlns.oracle.com/File2StoredProcedure"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <partnerLink name="StoredProcedureOutbound"
+                 partnerRole="StoredProcedureOutbound_role"
+                 partnerLinkType="ns1:StoredProcedureOutbound_plt"/>
+    <partnerLink myRole="Read_role" name="FileInbound"
+                 partnerLinkType="ns2:Read_plt"/>
+  </partnerLinks>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <variable name="Receive_Read_InputVariable"
+              messageType="ns2:InputParameters_msg"/>
+    <variable name="Invoke_StoredProcedureOutbound_InputVariable"
+              messageType="ns1:args_in_msg"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <receive name="Receive" partnerLink="FileInbound" portType="ns2:Read_ptt"
+             operation="Read" variable="Receive_Read_InputVariable"
+             createInstance="yes"/>
+    <assign name="Assign">
+      <copy>
+        <from variable="Receive_Read_InputVariable" part="InputParameters"/>
+        <to variable="Invoke_StoredProcedureOutbound_InputVariable"
+            part="InputParameters"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke" partnerLink="StoredProcedureOutbound"
+            portType="ns1:StoredProcedureOutbound_ptt"
+            operation="StoredProcedureOutbound"
+            inputVariable="Invoke_StoredProcedureOutbound_InputVariable"/>
+  </sequence>
+</process>

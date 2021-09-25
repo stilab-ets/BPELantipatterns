@@ -1,0 +1,67 @@
+<process xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" name="PayFlow" targetNamespace="http://xmlns.oracle.com/PayFlow" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:ns1="http://samples.otn.com" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns3="http://payment.org" xmlns:ns2="http://services.otn.com" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:client="http://xmlns.oracle.com/PayFlow" xmlns:ora="http://schemas.oracle.com/xpath/extension"><!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="PayFlowProvider" name="client" partnerRole="PayFlowRequester" plext:wsdlloc="PayFlow.wsdl" partnerLinkType="ns1:PayFlow"/>
+    <partnerLink name="PaymentProcessorService" plext:wsdlloc="PaymentProcessorService.wsdl" partnerLinkType="ns2:PaymentProcessorService" myRole="PaymentProcessorServiceRequester" partnerRole="PaymentProcessorServiceProvider"/>
+  </partnerLinks><!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <variables>
+    <variable name="input" messageType="ns1:PayFlowRequestMessage"/>
+    <variable name="output" messageType="ns1:PayFlowResultMessage"/>
+  </variables><!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <sequence name="main">
+    <receive name="ReceiveInput" partnerLink="client" portType="ns1:PayFlow" operation="initiate" variable="input" createInstance="yes"/>
+    <scope name="ExecutePayment">
+      <variables>
+        <variable name="PaymentRequest" messageType="ns2:PaymentProcessorServiceRequestMessage"/>
+        <variable name="PaymentResult" messageType="ns2:PaymentProcessorServiceResultMessage"/>
+        <variable name="InsufficientFundException" messageType="ns2:InsufficientFundExceptionPaymentProcessorServiceMessage"/>
+        <variable name="TransferRefusedException" messageType="ns2:TransferRefusedExceptionPaymentProcessorServiceMessage"/>
+      </variables>
+      <faultHandlers>
+        <catchAll>
+          <terminate name="Terminate_1"/>
+        </catchAll>
+      </faultHandlers>
+      <sequence name="Sequence_1">
+        <assign name="AssignPaymentRequest">
+          <copy>
+            <from variable="input" part="payload" query="/ns1:paymentRequest"/>
+            <to variable="PaymentRequest" part="payload" query="/ns2:paymentRequest"/>
+          </copy>
+        </assign>
+        <invoke name="InvokePaymentProcessorService" partnerLink="PaymentProcessorService" portType="ns2:PaymentProcessorService" operation="initiate" inputVariable="PaymentRequest"/>
+        <pick name="Pick_1">
+          <onMessage portType="ns2:PaymentProcessorServiceCallback" operation="onResult" variable="PaymentResult" partnerLink="PaymentProcessorService">
+            <assign name="AssignOutput">
+              <copy>
+                <from variable="PaymentResult" part="payload" query="/ns2:digitalReceipt"/>
+                <to variable="output" part="payload" query="/ns1:digitalReceipt"/>
+              </copy>
+            </assign>
+          </onMessage>
+          <onMessage portType="ns2:PaymentProcessorServiceCallback" operation="onInsufficientFundException" variable="InsufficientFundException" partnerLink="PaymentProcessorService">
+            <terminate name="InsufficientFunds"/>
+          </onMessage>
+          <onMessage portType="ns2:PaymentProcessorServiceCallback" operation="onTransferRefusedException" variable="TransferRefusedException" partnerLink="PaymentProcessorService">
+            <terminate name="TransferRefused"/>
+          </onMessage>
+          <onAlarm for="'P2DT'">
+            <terminate name="PaymentTimeout"/>
+          </onAlarm>
+        </pick>
+      </sequence>
+    </scope>
+    <invoke name="replyOutput" partnerLink="client" portType="ns1:PayFlowCallback" operation="onResult" inputVariable="output"/>
+  </sequence>
+</process>

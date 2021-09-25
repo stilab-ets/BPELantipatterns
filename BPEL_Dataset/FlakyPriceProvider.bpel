@@ -1,0 +1,119 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Apr 21 15:57:49 PDT 2006
+  Author:  kmreddy
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="FlakyPriceProvider"
+         targetNamespace="http://xmlns.oracle.com/FlakyPriceProvider"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns1="http://xmlns.oracle.com/PriceProvider"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns2="http://xmlns.oracle.com/bpel/services/IdentityService"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:client="http://xmlns.oracle.com/FlakyPriceProvider"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="client" partnerLinkType="client:FlakyPriceProvider"
+                 myRole="FlakyPriceProviderProvider"/>
+  </partnerLinks>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="inputVariable"
+              messageType="client:FlakyPriceProviderRequestMessage"/>
+    <variable name="outputVariable"
+              messageType="client:FlakyPriceProviderResponseMessage"/>
+    <variable name="FaultVar"
+              messageType="client:FlakyPriceProviderFaultMessage"/>
+    <variable name="zipCode" type="xsd:integer"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <!-- Receive input from requestor. (Note: This maps to operation defined in FlakyPriceProvider.wsdl) -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="client:FlakyPriceProvider" operation="process"
+             variable="inputVariable" createInstance="yes"/>
+    <!-- Generate reply to synchronous request -->
+    <assign name="Assign_3">
+      <copy>
+        <from variable="inputVariable" part="payload"
+              query="/ns1:PriceProviderProcessRequest/ns1:customerLocation"/>
+        <to variable="zipCode"/>
+      </copy>
+    </assign>
+    <switch name="Switch_1">
+      <case condition="((bpws:getVariableData('zipCode') > 99500) or (bpws:getVariableData('zipCode') > 96700 and bpws:getVariableData('zipCode') &lt; 97000))">
+        <bpelx:annotation>
+          <bpelx:pattern>alaskaOrHawaii</bpelx:pattern>
+        </bpelx:annotation>
+        <sequence name="Sequence_1">
+          <assign name="Assign_1">
+            <copy>
+              <from expression="'We do not ship to Alaska or Hawaii. Please contact an alternate store.'"/>
+              <to variable="FaultVar" part="payload" query="/client:error"/>
+            </copy>
+          </assign>
+          <reply name="replyFault" partnerLink="client"
+                 portType="client:FlakyPriceProvider" operation="process"
+                 variable="FaultVar" faultName="client:ServiceError"/>
+        </sequence>
+      </case>
+      <otherwise>
+        <sequence name="Sequence_2">
+          <assign name="Assign_2">
+            <copy>
+              <from expression="60"/>
+              <to variable="outputVariable" part="payload"
+                  query="/ns1:PriceProviderProcessResponse/ns1:itemPrice"/>
+            </copy>
+            <copy>
+              <from expression="10"/>
+              <to variable="outputVariable" part="payload"
+                  query="/ns1:PriceProviderProcessResponse/ns1:shippingCost"/>
+            </copy>
+            <copy>
+              <from expression="'P5D'"/>
+              <to variable="outputVariable" part="payload"
+                  query="/ns1:PriceProviderProcessResponse/ns1:deliveryTime"/>
+            </copy>
+          </assign>
+          <reply name="replyOutput" partnerLink="client"
+                 portType="client:FlakyPriceProvider" operation="process"
+                 variable="outputVariable"/>
+        </sequence>
+      </otherwise>
+    </switch>
+  </sequence>
+</process>

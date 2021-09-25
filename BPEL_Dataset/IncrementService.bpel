@@ -1,0 +1,48 @@
+<process name="IncrementService"
+         targetNamespace="http://services.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://services.otn.com"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+  <!-- this process receives a integer value, increments it
+  and then synchronously returns the integr. -->
+
+   <partnerLinks>
+     <partnerLink name="client"
+              partnerLinkType="tns:IncrementService"
+              myRole="IncrementServiceProvider"/>
+  </partnerLinks>
+ 
+ <variables>
+    <variable name="input"
+               messageType="tns:IncrementServiceRequestMessage"/>
+    <variable name="output"
+               messageType="tns:IncrementServiceResponseMessage"/>
+  </variables>
+
+
+  <sequence>
+    
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:IncrementService"
+             operation="process" variable="input"
+             createInstance="yes"/>
+
+<assign>
+  <copy>
+    <from expression="bpws:getVariableData('input','payload', '/tns:value') + 1"/>
+    <to variable="output" part="payload" query="/tns:result"/>
+  </copy>
+</assign>
+
+    <reply name="replyOutput" partnerLink="client"
+            portType="tns:IncrementService"
+            operation="process" variable="output"/>
+
+  </sequence>
+
+</process>
+

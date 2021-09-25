@@ -1,0 +1,195 @@
+<bpel:process 
+	name="GetGoogleGeocoding"
+    targetNamespace="http://maps.googleapis.com/geocoding/GetGoogleGeocoding/Core/definitions"
+    suppressJoinFailure="yes"
+    xmlns:tns="http://maps.googleapis.com/geocoding/GetGoogleGeocoding/Core/definitions"
+    xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+    xmlns:partnerdef="http://maps.googleapis.com/geocoding/definitions">
+
+    <!-- 
+	   GetGoogleGeocoding is a synchronous BPEL process wrapping the querying functionality
+	   of the Google Geocoding service interface. This integration process is used to geocode 
+	   postal addresses as well as to transform geographic coordinates into postal address 
+	   representation. GetGoogleGeocoding integrates the GoogleGeocoding message format for
+	   result presentation.
+	  
+	   @Layer: Core CIPs
+	  
+	   @System: Google Maps Web services
+	   @Component: Geocoding
+	   @Interface: geocode
+	  
+	   
+	   @Author: Rodion Hagin
+	   @Created: 01.06.2011
+	  
+	  -->
+	  
+	<!-- WSDL IMPORTS -->
+	<bpel:import 
+		location="GetGoogleGeocodingArtifacts.wsdl" 
+		namespace="http://maps.googleapis.com/geocoding/GetGoogleGeocoding/Core/definitions" 
+	    importType="http://schemas.xmlsoap.org/wsdl/" />
+	
+	<bpel:import 
+		location="GoogleGeocoding.wsdl" 
+		namespace="http://maps.googleapis.com/geocoding/definitions" 
+	    importType="http://schemas.xmlsoap.org/wsdl/" />
+        
+ 
+    <!-- PARTNERLINKS -->          
+    <bpel:partnerLinks>
+        
+        <!-- Represents the requester of this service. Used for callback. -->
+        <bpel:partnerLink 
+        	name="Client"
+            partnerLinkType="tns:GoogleGeocodingProviderPLT"
+            myRole="GoogleGeocodingProvider" />
+        
+        <!-- Represents Google Maps Geocoding. -->
+        <bpel:partnerLink 
+        	name="GoogleGeocoding"
+			partnerLinkType="partnerdef:GoogleGeocodingPLT" 
+			partnerRole="GoogleGeocodingProvider" />
+    </bpel:partnerLinks>
+  
+  
+    <!-- VARIABLES -->          
+    <bpel:variables>
+        <!-- Business process input -->
+        <bpel:variable name="input"
+                  messageType="tns:GetGoogleGeocodingRequestMessage"/>
+                  
+        <!-- Business process output -->
+        <bpel:variable name="output"
+                  messageType="tns:GetGoogleGeocodingResponseMessage"/>
+        
+        <!-- Business process fault output -->
+        <bpel:variable name="fault"
+                  messageType="tns:GetGoogleGeocodingFaultMessage" />
+        
+        <!-- GoogleGeocoding input -->
+		<bpel:variable name="inputGG" 
+				  messageType="partnerdef:GeocodingRequestMessage" />
+
+		<!-- GoogleGeocoding output -->
+		<bpel:variable name="outputGG" 
+				  messageType="partnerdef:GeocodingResponseMessage" />
+        
+    </bpel:variables>
+
+    <!-- FAULT HANDLING LOGIC --> 
+    <bpel:faultHandlers>
+
+      <!-- Catch and process faults thrown by GoogleGeocoding -->
+      <bpel:catch 
+        faultName="partnerdef:GeocodingFault" 
+        faultVariable="faultGG"
+        faultMessageType="partnerdef:GeocodingFaultMessage">
+        
+        <bpel:sequence>
+          <bpel:assign validate="no" name="ProcessFaultFromGG">
+              <bpel:copy>
+                  <bpel:from part="payload" variable="faultGG" />
+                  <bpel:to part="payload" variable="fault" />
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+          	name="replyFaultOutput" 
+              partnerLink="Client"
+              portType="tns:GetGoogleGeocoding"
+              operation="process"
+              variable="fault"
+              faultName="tns:GetGoogleGeocodingFault" />
+        </bpel:sequence>
+      </bpel:catch>
+      
+      <!-- Catch all faults during current process execution, generate fault message and 
+         send back to the requester interface 
+        -->
+      <bpel:catchAll>
+        <bpel:sequence>
+          <bpel:assign validate="no" name="CreateNewFault">
+              <bpel:copy>
+                  <bpel:from>
+                    <bpel:literal>
+                      <tn:GeocodeFault xmlns:tn="http://maps.googleapis.com/geocoding/types"
+                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tn:status>GetGoogleGeocoding process error</tn:status>
+                      </tn:GeocodeFault>
+                    </bpel:literal>
+                  </bpel:from>
+                  <bpel:to part="payload" variable="fault" />
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+            name="replyFaultOutput" 
+              partnerLink="Client"
+              portType="tns:GetGoogleGeocoding"
+              operation="process"
+              variable="fault"
+              faultName="tns:GetGoogleGeocodingFault" />
+        </bpel:sequence>
+      </bpel:catchAll>
+      
+    </bpel:faultHandlers>
+    
+    
+	<!-- ORCHESTRATION LOGIC -->
+    
+    <!-- Set of activities coordinating the flow of messages across the    
+       services integrated within this business process.  
+       
+       GetGoogleGeocoding BPEL process integrates the geocode interface of Google Maps Geocoding component.
+      -->        
+    <bpel:sequence name="main">
+        
+        <bpel:receive 
+        	name="receiveInput" 
+        	partnerLink="Client"
+            portType="tns:GetGoogleGeocoding"
+            operation="process" 
+            variable="input"
+            createInstance="yes" />
+            
+        <bpel:assign validate="no" name="PrepareInputToGoogleGeocoding">
+            
+            <!-- Pre-initialization of the variable is not required. 
+        	   OW2 Orchestra. 
+        	  -->
+            <bpel:copy>
+            	<bpel:from part="payload" variable="input" />
+                <bpel:to part="payload" variable="inputGG" />
+            </bpel:copy>
+        </bpel:assign>
+        
+        <bpel:invoke 
+        	name="InvokeGoogleGeocoding" 
+        	partnerLink="GoogleGeocoding" 
+        	operation="process" 
+        	portType="partnerdef:GoogleGeocoding" 
+        	inputVariable="inputGG" 
+        	outputVariable="outputGG" />
+        
+        <bpel:assign validate="no" name="ProcessOutputFromGoogleGeocoding">
+            
+            <!-- Pre-initialization of the variable is not required. 
+        	   OW2 Orchestra. 
+        	  -->
+            <bpel:copy>
+                <bpel:from part="payload" variable="outputGG" />
+                <bpel:to part="payload" variable="output" />
+            </bpel:copy>
+        </bpel:assign>
+        
+        <bpel:reply 
+        	name="replyOutput" 
+            partnerLink="Client"
+            portType="tns:GetGoogleGeocoding"
+            operation="process" 
+            variable="output" />
+    </bpel:sequence>
+</bpel:process>
+

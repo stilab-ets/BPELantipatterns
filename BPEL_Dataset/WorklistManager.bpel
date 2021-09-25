@@ -1,0 +1,300 @@
+<!-- WorklistManager BPEL Process -->
+<process name="WorklistManager" targetNamespace="http://services.oracle.com/bpel/task" suppressJoinFailure="yes" xmlns:tns="http://services.oracle.com/bpel/task" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension">
+	<bpelx:exec import="org.w3c.dom.Element"/>
+	<bpelx:exec import="com.oracle.bpel.client.Locator"/>
+	<bpelx:exec import="com.oracle.bpel.client.NormalizedMessage"/>
+	<bpelx:exec import="com.oracle.bpel.client.auth.DomainAuth"/>
+	<bpelx:exec import="com.oracle.bpel.client.auth.DomainAuthFactory"/>
+	<bpelx:exec import="com.oracle.bpel.client.delivery.IDeliveryService"/>
+	<bpelx:exec import="com.oracle.bpel.client.util.WhereCondition"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.ITask"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.IWorklistService"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.TaskFactory"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.Tasklist"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.TasklistFactory"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.IWhereCondition"/>
+	<bpelx:exec import="com.oracle.services.bpel.task.WhereConditionFactory"/>
+	<bpelx:exec import="org.collaxa.xml.IBaseFacade"/>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNERLINKS:List of services participating in this BPEL process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<partnerLinks>
+		<!-- The 'client' role represents the requester of this service. -->
+		<partnerLink name="client" partnerLinkType="tns:WorklistManager" myRole="WorklistManagerProvider"/>
+	</partnerLinks>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     VARIABLES: List of messages and XML documents used in this process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<variables>
+		<!-- Reference to the message passed as input during initiation -->
+		<variable messageType="tns:lookupTaskRequestMessage" name="lookupTaskRequest"/>
+		<variable messageType="tns:listTasksRequestMessage" name="listTasksRequest"/>
+		<!-- 
+          Reference to the message that will be returned to the requester
+          -->
+		<variable name="listTasksResponse" messageType="tns:listTasksResponseMessage"/>
+		<variable messageType="tns:lookupTaskResponseMessage" name="lookupTaskResponse"/>
+		<variable messageType="tns:taskRequestMessage" name="taskRequest"/>
+		<variable messageType="tns:taskResponseMessage" name="taskResponse"/>
+	</variables>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     ORCHESTRATION LOGIC: Set of activities coordinating the flow of 
+     messages across the services integrated within this business process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<sequence name="main">
+		<!-- Receive input from requester. 
+             Note: This maps to operation defined in WorklistManager.wsdl 
+             -->
+		<pick createInstance="yes">
+			<onMessage partnerLink="client" portType="tns:WorklistManager" operation="listTasks" variable="listTasksRequest">
+				<sequence>
+					<bpelx:exec xmlns:bpelx="http://schemas.oracle.com/bpel/extension" language="java" version="1.4">
+						<![CDATA[
+							try
+							{
+					            Element  element =
+					                (Element)getVariableData("listTasksRequest","payload","/tns:whereCondition");
+					                 	// Lookup the worklist service.
+					            IWhereCondition whereCondition = WhereConditionFactory.createFacade( element );
+					                 						                 						            
+					            Locator locator = getLocator( );
+					             
+        						IWorklistService worklist = 
+            						(IWorklistService)locator.lookupService( IWorklistService.SERVICE_NAME );  
+
+								
+								boolean first = true;
+								
+								WhereCondition where = new WhereCondition();
+								
+								if(whereCondition.getAssignee() != null && !"".equals( whereCondition.getAssignee()) )
+								{
+									WhereCondition whereAssignee = new WhereCondition( "assignee = '" + whereCondition.getAssignee() + "'" );
+									
+									where.append( whereAssignee);
+									
+									first = false;										
+								}
+								
+								 
+								if(whereCondition.getCreator() != null && !"".equals( whereCondition.getCreator() ) )
+								{
+									WhereCondition whereCreator = new WhereCondition( "creator = '" + whereCondition.getCreator() + "'" );
+									
+									if(first)
+										where.append( whereCreator);
+									else
+										where.append("and").append( whereCreator);	
+										
+									first = false;										
+								}
+								
+								if(whereCondition.getTitle() != null && !"".equals( whereCondition.getTitle() ) )
+								{
+									WhereCondition whereTitle = new WhereCondition( "title = '" + whereCondition.getTitle() + "'" );
+									
+									if(first)
+										where.append( whereTitle);
+									else
+										where.append("and").append( whereTitle);	
+										
+									first = false;										
+								}
+								
+								if(whereCondition.getStatus() != null && !"".equals( whereCondition.getStatus() ) )
+								{
+									WhereCondition whereStatus = new WhereCondition( "status = '" + whereCondition.getStatus() + "'" );
+									
+									if(first)
+										where.append( whereStatus);
+									else
+										where.append("and").append( whereStatus);	
+										
+									first = false;										
+								}	
+								
+								if(whereCondition.getCustomKey() != null && !"".equals( whereCondition.getCustomKey() ) )
+								{
+									WhereCondition whereCustomKey = new WhereCondition( "customKey = '" + whereCondition.getCustomKey() + "'" );
+									
+									if(first)
+										where.append( whereCustomKey);
+									else
+										where.append("and").append( whereCustomKey );	
+										
+									first = false;										
+								}																							
+								
+								try
+								{
+									if(whereCondition.getPriority() > 0  )
+									{
+										WhereCondition wherePriority = new WhereCondition( "priority = " + whereCondition.getPriority() );
+
+										if(first)
+											where.append( wherePriority);
+										else
+											where.append("and").append( wherePriority);	
+
+										first = false;										
+									}
+								}
+								catch(java.util.NoSuchElementException ne)
+								{
+								}
+								
+
+						 	    
+						 	    ITask[] tasks  = worklist.listTasks( where );
+						 	    
+						 	    Tasklist tasklist = TasklistFactory.createFacade();
+						 	    
+						 	    for(int i = 0; i < tasks.length; i ++ )
+									tasklist.addTask( tasks[i] );  
+						 	          
+						        
+						        setVariableData("listTasksResponse","payload",tasklist.getRootElement() );
+					        }
+					        catch( Exception e )
+					        {
+					            e.printStackTrace();
+					            addAuditTrailEntry(e);
+					        }						    						       
+    	  ]]>
+					</bpelx:exec>
+					<reply name="replyOutput" partnerLink="client" portType="tns:WorklistManager" variable="listTasksResponse" operation="listTasks"/>
+				</sequence>
+			</onMessage>
+			<onMessage partnerLink="client" portType="tns:WorklistManager" operation="lookupTask" variable="lookupTaskRequest">
+				<sequence>
+					<bpelx:exec xmlns:bpelx="http://schemas.oracle.com/bpel/extension" language="java" version="1.4">
+						<![CDATA[
+							try
+							{
+							
+					            Element  taskId=
+					                (Element)getVariableData("lookupTaskRequest","payload","/tns:taskId");
+					                 	// Lookup the worklist service.
+					                 						                 						            
+					            Locator locator = getLocator( );
+					             
+        						IWorklistService worklist = 
+            						(IWorklistService)locator.lookupService( IWorklistService.SERVICE_NAME );  
+        
+						        // Lookup the specific task the user has selected.
+						        IBaseFacade task  = (IBaseFacade)worklist.lookupTask( taskId.getNodeValue() );
+						        
+						        setVariableData("lookupTaskResponse","payload",task.getRootElement() );
+					        }
+					        catch( Exception e )
+					        {
+					            e.printStackTrace();
+					            addAuditTrailEntry(e);
+					        }						    						       
+    	  ]]>
+					</bpelx:exec>
+					<reply partnerLink="client" portType="tns:WorklistManager" operation="lookupTask" variable="lookupTaskResponse"/>
+				</sequence>
+			</onMessage>
+			<onMessage partnerLink="client" portType="tns:WorklistManager" operation="initiateTask" variable="taskRequest">
+				<sequence>
+					<bpelx:exec xmlns:bpelx="http://schemas.oracle.com/bpel/extension" language="java" version="1.4">
+						<![CDATA[
+							try
+							{
+					            Element  element =
+					                (Element)getVariableData("taskRequest","payload","/tns:task");
+					                
+					            IBaseFacade task = (IBaseFacade)TaskFactory.createFacade( element );
+					            
+					            if(!task.containsChildElement("duration","http://services.oracle.com/bpel/task"))
+					            	task.addChildElement("duration","http://services.oracle.com/bpel/task","");     						                 						            
+
+					            Locator locator = getLocator( );
+					            
+							    IDeliveryService deliveryService = (IDeliveryService)locator.lookupService(IDeliveryService.SERVICE_NAME );
+							
+							    // construct the normalized message and send to Oracle BPEL process manager
+							    NormalizedMessage nm = new NormalizedMessage( );
+							    nm.addPart("payload" , element );
+								
+							    deliveryService.post("TaskManager", "initiateTask", nm);						    				            
+					            
+					        }
+					        catch( Exception e )
+					        {
+					            e.printStackTrace();
+					            addAuditTrailEntry(e);
+					        }						            
+
+    	  ]]>
+					</bpelx:exec>
+					<reply partnerLink="client" portType="tns:WorklistManager" operation="initiateTask" variable="taskResponse"/>
+				</sequence>
+			</onMessage>
+			<onMessage partnerLink="client" portType="tns:WorklistManager" operation="updateTask" variable="taskRequest">
+				<sequence>
+					<bpelx:exec xmlns:bpelx="http://schemas.oracle.com/bpel/extension" language="java" version="1.4">
+						<![CDATA[
+							try
+							{							
+					            Element  element =
+					                (Element)getVariableData("taskRequest","payload","/tns:task");
+					                 	// Lookup the worklist service.
+					                 						                 						            
+					            ITask task = TaskFactory.createFacade( element );
+					            
+					            Locator locator = getLocator( );
+					             
+        						IWorklistService worklist = 
+            						(IWorklistService)locator.lookupService( IWorklistService.SERVICE_NAME );  
+        
+						        // update the specific task the user has selected.
+						        worklist.updateTask( task );
+						        
+					        }
+					        catch( Exception e )
+					        {
+					            e.printStackTrace();
+					            addAuditTrailEntry(e);
+					        }						    						       
+    	  ]]>
+					</bpelx:exec>
+					<reply partnerLink="client" portType="tns:WorklistManager" operation="updateTask" variable="taskResponse"/>
+				</sequence>
+			</onMessage>
+			<onMessage partnerLink="client" portType="tns:WorklistManager" operation="completeTask" variable="taskRequest">
+				<sequence>
+					<bpelx:exec xmlns:bpelx="http://schemas.oracle.com/bpel/extension" language="java" version="1.4">
+						<![CDATA[
+							try
+							{							
+					            Element  element =
+					                (Element)getVariableData("taskRequest","payload","/tns:task");
+					                 	// Lookup the worklist service.
+					                 						                 						            
+					            ITask task = TaskFactory.createFacade( element );
+					            
+					            Locator locator = getLocator( );
+					             
+        						IWorklistService worklist = 
+            						(IWorklistService)locator.lookupService( IWorklistService.SERVICE_NAME );  
+        
+						        // update the specific task the user has selected.
+						        worklist.completeTask( task );
+						        
+					        }
+					        catch( Exception e )
+					        {
+					            e.printStackTrace();
+					            addAuditTrailEntry(e);
+					        }
+    	  ]]>
+					</bpelx:exec>
+					<reply partnerLink="client" portType="tns:WorklistManager" operation="completeTask" variable="taskResponse"/>
+				</sequence>
+			</onMessage>
+		</pick>
+		<!-- Generate reply to synchronous request -->
+	</sequence>
+</process>

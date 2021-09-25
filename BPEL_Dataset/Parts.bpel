@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:PartsDataService="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/PartsDataService.wsdl" xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.bpel/parts/public" xmlns:ns1="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd" xmlns:ns3="urn:partlist" xmlns:types1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:linksAreTransitions="yes" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="Parts" suppressJoinFailure="yes" targetNamespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.bpel">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132923085865005775" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923085866005843" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923085866005843"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132923085866305855" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132923085866305855"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {287,568}" aei:objectId="132923085866705873" aei:type="SEQUENCE" bpmnElement="132923085866705873" isHorizontal="false">
+            <dc:Bounds height="568" width="287" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {123,25}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Get_Parts_List" aei:objectId="132923085866905875" aei:principal="" aei:type="RECEIVE" bpmnElement="132923085866905875">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {163,30}" aei:absoluteSize="DIM {70,13}" aei:anchor.location="1" aei:anchor.objectId="132923085866905875" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923085867005877" aei:relative.location="LOC {-35,47}" aei:text="Get_Parts_List" bpmnElement="132923085866905875label">
+               <dc:Bounds height="13" width="70" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {96,110}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Retrieve_Data_from_Database" aei:objectId="132923085867005879" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132923085867005879">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132923085867205885" aei:type="ASSIGN" bpmnElement="132923085867205885">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:SelectDataRequest xmlns:ns=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;   &lt;ns:tableName&gt;SampleParts&lt;/ns:tableName&gt;&#10;   &lt;ns:whereClause&gt;&lt;/ns:whereClause&gt;&#10;&lt;/ns:SelectDataRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923085867305887" aei:toPart="SelectDataRequest" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132923085867305887"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {96,188}" aei:absoluteSize="DIM {125,53}" aei:name="Set_Parts_Results_" aei:objectId="132923085867405889" aei:type="ASSIGN" bpmnElement="132923085867405889">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns2:PartsList xmlns:ns2=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd&quot;&#10;               xmlns:ns1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;   {&#10;   let $make  := $PartsRequest/ns2:make/text()&#10;   let $model := $PartsRequest/ns2:model/text()&#10;   let $year  := $PartsRequest/ns2:year/text()   &#10;for $part in $SelectDataResponse/ns1:part&#10;   where $part/ns1:make/text() = $make &#10;     and $part/ns1:model/text() = $model&#10;     and $part/ns1:year/text() = $year&#10;   return&#10;      &lt;ns2:part&gt;&#10;         &lt;ns2:make&gt;{ $part/ns1:make/text() }&lt;/ns2:make&gt;&#10;         &lt;ns2:model&gt;{ $part/ns1:model/text() }&lt;/ns2:model&gt;&#10;         &lt;ns2:year&gt;{ $part/ns1:year/text() }&lt;/ns2:year&gt;&#10;         &lt;ns2:category&gt;{ $part/ns1:category/text() }&lt;/ns2:category&gt;&#10;         &lt;ns2:sku&gt;{ $part/ns1:sku/text() }&lt;/ns2:sku&gt;&#10;         &lt;ns2:desc&gt;{ $part/ns1:desc/text() }&lt;/ns2:desc&gt;&#10;         &lt;ns2:partCost&gt;{ $part/ns1:partCost/text() }&lt;/ns2:partCost&gt;&#10;      &lt;/ns2:part&gt;&#10;   }&#10;&lt;/ns2:PartsList&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923085867405891" aei:toVariable="PartsResults" aei:type="ASSIGN_COPY" bpmnElement="132923085867405891"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,266}" aei:absoluteSize="DIM {267,222}" aei:name="If_No_Parts_are_returned" aei:objectId="132923085867505893" aei:type="IF" bpmnElement="132923085867505893" isHorizontal="false">
+            <dc:Bounds height="222" width="267" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {163,285}" aei:absoluteSize="DIM {128,13}" aei:anchor.location="4" aei:anchor.objectId="132923085867505893" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923085867605895" aei:relative.location="LOC {-54,-18}" aei:text="If_No_Parts_are_returned" bpmnElement="132923085867505893label">
+               <dc:Bounds height="13" width="128" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="count( $PartsResults/ns2:part ) = 0" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {25,326}" aei:absoluteSize="DIM {183,102}" aei:objectId="132923085867605897" aei:type="ELSE_IF" bpmnElement="132923085867505893ifDef">
+            <dc:Bounds height="102" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {121,345}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="132923085867605897" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923085868005905" aei:relative.location="LOC {-28,-13}" aei:text="If Condition" bpmnElement="132923085867505893ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {54,365}" aei:absoluteSize="DIM {125,53}" aei:name="Use_Default_Parts" aei:objectId="132923085867705899" aei:type="ASSIGN" bpmnElement="132923085867705899">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns2:PartsList xmlns:ns2=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd&quot;&#10;               xmlns:ns1=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;   {&#10;   let $make  := 'Chevy'&#10;   let $model := 'Vega'&#10;   let $year  := '1972'&#10;for $part in $SelectDataResponse/ns1:part&#10;   where $part/ns1:make/text() = $make &#10;     and $part/ns1:model/text() = $model&#10;     and $part/ns1:year/text() = $year&#10;   return&#10;      &lt;ns2:part&gt;&#10;      &lt;ns2:make&gt;{ $PartsRequest/ns2:make/text() }&lt;/ns2:make&gt;&#10;      &lt;ns2:model&gt;{ $PartsRequest/ns2:model/text() }&lt;/ns2:model&gt;&#10;      &lt;ns2:year&gt;{ $PartsRequest/ns2:year/text() }&lt;/ns2:year&gt;&#10;         &lt;ns2:category&gt;{ $part/ns1:category/text() }&lt;/ns2:category&gt;&#10;         &lt;ns2:sku&gt;{ $part/ns1:sku/text() }&lt;/ns2:sku&gt;&#10;         &lt;ns2:desc&gt;{ $part/ns1:desc/text() }&lt;/ns2:desc&gt;&#10;         &lt;ns2:partCost&gt;{ $part/ns1:partCost/text() }&lt;/ns2:partCost&gt;&#10;      &lt;/ns2:part&gt;&#10;   }&#10;&lt;/ns2:PartsList&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132923085867905903" aei:toVariable="PartsResults" aei:type="ASSIGN_COPY" bpmnElement="132923085867905903"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {44,355}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132923085867705901" aei:type="Sequence" bpmnElement="132923085867705899wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {233,326}" aei:absoluteSize="DIM {59,102}" aei:objectId="132923085868005907" aei:type="ELSE" bpmnElement="132923085867505893elseDef">
+            <dc:Bounds height="62" width="59" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {267,345}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="132923085868005907" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923085868205911" aei:relative.location="LOC {-9,-13}" aei:text="Else" bpmnElement="132923085867505893elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {252,355}" aei:absoluteSize="DIM {21,33}" aei:objectId="132923085868105909" aei:type="SEQUENCE" bpmnElement="132923085868105909" isHorizontal="false">
+            <dc:Bounds height="33" width="25" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {123,513}" aei:absoluteSize="DIM {70,60}" aei:name="Reply_With_Data" aei:objectId="132923085868305913" aei:type="REPLY" bpmnElement="132923085868305913">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {163,518}" aei:absoluteSize="DIM {84,13}" aei:anchor.location="1" aei:anchor.objectId="132923085868305913" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132923085868405915" aei:relative.location="LOC {-42,47}" aei:text="Reply_With_Data" bpmnElement="132923085868305913label">
+               <dc:Bounds height="13" width="84" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/Parts.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.wsdl"/>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/Parts.public.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.bpel/parts/public"/>
+   <bpel:import importType="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd" location="../runtimeParameters/PartsList.xml"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/PartsDataService.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/PartsDataService.wsdl"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="132923085866005843" aei:interface="ns1:PartsPortType" myRole="Provider" name="Process_Consumer" partnerLinkType="ns:PartsPortTypePLT"/>
+      <bpel:partnerLink aei:id="132923085866305855" name="PartsDataService" partnerLinkType="PartsDataService:PartsDataServicePL" partnerRole="process"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="ns2:PartsRequest" name="PartsRequest"/>
+      <bpel:variable element="ns2:PartsList" name="PartsResults"/>
+      <bpel:variable element="types1:SelectDataResponse" name="SelectDataResponse"/>
+   </bpel:variables>
+   <bpel:sequence aei:id="132923085866705873">
+      <bpel:receive aei:id="132923085866905875" createInstance="yes" name="Get_Parts_List" operation="GetPartsList" partnerLink="Process_Consumer" variable="PartsRequest"/>
+      <bpel:scope aei:implicit="true" name="Retrieve_Data_from_Database">
+         <bpel:variables>
+            <bpel:variable messageType="PartsDataService:SelectDataRequest" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="132923085867205885">
+               <bpel:copy aei:id="132923085867305887">
+                  <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:SelectDataRequest xmlns:ns="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+   <ns:tableName>SampleParts</ns:tableName>
+   <ns:whereClause></ns:whereClause>
+</ns:SelectDataRequest>]]></bpel:from>
+                  <bpel:to part="SelectDataRequest" variable="parameters"/>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:invoke aei:id="132923085867005879" inputVariable="parameters" name="Retrieve_Data_from_Database" operation="SelectData" outputVariable="SelectDataResponse" partnerLink="PartsDataService"/>
+         </bpel:sequence>
+      </bpel:scope>
+      <bpel:assign aei:id="132923085867405889" name="Set_Parts_Results_">
+         <bpel:copy aei:id="132923085867405891">
+            <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns2:PartsList xmlns:ns2="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd"
+               xmlns:ns1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+   {
+   let $make  := $PartsRequest/ns2:make/text()
+   let $model := $PartsRequest/ns2:model/text()
+   let $year  := $PartsRequest/ns2:year/text()   
+for $part in $SelectDataResponse/ns1:part
+   where $part/ns1:make/text() = $make 
+     and $part/ns1:model/text() = $model
+     and $part/ns1:year/text() = $year
+   return
+      <ns2:part>
+         <ns2:make>{ $part/ns1:make/text() }</ns2:make>
+         <ns2:model>{ $part/ns1:model/text() }</ns2:model>
+         <ns2:year>{ $part/ns1:year/text() }</ns2:year>
+         <ns2:category>{ $part/ns1:category/text() }</ns2:category>
+         <ns2:sku>{ $part/ns1:sku/text() }</ns2:sku>
+         <ns2:desc>{ $part/ns1:desc/text() }</ns2:desc>
+         <ns2:partCost>{ $part/ns1:partCost/text() }</ns2:partCost>
+      </ns2:part>
+   }
+</ns2:PartsList>]]></bpel:from>
+            <bpel:to variable="PartsResults"/>
+         </bpel:copy>
+      </bpel:assign>
+      <bpel:if aei:id="132923085867505893" name="If_No_Parts_are_returned">
+         <bpel:condition>count( $PartsResults/ns2:part ) = 0</bpel:condition>
+         <bpel:assign aei:id="132923085867705899" name="Use_Default_Parts">
+            <bpel:copy aei:id="132923085867905903">
+               <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns2:PartsList xmlns:ns2="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd"
+               xmlns:ns1="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+   {
+   let $make  := 'Chevy'
+   let $model := 'Vega'
+   let $year  := '1972'
+for $part in $SelectDataResponse/ns1:part
+   where $part/ns1:make/text() = $make 
+     and $part/ns1:model/text() = $model
+     and $part/ns1:year/text() = $year
+   return
+      <ns2:part>
+      <ns2:make>{ $PartsRequest/ns2:make/text() }</ns2:make>
+      <ns2:model>{ $PartsRequest/ns2:model/text() }</ns2:model>
+      <ns2:year>{ $PartsRequest/ns2:year/text() }</ns2:year>
+         <ns2:category>{ $part/ns1:category/text() }</ns2:category>
+         <ns2:sku>{ $part/ns1:sku/text() }</ns2:sku>
+         <ns2:desc>{ $part/ns1:desc/text() }</ns2:desc>
+         <ns2:partCost>{ $part/ns1:partCost/text() }</ns2:partCost>
+      </ns2:part>
+   }
+</ns2:PartsList>]]></bpel:from>
+               <bpel:to variable="PartsResults"/>
+            </bpel:copy>
+         </bpel:assign>
+         <bpel:else aei:id="132923085868005907">
+            <bpel:empty aei:id="132923085868105909" aei:implicit="yes"/>
+         </bpel:else>
+      </bpel:if>
+      <bpel:reply aei:id="132923085868305913" name="Reply_With_Data" operation="GetPartsList" partnerLink="Process_Consumer" variable="PartsResults"/>
+   </bpel:sequence>
+</bpel:process>

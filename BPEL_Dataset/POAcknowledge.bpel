@@ -1,0 +1,91 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Thu Feb 03 21:32:22 EST 2005
+  // Author:  ssondur
+  // Purpose: Asynchronous BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="POAcknowledge" targetNamespace="http://xmlns.oracle.com/POAcknowledge" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/file/WritePOA/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://xmlns.oracle.com/ias/pcbpel/NotificationService" xmlns:client="http://xmlns.oracle.com/POAcknowledge" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ns1="http://www.globalcompany.com/ns/sales" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/file/FileWrite/" xmlns:ns2="http://www.thiscompany.com/ns/sales" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink name="client" partnerLinkType="client:POAcknowledge" myRole="POAcknowledgeProvider" partnerRole="POAcknowledgeRequester" plext:wsdlloc="POAcknowledge.wsdl"/>
+    <partnerLink name="FileWriteAdapter" partnerRole="Write_role" partnerLinkType="ns3:Write_plt" plext:wsdlloc="FileWrite.wsdl" plext:inbport="Write_ptt" plext:inbound="false"/>
+    <partnerLink name="NotificationService" partnerRole="NotificationServiceProvider" partnerLinkType="ns5:NotificationServiceLink" plext:wsdlloc="NotificationService.wsdl"/>
+  </partnerLinks>
+  <variables>
+    <variable name="inputVariable" messageType="client:POAcknowledgeRequestMessage"/>
+    <variable name="outputVariable" messageType="client:POAcknowledgeResponseMessage"/>
+    <variable name="Invoke_FileWrite_Write_InputVariable" messageType="ns3:POAcknowledge_msg"/>
+  </variables>
+  <sequence name="main">
+    <receive name="receiveInput" partnerLink="client" portType="client:POAcknowledge" operation="initiate" variable="inputVariable" createInstance="yes"/>
+    <assign name="Transform_PO">
+      <bpelx:annotation>
+        <bpelx:pattern>transformation
+        </bpelx:pattern>
+      </bpelx:annotation>
+      <copy>
+        <from expression="ora:processXSLT('Transformation_1.xsl',bpws:getVariableData('inputVariable','payload'))"/>
+        <to variable="outputVariable" part="payload"/>
+      </copy>
+    </assign>
+    <assign name="Assign_FileWriteIn">
+      <copy>
+        <from variable="outputVariable" part="payload"/>
+        <to variable="Invoke_FileWrite_Write_InputVariable" part="POAcknowledge"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_FileWrite" partnerLink="FileWriteAdapter" portType="ns3:Write_ptt" operation="Write" inputVariable="Invoke_FileWrite_Write_InputVariable"/>
+    <scope name="NotificationService">
+      <variables>
+        <variable name="varNotificationReq" messageType="ns5:EmailNotificationRequest"/>
+        <variable name="varNotificationResponse" messageType="ns5:ArrayOfResponse"/>
+        <variable name="NotificationServiceFaultVariable" messageType="ns5:NotificationServiceErrorMessage"/>
+      </variables>
+      <faultHandlers>
+        <catch faultName="ns5:NotificationServiceFault" faultVariable="NotificationServiceFaultVariable">
+          <empty/>
+        </catch>
+      </faultHandlers>
+      <sequence>
+        <assign name="Assign">
+          <copy>
+            <from expression="string('Default')"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:FromAccountName"/>
+          </copy>
+          <copy>
+            <from expression="string('')"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:Bcc"/>
+          </copy>
+          <copy>
+            <from expression="string('')"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:Cc"/>
+          </copy>
+          <copy>
+            <from expression="concat(string('Dear Customer,  Your order number '),bpws:getVariableData('inputVariable','payload','/ns1:PurchaseOrder/ns1:ID'),string(' for customer '),bpws:getVariableData('inputVariable','payload','/ns1:PurchaseOrder/ns1:CustID'),string(' has been confirmed. The order status is &quot;'),bpws:getVariableData('inputVariable','payload','/ns1:PurchaseOrder/ns1:OrderInfo/ns1:OrderStatus'),string('&quot;.  Thanks for using Order Booking Application from Oracle BPEL Process Manager. Administrator.'))"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:Content/ns5:ContentBody"/>
+          </copy>
+          <copy>
+            <from expression="string('text/html')"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:Content/ns5:MimeType"/>
+          </copy>
+          <copy>
+            <from expression="string('')"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:ReplyToAddress"/>
+          </copy>
+          <copy>
+            <from expression="concat(string('Order Numnber '),bpws:getVariableData('inputVariable','payload','/ns1:PurchaseOrder/ns1:ID'))"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:Subject"/>
+          </copy>
+          <copy>
+            <from expression="bpws:getVariableData('inputVariable','payload','/ns1:PurchaseOrder/ns1:UserContact/ns1:EmailAddress')"/>
+            <to variable="varNotificationReq" part="EmailPayload" query="/EmailPayload/ns5:To"/>
+          </copy>
+        </assign>
+        <invoke name="InvokeNotificationService" partnerLink="NotificationService" portType="ns5:NotificationService" operation="sendEmailNotification" inputVariable="varNotificationReq" outputVariable="varNotificationResponse"/>
+      </sequence>
+    </scope>
+    <invoke name="callbackClient" partnerLink="client" portType="client:POAcknowledgeCallback" operation="onResult" inputVariable="outputVariable"/>
+  </sequence>
+</process>

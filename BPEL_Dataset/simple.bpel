@@ -1,0 +1,48 @@
+<process name="simple" 
+         targetNamespace="urn:simple:stockQuoteService"
+         xmlns:tns="urn:simple:stockQuoteService"
+         xmlns:tns-utils="urn:simple:stockQuoteService-Utils"
+         xmlns:sqp="http://tempuri.org/services/stockquote"
+         xmlns:sref="http://schemas.xmlsoap.org/ws/2002/07/service-reference/"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+
+  <partnerLinks>
+    <partnerLink name="caller" partnerLinkType="tns:StockQuoteSLT" myRole="service"/>
+    <partnerLink name="provider" partnerLinkType="tns-utils:StockQuoteSLT" partnerRole="service"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="request" messageType="tns:request"/>
+    <variable name="response" messageType="tns:response"/>
+    <variable name="invocationrequest" messageType="sqp:GetQuoteInput"/>
+    <variable name="invocationresponse" messageType="sqp:GetQuoteOutput"/>
+  </variables>
+
+  <sequence name="sequence">
+    <receive name="receive" partnerLink="caller" portType="tns:StockQuotePT" 
+             operation="gimmeQuote" variable="request"
+             createInstance="yes"/>
+    
+    <assign>
+      <copy>
+          <from variable="request" part="symbol"/>
+          <to variable="invocationrequest" part="symbol"/>
+      </copy>
+    </assign>
+
+    <invoke name="invoke" partnerLink="provider" portType="sqp:StockquotePT"
+            operation="getQuote" inputVariable="invocationrequest"
+            outputVariable="invocationresponse"/>
+
+    <assign>
+      <copy>
+          <from variable="invocationresponse" part="quote"/>
+          <to variable="response" part="quote"/>
+      </copy>
+    </assign>
+
+    <reply name="reply" partnerLink="caller" portType="tns:StockQuotePT" 
+           operation="gimmeQuote" variable="response"/>
+  </sequence>
+
+</process>

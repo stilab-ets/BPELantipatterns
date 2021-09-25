@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:loan="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd" xmlns:loanapp="http://www.example.org/loanApplication/" xmlns:loanmsg="http://docs.active-endpoints.com/sample/wsdl/loanMessages/2008/02/loanMessages.wsdl" xmlns:riskws="http://docs.active-endpoints.com/sample/wsdl/riskAssessment/2008/02/riskAssessment.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" name="riskAssessment" suppressJoinFailure="yes" targetNamespace="http://docs.active-endpoints.com/sample/bpel/riskassessment/2008/02/riskAssessment.bpel">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132830483095112721" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132830483095412767" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132830483095412767"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {920,702}" aei:objectId="132830483095612787" aei:type="SEQUENCE" bpmnElement="132830483095612787" isHorizontal="false">
+            <dc:Bounds height="702" width="920" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {440,25}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Receive_Credit_Information_Message" aei:objectId="132830483095712789" aei:principal="" aei:type="RECEIVE" bpmnElement="132830483095712789">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {477,30}" aei:absoluteSize="DIM {183,13}" aei:anchor.location="1" aei:anchor.objectId="132830483095712789" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483095812791" aei:relative.location="LOC {-91,47}" aei:text="Receive_Credit_Information_Message" bpmnElement="132830483095712789label">
+               <dc:Bounds height="13" width="183" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,110}" aei:absoluteSize="DIM {900,512}" aei:name="Assess_Risk" aei:objectId="132830483095812793" aei:type="IF" bpmnElement="132830483095812793" isHorizontal="false">
+            <dc:Bounds height="512" width="900" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {477,129}" aei:absoluteSize="DIM {58,13}" aei:anchor.location="4" aei:anchor.objectId="132830483095812793" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483095812795" aei:relative.location="LOC {-19,-18}" aei:text="Assess_Risk" bpmnElement="132830483095812793label">
+               <dc:Bounds height="13" width="58" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$creditInformation/loan:lastName = 'Assessfault'" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {25,170}" aei:absoluteSize="DIM {183,392}" aei:objectId="132830483095812797" aei:type="ELSE_IF" bpmnElement="132830483095812793ifDef">
+            <dc:Bounds height="187" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {121,189}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="132830483095812797" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483096012809" aei:relative.location="LOC {-28,-13}" aei:text="If Condition" bpmnElement="132830483095812793ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {44,199}" aei:absoluteSize="DIM {145,158}" aei:name="NameIsAssessfault" aei:objectId="132830483095812799" aei:type="SEQUENCE" bpmnElement="132830483095812799" isHorizontal="false">
+            <dc:Bounds height="163" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {54,209}" aei:absoluteSize="DIM {125,53}" aei:name="InduceFault" aei:objectId="132830483095912801" aei:type="ASSIGN" bpmnElement="132830483095912801">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:errorMessage xmlns:loan=&quot;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&quot;&gt;&#13;&#10;   &lt;loan:errorCode&gt;201&lt;/loan:errorCode&gt;&#13;&#10;   &lt;loan:reason&gt;No risk assessment for you&lt;/loan:reason&gt;&#13;&#10;&lt;/loan:errorMessage&gt;" aei:fromType="4" aei:objectId="132830483095912803" aei:toVariable="inducedFault" aei:type="ASSIGN_COPY" bpmnElement="132830483095912803"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {81,287}" aei:absoluteSize="DIM {70,60}" aei:name="ReplyWithFault" aei:objectId="132830483096012805" aei:type="REPLY" bpmnElement="132830483096012805">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {121,292}" aei:absoluteSize="DIM {73,13}" aei:anchor.location="1" aei:anchor.objectId="132830483096012805" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483096012807" aei:relative.location="LOC {-36,47}" aei:text="ReplyWithFault" bpmnElement="132830483096012805label">
+               <dc:Bounds height="13" width="73" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {233,170}" aei:absoluteSize="DIM {692,392}" aei:objectId="132830483096012811" aei:type="ELSE" bpmnElement="132830483095812793elseDef">
+            <dc:Bounds height="392" width="692" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {581,189}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="132830483096012811" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483097112875" aei:relative.location="LOC {-9,-13}" aei:text="Else" bpmnElement="132830483095812793elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {262,209}" aei:absoluteSize="DIM {634,343}" aei:objectId="132830483096112813" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132830483096112813" isHorizontal="false">
+            <dc:Bounds height="343" width="634" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {581,214}" aei:absoluteSize="DIM {0,13}" aei:anchor.location="11" aei:anchor.objectId="132830483096112813" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483096312833" aei:relative.location="LOC {0,5}" bpmnElement="132830483096112813label">
+               <dc:Bounds height="13" width="0" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {272,219}" aei:absoluteSize="DIM {619,327}" aei:objectId="132830483096412835" aei:type="SEQUENCE" bpmnElement="132830483096412835" isHorizontal="false">
+            <dc:Bounds height="327" width="619" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {282,229}" aei:absoluteSize="DIM {599,222}" aei:name="Assign_Risk" aei:objectId="132830483096512837" aei:type="IF" bpmnElement="132830483096512837" isHorizontal="false">
+            <dc:Bounds height="222" width="599" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {581,243}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="132830483096512837" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483096512839" aei:relative.location="LOC {-18,-18}" aei:text="Assign_Risk" bpmnElement="132830483096512837label">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="($creditInformation/loan:otherInfo &gt;= '6') and ($creditInformation/loan:amountRequested &gt;= '50000')" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {282,289}" aei:absoluteSize="DIM {183,102}" aei:objectId="132830483096512841" aei:type="ELSE_IF" bpmnElement="132830483096512837ifDef">
+            <dc:Bounds height="102" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {373,303}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="132830483096512841" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483096712849" aei:relative.location="LOC {-28,-13}" aei:text="If Condition" bpmnElement="132830483096512837ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {311,328}" aei:absoluteSize="DIM {125,53}" aei:name="High_if_rate__6_and_amount__50000" aei:objectId="132830483096612843" aei:type="ASSIGN" bpmnElement="132830483096612843">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:assessmentInfo xmlns:loan=&quot;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&quot;&gt;&#13;&#10;   &lt;loan:riskAssessment&gt;high&lt;/loan:riskAssessment&gt;&#13;&#10;&lt;/loan:assessmentInfo&gt;" aei:fromType="4" aei:objectId="132830483096712847" aei:toVariable="riskAssessment" aei:type="ASSIGN_COPY" bpmnElement="132830483096712847"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {301,318}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830483096612845" aei:type="Sequence" bpmnElement="132830483096612843wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="($creditInformation/loan:otherInfo &lt;= '8') and ($creditInformation/loan:amountRequested &lt;= '5000')" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {490,289}" aei:absoluteSize="DIM {183,102}" aei:objectId="132830483096712851" aei:type="ELSE_IF" bpmnElement="132830483096712851">
+            <dc:Bounds height="102" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {581,303}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="132830483096712851" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483096912859" aei:relative.location="LOC {-28,-13}" aei:text="If Condition" bpmnElement="132830483096712851label">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {519,328}" aei:absoluteSize="DIM {125,53}" aei:name="Low_if_rate__8_and_amount__5000" aei:objectId="132830483096812853" aei:type="ASSIGN" bpmnElement="132830483096812853">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:assessmentInfo xmlns:loan=&quot;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&quot;&gt;&#13;&#10;   &lt;loan:riskAssessment&gt;low&lt;/loan:riskAssessment&gt;&#13;&#10;&lt;/loan:assessmentInfo&gt;" aei:fromType="4" aei:objectId="132830483096812857" aei:toVariable="riskAssessment" aei:type="ASSIGN_COPY" bpmnElement="132830483096812857"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {509,318}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830483096812855" aei:type="Sequence" bpmnElement="132830483096812853wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {698,289}" aei:absoluteSize="DIM {183,102}" aei:objectId="132830483096912861" aei:type="ELSE" bpmnElement="132830483096512837elseDef">
+            <dc:Bounds height="102" width="183" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {789,303}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="132830483096912861" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483097112869" aei:relative.location="LOC {-9,-13}" aei:text="Else" bpmnElement="132830483096512837elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {727,328}" aei:absoluteSize="DIM {125,53}" aei:name="OtherReview" aei:objectId="132830483096912863" aei:type="ASSIGN" bpmnElement="132830483096912863">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromLiteral="&lt;loan:assessmentInfo xmlns:loan=&quot;http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd&quot;&gt;&#13;&#10;   &lt;loan:riskAssessment&gt;review&lt;/loan:riskAssessment&gt;&#13;&#10;&lt;/loan:assessmentInfo&gt;" aei:fromType="4" aei:objectId="132830483097012867" aei:toVariable="riskAssessment" aei:type="ASSIGN_COPY" bpmnElement="132830483097012867"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {717,318}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830483096912865" aei:type="Sequence" bpmnElement="132830483096912863wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {546,476}" aei:absoluteSize="DIM {70,60}" aei:name="ReplyWithAssessment" aei:objectId="132830483097112871" aei:type="REPLY" bpmnElement="132830483097112871">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {581,476}" aei:absoluteSize="DIM {106,13}" aei:anchor.location="1" aei:anchor.objectId="132830483097112871" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830483097112873" aei:relative.location="LOC {-53,47}" aei:text="ReplyWithAssessment" bpmnElement="132830483097112871label">
+               <dc:Bounds height="13" width="106" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {252,199}" aei:absoluteSize="DIM {654,363}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830483096112831" aei:type="Sequence" bpmnElement="132830483096112813wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="368" width="659" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {440,647}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="132830483097112877" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="132830483097112877">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/riskAssessment.wsdl" namespace="http://docs.active-endpoints.com/sample/wsdl/riskAssessment/2008/02/riskAssessment.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/loanRequest.xsd" namespace="http://schemas.active-endpoints.com/sample/LoanRequest/2008/02/loanRequest.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/loanMessages.wsdl" namespace="http://docs.active-endpoints.com/sample/wsdl/loanMessages/2008/02/loanMessages.wsdl"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="132830483095412767" myRole="assessor" name="RiskAssessment" partnerLinkType="riskws:RiskAssessmentLT"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="loan:loanProcessRequest" name="creditInformation"/>
+      <bpel:variable element="loan:riskAssessmentResponse" name="riskAssessment"/>
+      <bpel:variable element="loan:errorMessage" name="inducedFault">
+         <bpel:from>
+            <bpel:literal>
+               <loan:errorMessage>
+   <loan:errorCode>1</loan:errorCode>
+   <loan:reason>default init value</loan:reason>
+</loan:errorMessage>
+            </bpel:literal>
+         </bpel:from>
+      </bpel:variable>
+   </bpel:variables>
+   <bpel:sequence aei:id="132830483095612787">
+      <bpel:receive aei:id="132830483095712789" createInstance="yes" name="Receive_Credit_Information_Message" operation="check" partnerLink="RiskAssessment" variable="creditInformation"/>
+      <bpel:if aei:id="132830483095812793" name="Assess_Risk">
+         <bpel:condition>$creditInformation/loan:lastName = 'Assessfault'</bpel:condition>
+         <bpel:sequence aei:id="132830483095812799" name="NameIsAssessfault">
+            <bpel:assign aei:id="132830483095912801" name="InduceFault">
+               <bpel:copy aei:id="132830483095912803">
+                  <bpel:from>
+                     <bpel:literal>
+                        <loan:errorMessage>
+   <loan:errorCode>201</loan:errorCode>
+   <loan:reason>No risk assessment for you</loan:reason>
+</loan:errorMessage>
+                     </bpel:literal>
+                  </bpel:from>
+                  <bpel:to variable="inducedFault"/>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:reply aei:id="132830483096012805" faultName="riskws:loanProcessFault" name="ReplyWithFault" operation="check" partnerLink="RiskAssessment" variable="inducedFault"/>
+         </bpel:sequence>
+         <bpel:else aei:id="132830483096012811">
+            <bpel:scope aei:id="132830483096112813">
+               <bpel:sequence aei:id="132830483096412835">
+                  <bpel:if aei:id="132830483096512837" name="Assign_Risk">
+                     <bpel:condition>($creditInformation/loan:otherInfo &gt;= '6') and ($creditInformation/loan:amountRequested &gt;= '50000')</bpel:condition>
+                     <bpel:assign aei:id="132830483096612843" name="High_if_rate__6_and_amount__50000">
+                        <bpel:copy aei:id="132830483096712847">
+                           <bpel:from>
+                              <bpel:literal>
+                                 <loan:assessmentInfo>
+   <loan:riskAssessment>high</loan:riskAssessment>
+</loan:assessmentInfo>
+                              </bpel:literal>
+                           </bpel:from>
+                           <bpel:to variable="riskAssessment"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:elseif aei:id="132830483096712851">
+                        <bpel:condition>($creditInformation/loan:otherInfo &lt;= '8') and ($creditInformation/loan:amountRequested &lt;= '5000')</bpel:condition>
+                        <bpel:assign aei:id="132830483096812853" name="Low_if_rate__8_and_amount__5000">
+                           <bpel:copy aei:id="132830483096812857">
+                              <bpel:from>
+                                 <bpel:literal>
+                                    <loan:assessmentInfo>
+   <loan:riskAssessment>low</loan:riskAssessment>
+</loan:assessmentInfo>
+                                 </bpel:literal>
+                              </bpel:from>
+                              <bpel:to variable="riskAssessment"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                     </bpel:elseif>
+                     <bpel:else aei:id="132830483096912861">
+                        <bpel:assign aei:id="132830483096912863" name="OtherReview">
+                           <bpel:copy aei:id="132830483097012867">
+                              <bpel:from>
+                                 <bpel:literal>
+                                    <loan:assessmentInfo>
+   <loan:riskAssessment>review</loan:riskAssessment>
+</loan:assessmentInfo>
+                                 </bpel:literal>
+                              </bpel:from>
+                              <bpel:to variable="riskAssessment"/>
+                           </bpel:copy>
+                        </bpel:assign>
+                     </bpel:else>
+                  </bpel:if>
+                  <bpel:reply aei:id="132830483097112871" name="ReplyWithAssessment" operation="check" partnerLink="RiskAssessment" variable="riskAssessment"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:else>
+      </bpel:if>
+      <bpel:empty aei:id="132830483097112877"/>
+   </bpel:sequence>
+</bpel:process>

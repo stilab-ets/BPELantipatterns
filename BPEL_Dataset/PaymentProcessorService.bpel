@@ -1,0 +1,186 @@
+<!-- PaymentProcessorService BPEL Process -->
+<process name="PaymentProcessorService" 
+      targetNamespace="http://services.otn.com" 
+      suppressJoinFailure="yes" 
+      xmlns:task="http://services.oracle.com/bpel/task" 
+      xmlns:tns="http://services.otn.com" 
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+      xmlns:payment="http://payment.org"
+      xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+      xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+	<!-- 
+    Processes an XML payment request document and
+    asynchronously returns a digital receipt.
+     
+    InsufficientFundException 
+             if  amount > 500
+     
+    TransferRefusedException
+             if user reject fund transfer 
+     -->
+	<partnerLinks>
+		<!--
+        The 'client' role represents the requester of this service. It is 
+        used for callback. The location and correlation information associated
+        with the client role are automatically set using WS-Addressing.
+        -->
+		<partnerLink name="client" partnerLinkType="tns:PaymentProcessorService" myRole="PaymentProcessorServiceProvider" partnerRole="PaymentProcessorServiceRequester"/>
+		<partnerLink name="approvalManager" partnerLinkType="task:TaskManager" partnerRole="TaskManager" myRole="TaskManagerRequester"/>
+	</partnerLinks>
+	<!-- List of messages and XML documents used as part of this 
+         BPEL process 
+         -->
+	<variables>
+		<!-- Reference to the message passed as input during initiation -->
+		<variable name="input" messageType="tns:PaymentProcessorServiceRequestMessage"/>
+		<!-- Reference to the message that will be sent back to the 
+             requestor during callback
+             -->
+		<variable name="output" messageType="tns:PaymentProcessorServiceResultMessage"/>
+		<!-- error messages of Payment Processor-->
+		<variable name="transferRefusedException" messageType="tns:TransferRefusedExceptionPaymentProcessorServiceMessage"/>
+		<variable name="insufficientFundException" messageType="tns:InsufficientFundExceptionPaymentProcessorServiceMessage"/>
+		<variable name="conclusion" type="xsd:string"/>
+	</variables>
+	<!-- Orchestration Logic -->
+	<sequence>
+		<!-- Receive input from requestor. 
+             Note: This maps to operation defined in PaymentProcessorService.wsdl 
+             -->
+		<receive name="receiveInput" partnerLink="client" portType="tns:PaymentProcessorService" operation="initiate" variable="input" createInstance="yes"/>
+		<!-- switch depends on the input value -->
+		<switch>
+			<case condition="bpws:getVariableData('input', 'payload','/tns:paymentRequest/payment:amount') &gt; 500">
+				<sequence>
+					<assign>
+						<copy>
+							<from expression="'Required amount is bigger than 500'"/>
+							<to variable="insufficientFundException" part="payload" query="/tns:insufficientFundException/payment:error"/>
+						</copy>
+						<copy>
+							<from variable="input" part="payload" query="/tns:paymentRequest"/>
+							<to variable="insufficientFundException" part="payload" query="/tns:insufficientFundException/payment:request"/>
+						</copy>
+					</assign>
+					<invoke name="replyOutput" partnerLink="client" portType="tns:PaymentProcessorServiceCallback" operation="onInsufficientFundException" inputVariable="insufficientFundException"/>
+					<terminate/>
+				</sequence>
+			</case>
+			<otherwise>
+				<empty/>
+			</otherwise>
+		</switch>
+		<scope name="approvePayment" variableAccessSerializable="no">
+			<variables>
+				<variable name="approvalTask" element="task:task"/>
+			</variables>
+			<sequence>
+				<assign name="prepareTask">
+					<!-- Assign 'title' to task request -->
+					<copy>
+						<from expression="string( 'Process Payment Request' )"/>
+						<to variable="approvalTask" query="/task:task/task:title"/>
+					</copy>
+					<!-- Assign 'creator' to task request -->
+					<copy>
+						<from expression="string( 'PaymentProcessorService' )"/>
+						<to variable="approvalTask" query="/task:task/task:creator"/>
+					</copy>
+					<!-- Assign 'assignee' to task request -->
+					<copy>
+						<from expression="string( 'demo@paymentprocessor.com' )"/>
+						<to variable="approvalTask" query="/task:task/task:assignee"/>
+					</copy>
+					<!-- Assign 'duration' to task request -->
+					<copy>
+						<from expression="string( 'PT3H' )"/>
+						<to variable="approvalTask" query="/task:task/task:duration"/>
+					</copy>
+					<!-- Assign 'priority' to task request -->
+					<copy>
+						<from expression="3"/>
+						<to variable="approvalTask" query="/task:task/task:priority"/>
+					</copy>
+					<!-- Assign 'attachment' to task request -->
+					<copy>
+						<from variable="input" part="payload" query="/tns:paymentRequest"/>
+						<to variable="approvalTask" query="/task:task/task:attachment"/>
+					</copy>
+				</assign>
+				<scope name="approvalUserInteraction" variableAccessSerializable="no">
+					<variables>
+						<variable name="taskRequest" messageType="task:taskMessage"/>
+						<variable name="taskResponse" messageType="task:taskMessage"/>
+					</variables>
+					<sequence>
+						<!-- Assign task document to task message -->
+						<assign name="setPayload">
+							<copy>
+								<from variable="approvalTask"/>
+								<to variable="taskRequest" part="payload"/>
+							</copy>
+						</assign>
+						<!--  initiate task -->
+						<invoke name="initiateTask" partnerLink="approvalManager" portType="task:TaskManager" operation="initiateTask" inputVariable="taskRequest"/>
+						<!--  Receive the outcome of the task -->
+						<receive name="receiveTaskResult" partnerLink="approvalManager" portType="task:TaskManagerCallback" operation="onTaskResult" variable="taskResponse"/>
+						<!-- Read task document from task message -->
+						<assign name="readPayload">
+							<copy>
+								<from variable="taskResponse" part="payload"/>
+								<to variable="approvalTask"/>
+							</copy>
+						</assign>
+					</sequence>
+				</scope>
+				<assign>
+					<copy>
+						<from variable="approvalTask" query="/task:task/task:conclusion"/>
+						<to variable="conclusion"/>
+					</copy>
+					<copy>
+						<from variable="approvalTask" query="/task:task/task:attachment"/>
+						<to variable="output" part="payload" query="/tns:digitalReceipt/payment:request"/>
+					</copy>
+				</assign>
+			</sequence>
+		</scope>
+		<!-- switch depends on the task conclution value -->
+		<switch>
+			<case condition="bpws:getVariableData('conclusion') = 'Approved'">
+				<sequence>
+					<assign>
+						<copy>
+							<from expression="'Approved'"/>
+							<to variable="output" part="payload" query="/tns:digitalReceipt/payment:status"/>
+						</copy>
+						<copy>
+							<from expression="'11111111'"/>
+							<to variable="output" part="payload" query="/tns:digitalReceipt/payment:confirmationID"/>
+						</copy>
+					</assign>
+					<!-- Asynchronous callback to the requester.
+                         Note: the callback location and correlation id is transparently handled 
+                         using WS-addressing.
+                         -->
+					<invoke name="replyOutput2" partnerLink="client" portType="tns:PaymentProcessorServiceCallback" operation="onResult" inputVariable="output"/>
+				</sequence>
+			</case>
+			<otherwise>
+				<sequence>
+					<assign>
+						<copy>
+							<from variable="conclusion"/>
+							<to variable="transferRefusedException" part="payload" query="/tns:transferRefusedException/payment:error"/>
+						</copy>
+						<copy>
+							<from variable="input" part="payload" query="/tns:paymentRequest"/>
+							<to variable="transferRefusedException" part="payload" query="/tns:transferRefusedException/payment:request"/>
+						</copy>
+					</assign>
+					<invoke name="replyOutput3" partnerLink="client" portType="tns:PaymentProcessorServiceCallback" operation="onTransferRefusedException" inputVariable="transferRefusedException"/>
+				</sequence>
+			</otherwise>
+		</switch>
+	</sequence>
+</process>

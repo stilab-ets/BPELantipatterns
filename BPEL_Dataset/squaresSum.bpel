@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (C) 2012-2015 Alvaro Cortijo-García, Antonio García-Domínguez
+
+   This file is part of the SquaresSum composition in the UCASE
+   WS-BPEL composition repository.
+
+   This program is free software: you can redistribute it and/or
+   modify it under the terms of the GNU General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<process xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:tns="http://enterprise.netbeans.org/bpel/SquaresSum/squaresSum" xmlns:ns0="http://xml.netbeans.org/schema/squaresSum" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="squaresSum" targetNamespace="http://enterprise.netbeans.org/bpel/SquaresSum/squaresSum">
+
+    <import namespace="http://xml.netbeans.org/schema/squaresSum" location="squaresSum.xsd" importType="http://www.w3.org/2001/XMLSchema"></import>
+    <import importType="http://schemas.xmlsoap.org/wsdl/" location="squaresSum.wsdl" namespace="http://j2ee.netbeans.org/wsdl/squaresSum"/>
+  <partnerLinks>
+    <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" myRole="squaresSumPortTypeRole" name="client" partnerLinkType="tns:squaresSum"/>
+  </partnerLinks>
+  <variables>
+    <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" messageType="tns:squaresSumOperationResponse" name="output"/>
+    <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" messageType="tns:squaresSumOperationRequest" name="input"/>
+    <variable name="currentResult" type="xsd:unsignedInt"/>
+    <variable name="newItem" element="ns0:element">
+        <from>
+            <literal xml:space="preserve">
+                <tns:element xmlns:tns="http://xml.netbeans.org/schema/squaresSum" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">0</tns:element>
+            </literal>
+        </from>
+    </variable>
+  </variables>
+  <sequence>
+    <receive xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" createInstance="yes" name="ReceiveRequest" operation="squaresSumOperation" partnerLink="client" portType="tns:squaresSumPortType" variable="input"/>
+    <assign name="InitializeEmptyResult">
+      <copy>
+        <from>
+          <literal>
+            <ns0:squaresSumResponse>
+              <ns0:sum>0</ns0:sum>
+              <ns0:elements>
+                <ns0:element>0</ns0:element>
+              </ns0:elements>
+            </ns0:squaresSumResponse>
+          </literal>
+        </from>
+        <to part="response" variable="output"/>
+      </copy>
+    </assign>
+    <forEach counterName="i" name="GenerateResults" parallel="yes">
+      <startCounterValue>1</startCounterValue>
+      <finalCounterValue>number($input.request/ns0:n)</finalCounterValue>
+      <scope isolated="yes" name="ResultLoopBody">
+        <sequence>
+          <assign name="SquareElement">
+            <copy>
+              <from>$i * $i</from>
+              <to variable="currentResult"/>
+            </copy>
+          </assign>
+          <assign name="IncreaseSum">
+            <copy>
+              <from>$currentResult + $output.response/ns0:sum</from>
+              <to>$output.response/ns0:sum</to>
+            </copy>
+          </assign>
+          <assign name="AddResult">
+            <copy>
+               <from variable="currentResult"></from>
+               <to variable="newItem"></to>
+            </copy>
+            <copy>
+              <from>
+              	<![CDATA[bpel:doXslTransform("project:/xslt/addElement.xsl", $output.response/ns0:elements, "newItem", $newItem)]]>
+              </from>
+              <to>$output.response/ns0:elements</to>
+            </copy>
+          </assign>
+        </sequence>
+      </scope>
+    </forEach>
+    <reply xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" name="SendResult" operation="squaresSumOperation" partnerLink="client" portType="tns:squaresSumPortType" variable="output"/>
+  </sequence>
+</process>

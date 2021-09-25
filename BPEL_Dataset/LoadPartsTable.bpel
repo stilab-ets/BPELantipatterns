@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:abx="http://www.activebpel.org/bpel/extension" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:logging="http://docs.active-endpoints/wsdl/logging/2009/05/logging.wsdl" xmlns:ns="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.bpel/parts/public" xmlns:ns1="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.wsdl" xmlns:ns2="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd" xmlns:ns3="urn:partlist" xmlns:ns4="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/PartsDataService.wsdl" xmlns:ns5="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd" xmlns:ns6="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/LoadPartsTableService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:linksAreTransitions="yes" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="LoadPartsTable" suppressJoinFailure="yes" targetNamespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/LoadPartsTable.bpel">
+   <bpmndi:BPMNDiagram xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132830464522211567" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132830464522711643" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132830464522711643"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132830464522811655" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132830464522811655"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="132830464522911667" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="132830464522911667"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {382,644}" aei:objectId="132830464523111689" aei:type="SEQUENCE" bpmnElement="132830464523111689" isHorizontal="false">
+            <dc:Bounds height="649" width="387" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {171,25}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="LoadTable" aei:objectId="132830464523211691" aei:principal="" aei:type="RECEIVE" bpmnElement="132830464523211691">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {117,30}" aei:absoluteSize="DIM {49,13}" aei:anchor.location="1" aei:anchor.objectId="132830464523211691" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830464523211693" aei:relative.location="LOC {-24,47}" aei:text="LoadTable" bpmnElement="132830464523211691label">
+               <dc:Bounds height="13" width="49" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,110}" aei:absoluteSize="DIM {362,169}" aei:name="Drop_Table" aei:objectId="132830464523211695" aei:showFaultHandler="true" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132830464523211695" isHorizontal="false">
+            <dc:Bounds height="169" width="362" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {117,115}" aei:absoluteSize="DIM {55,13}" aei:anchor.location="11" aei:anchor.objectId="132830464523211695" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830464523411713" aei:relative.location="LOC {-27,5}" aei:text="Drop_Table" bpmnElement="132830464523211695label">
+               <dc:Bounds height="13" width="55" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {45,130}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="DropTable" aei:objectId="132830464523811731" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132830464523811731">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132830464524011739" aei:type="ASSIGN" bpmnElement="132830464524011739">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$LoadTableRequest/ns5:tableName" aei:fromType="3" aei:objectId="132830464524011741" aei:toPart="DropTableRequest" aei:toQuery="ns5:tableName" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132830464524011741"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {35,120}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830464523811733" aei:type="Sequence" bpmnElement="132830464523811731wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {217,120}" aei:absoluteSize="DIM {165,153}" aei:catchAllFaults="true" aei:constraint="" aei:expanded="true" aei:expandedSize="DIM {-1,-1}" aei:objectId="132830464523611715" aei:type="CATCH_ALL" bpmnElement="132830464523611715" isHorizontal="false">
+            <dc:Bounds height="153" width="165" x="187" y="5"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {117,120}" aei:absoluteSize="DIM {24,13}" aei:anchor.location="0" aei:anchor.objectId="132830464523611715" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830464523811729" aei:relative.location="LOC {-12,0}" aei:text="Error" bpmnElement="132830464523611715label">
+               <dc:Bounds height="13" width="24" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {237,190}" aei:absoluteSize="DIM {125,53}" aei:name="send" aei:objectId="132830464523611717" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132830464523611717">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132830464523811725" aei:type="ASSIGN" bpmnElement="132830464523811725">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns:logWriteMessage xmlns:ns=&quot;http://schemas.active-endpoints.com/logging/2009/05/logging.xsd&quot;&gt;&#10;   &lt;ns:message&gt;drop table faulted&lt;/ns:message&gt;&#10;&lt;/ns:logWriteMessage&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132830464523811727" aei:toPart="logPart" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132830464523811727"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {227,180}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830464523711719" aei:type="Sequence" bpmnElement="132830464523611717wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {144,304}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="CreateTable" aei:objectId="132830464524011743" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132830464524011743">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132830464524111749" aei:type="ASSIGN" bpmnElement="132830464524111749">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$LoadTableRequest/ns5:tableName" aei:fromType="3" aei:objectId="132830464524111751" aei:toPart="CreateTableRequest" aei:toQuery="ns5:tableName" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132830464524111751"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {144,382}" aei:absoluteSize="DIM {125,53}" aei:name="Get_Parts_Data" aei:objectId="132830464524211753" aei:type="ASSIGN" bpmnElement="132830464524211753">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="abx:getCatalogResource(&quot;project:/CommonSampleServices/runtimeParameters/PartsList.xml&quot;)" aei:fromType="3" aei:objectId="132830464524211755" aei:toVariable="PartsList" aei:type="ASSIGN_COPY" bpmnElement="132830464524211755"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {126,460}" aei:absoluteSize="DIM {160,104}" aei:finalExpression="count( $PartsList/ns2:part )" aei:name="Insert_Parts" aei:objectId="132830464524211757" aei:startExpression="1" aei:type="FOR_EACH" bpmnElement="132830464524211757">
+            <dc:Bounds height="104" width="160" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {127,550}" aei:absoluteSize="DIM {60,13}" aei:anchor.location="11" aei:anchor.objectId="132830464524211757" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830464524311759" aei:relative.location="LOC {0,-6}" aei:text="Insert_Parts" bpmnElement="132830464524211757label">
+               <dc:Bounds height="13" width="60" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {131,465}" aei:absoluteSize="DIM {150,79}" aei:name="Insert_Parts" aei:objectId="132830464524311761" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132830464524311761" isHorizontal="false">
+            <dc:Bounds height="88" width="160" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {146,480}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="InsertData" aei:objectId="132830464524611781" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="132830464524611781">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132830464524811789" aei:type="ASSIGN" bpmnElement="132830464524811789">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&lt;ns5:InsertDataRequest xmlns:ns5=&quot;http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd&quot;&gt;&#10;   &lt;ns5:make&gt;{ $PartsList/ns2:part[ $counter ]/ns2:make/text() }&lt;/ns5:make&gt;&#10;   &lt;ns5:model&gt;{ $PartsList/ns2:part[ $counter ]/ns2:model/text() }&lt;/ns5:model&gt;&#10;   &lt;ns5:year&gt;{ $PartsList/ns2:part[ $counter ]/ns2:year/text() }&lt;/ns5:year&gt;&#10;   &lt;ns5:category&gt;{ $PartsList/ns2:part[ $counter ]/ns2:category/text() }&lt;/ns5:category&gt;&#10;   &lt;ns5:sku&gt;{ $PartsList/ns2:part[ $counter ]/ns2:sku/text() }&lt;/ns5:sku&gt;&#10;   &lt;ns5:desc&gt;{ $PartsList/ns2:part[ $counter ]/ns2:desc/text() }&lt;/ns5:desc&gt;&#10;   &lt;ns5:partCost&gt;{ $PartsList/ns2:part[ $counter ]/ns2:partCost/text() }&lt;/ns5:partCost&gt;&#10;&lt;/ns5:InsertDataRequest&gt;" aei:fromLanguage="urn:active-endpoints:expression-language:xquery1.0" aei:fromType="3" aei:objectId="132830464524911791" aei:toPart="InsertDataRequest" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132830464524911791"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {136,470}" aei:absoluteSize="DIM {145,73}" aei:actySimState="0" aei:bpelName="" aei:joinConditionComp="" aei:objectId="132830464524611783" aei:type="Sequence" bpmnElement="132830464524611781wrappingSequence" isHorizontal="false">
+            <dc:Bounds height="78" width="150" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {171,589}" aei:absoluteSize="DIM {70,60}" aei:name="LoadTable-Reply" aei:objectId="132830464524911793" aei:type="REPLY" bpmnElement="132830464524911793">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {117,584}" aei:absoluteSize="DIM {80,13}" aei:anchor.location="1" aei:anchor.objectId="132830464524911793" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132830464525011795" aei:relative.location="LOC {-40,47}" aei:text="LoadTable-Reply" bpmnElement="132830464524911793label">
+               <dc:Bounds height="13" width="80" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="132830464525011801" aei:type="ASSIGN" bpmnElement="132830464525011801">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$CreateTableResponse.CreateTableResponse/." aei:fromType="3" aei:objectId="132830464525011803" aei:toPart="LoadTableResponse" aei:toQuery="." aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="132830464525011803"/>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+   </bpel:extensions>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/Parts.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/01/Parts.wsdl"/>
+   <bpel:import importType="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd" location="../runtimeParameters/PartsList.xml"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/PartsDataService.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/PartsDataService.wsdl"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/LoadPartsTableService.wsdl" namespace="http://www.active-endpoints.com/demo/bpel/Parts/2010/07/LoadPartsTableService.wsdl"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/PartsDataService.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/Parts.xsd" namespace="http://schemas.active-endpoints.com/demo/schema/Parts/2010/01/Parts.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://docs.active-endpoints/wsdl/logging/2009/05/logging.wsdl"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="132830464522711643" name="PartsDataService" partnerLinkType="ns4:PartsDataServicePL" partnerRole="process"/>
+      <bpel:partnerLink aei:id="132830464522811655" myRole="process" name="Process_Consumer" partnerLinkType="ns6:LoadPartsTableServicePL"/>
+      <bpel:partnerLink aei:id="132830464522911667" name="LoggingService" partnerLinkType="logging:loggingPLT" partnerRole="sender"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="ns2:PartsList" name="PartsList"/>
+      <bpel:variable element="ns5:DropTableResponse" name="DropTableResponse"/>
+      <bpel:variable element="ns5:InsertDataResponse" name="InsertDataResponse"/>
+      <bpel:variable element="ns5:LoadTableRequest" name="LoadTableRequest"/>
+      <bpel:variable messageType="ns4:CreateTableResponse" name="CreateTableResponse"/>
+   </bpel:variables>
+   <bpel:sequence aei:id="132830464523111689">
+      <bpel:receive aei:id="132830464523211691" createInstance="yes" name="LoadTable" operation="LoadTable" partnerLink="Process_Consumer" variable="LoadTableRequest"/>
+      <bpel:scope aei:id="132830464523211695" name="Drop_Table">
+         <bpel:faultHandlers>
+            <bpel:catchAll aei:id="132830464523611715">
+               <bpel:scope aei:implicit="true" name="send">
+                  <bpel:variables>
+                     <bpel:variable messageType="logging:logMessage" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="132830464523811725">
+                        <bpel:copy aei:id="132830464523811727">
+                           <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns:logWriteMessage xmlns:ns="http://schemas.active-endpoints.com/logging/2009/05/logging.xsd">
+   <ns:message>drop table faulted</ns:message>
+</ns:logWriteMessage>]]></bpel:from>
+                           <bpel:to part="logPart" variable="parameters"/>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:invoke aei:id="132830464523611717" inputVariable="parameters" name="send" operation="send" partnerLink="LoggingService"/>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:catchAll>
+         </bpel:faultHandlers>
+         <bpel:scope aei:implicit="true" name="DropTable">
+            <bpel:variables>
+               <bpel:variable messageType="ns4:DropTableRequest" name="parameters"/>
+            </bpel:variables>
+            <bpel:sequence>
+               <bpel:assign aei:id="132830464524011739">
+                  <bpel:copy aei:id="132830464524011741">
+                     <bpel:from>$LoadTableRequest/ns5:tableName</bpel:from>
+                     <bpel:to part="DropTableRequest" variable="parameters">
+                        <bpel:query>ns5:tableName</bpel:query>
+                     </bpel:to>
+                  </bpel:copy>
+               </bpel:assign>
+               <bpel:invoke aei:id="132830464523811731" inputVariable="parameters" name="DropTable" operation="DropTable" outputVariable="DropTableResponse" partnerLink="PartsDataService"/>
+            </bpel:sequence>
+         </bpel:scope>
+      </bpel:scope>
+      <bpel:scope aei:implicit="true" name="CreateTable">
+         <bpel:variables>
+            <bpel:variable messageType="ns4:CreateTableRequest" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="132830464524111749">
+               <bpel:copy aei:id="132830464524111751">
+                  <bpel:from>$LoadTableRequest/ns5:tableName</bpel:from>
+                  <bpel:to part="CreateTableRequest" variable="parameters">
+                     <bpel:query>ns5:tableName</bpel:query>
+                  </bpel:to>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:invoke aei:id="132830464524011743" inputVariable="parameters" name="CreateTable" operation="CreateTable" outputVariable="CreateTableResponse" partnerLink="PartsDataService"/>
+         </bpel:sequence>
+      </bpel:scope>
+      <bpel:assign aei:id="132830464524211753" name="Get_Parts_Data">
+         <bpel:copy aei:id="132830464524211755">
+            <bpel:from>abx:getCatalogResource("project:/CommonSampleServices/runtimeParameters/PartsList.xml")</bpel:from>
+            <bpel:to variable="PartsList"/>
+         </bpel:copy>
+      </bpel:assign>
+      <bpel:forEach aei:id="132830464524211757" counterName="counter" name="Insert_Parts" parallel="no">
+         <bpel:startCounterValue>1</bpel:startCounterValue>
+         <bpel:finalCounterValue>count( $PartsList/ns2:part )</bpel:finalCounterValue>
+         <bpel:scope aei:id="132830464524311761" name="Insert_Parts">
+            <bpel:scope aei:implicit="true" name="InsertData">
+               <bpel:variables>
+                  <bpel:variable messageType="ns4:InsertDataRequest" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="132830464524811789">
+                     <bpel:copy aei:id="132830464524911791">
+                        <bpel:from expressionLanguage="urn:active-endpoints:expression-language:xquery1.0"><![CDATA[<ns5:InsertDataRequest xmlns:ns5="http://schemas.active-endpoints.com/demo/schema/Parts/2010/07/PartsDataService.xsd">
+   <ns5:make>{ $PartsList/ns2:part[ $counter ]/ns2:make/text() }</ns5:make>
+   <ns5:model>{ $PartsList/ns2:part[ $counter ]/ns2:model/text() }</ns5:model>
+   <ns5:year>{ $PartsList/ns2:part[ $counter ]/ns2:year/text() }</ns5:year>
+   <ns5:category>{ $PartsList/ns2:part[ $counter ]/ns2:category/text() }</ns5:category>
+   <ns5:sku>{ $PartsList/ns2:part[ $counter ]/ns2:sku/text() }</ns5:sku>
+   <ns5:desc>{ $PartsList/ns2:part[ $counter ]/ns2:desc/text() }</ns5:desc>
+   <ns5:partCost>{ $PartsList/ns2:part[ $counter ]/ns2:partCost/text() }</ns5:partCost>
+</ns5:InsertDataRequest>]]></bpel:from>
+                        <bpel:to part="InsertDataRequest" variable="parameters"/>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:invoke aei:id="132830464524611781" inputVariable="parameters" name="InsertData" operation="InsertData" outputVariable="InsertDataResponse" partnerLink="PartsDataService"/>
+               </bpel:sequence>
+            </bpel:scope>
+         </bpel:scope>
+      </bpel:forEach>
+      <bpel:scope aei:implicit="true" name="LoadTable-Reply">
+         <bpel:variables>
+            <bpel:variable messageType="ns6:LoadTableResponse" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="132830464525011801">
+               <bpel:copy aei:id="132830464525011803">
+                  <bpel:from>$CreateTableResponse.CreateTableResponse/.</bpel:from>
+                  <bpel:to part="LoadTableResponse" variable="parameters">
+                     <bpel:query>.</bpel:query>
+                  </bpel:to>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:reply aei:id="132830464524911793" name="LoadTable-Reply" operation="LoadTable" partnerLink="Process_Consumer" variable="parameters"/>
+         </bpel:sequence>
+      </bpel:scope>
+   </bpel:sequence>
+</bpel:process>

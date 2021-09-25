@@ -1,0 +1,145 @@
+<process xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         name="testProcess"
+         targetNamespace="urn:aecho:apcService"
+         xmlns:tns="urn:aecho:apcService"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+  <partnerLinks>
+    <partnerLink name="User" partnerLinkType="tns:UserSLT" myRole="serviceProvider"/>
+  </partnerLinks>
+  <variables>
+    <variable name="userRequest" messageType="tns:userRequest"/>
+    <variable name="userResponse" messageType="tns:userResponse"/>
+    <variable name="x" messageType="tns:float"/>
+    <variable name="y" messageType="tns:float"/>
+    <variable name="xstep" messageType="tns:float"/>
+    <variable name="ystep" messageType="tns:float"/>
+    <variable name="z" messageType="tns:complex"/>
+    <variable name="rr" messageType="tns:float"/>
+    <variable name="ii" messageType="tns:float"/>
+    <variable name="ri" messageType="tns:float"/>
+    <variable name="counter" messageType="tns:float"/>
+  </variables>
+
+  <sequence name="sequenceMain">
+    <receive name="receiveTestRequest" partnerLink="User"
+              portType="tns:apcTestPT" operation="test"
+             variable="userRequest" createInstance="yes">
+    </receive>
+    <assign>
+      <copy>
+        <from expression="4 div number(bpws:getVariableData('userRequest', 'size'))" />
+        <to variable="ystep" part="value"/>
+      </copy>
+      <copy>
+        <from expression="4 div number(bpws:getVariableData('userRequest', 'size'))" />
+        <to variable="xstep" part="value"/>
+      </copy>
+    </assign>
+    <assign>
+      <copy>
+        <from expression="''" />
+        <to variable="userResponse" part="result" query="/result" />
+      </copy>
+    </assign>
+
+    <assign name="inityloop">
+      <copy>
+        <from expression="-2" />
+        <to variable="y" part="value"/>
+      </copy>
+    </assign>
+    <while condition="bpws:getVariableData('y', 'value') &lt;= 2" name="yloop">
+      <sequence>
+	<assign name="initxloop">
+	  <copy>
+	    <from expression="-2" />
+	    <to variable="x" part="value"/>
+	  </copy>
+	</assign>
+	<while condition="bpws:getVariableData('x', 'value') &lt;= 2" name="xloop">
+	  <sequence>
+	    <assign name="initz">
+	      <copy>
+		<from variable="x" part="value"/>
+		<to variable="z" part="r"/>
+	      </copy>
+	      <copy>
+		<from variable="y" part="value"/>
+		<to variable="z" part="i"/>
+	      </copy>
+	      <copy>
+		<from expression="0" />
+		<to variable="counter" part="value"/>
+	      </copy>
+	      <copy>
+		<from expression="0" />
+		<to variable="rr" part="value"/>
+	      </copy>
+	      <copy>
+		<from expression="0" />
+		<to variable="ii" part="value"/>
+	      </copy>
+	    </assign>
+
+	    <while condition="bpws:getVariableData('rr', 'value') + bpws:getVariableData('ii', 'value') &lt; 4 and bpws:getVariableData('counter', 'value') &lt; 5" name="zloop">
+		<assign name="computez">
+		  <copy>
+		    <from expression="bpws:getVariableData('z', 'r') * bpws:getVariableData('z', 'r')" />
+		    <to variable="rr" part="value"/>
+		  </copy>
+		  <copy>
+		    <from expression="bpws:getVariableData('z', 'r') * bpws:getVariableData('z', 'i')" />
+		    <to variable="ri" part="value"/>
+		  </copy>
+		  <copy>
+		    <from expression="bpws:getVariableData('z', 'i') * bpws:getVariableData('z', 'i')" />
+		    <to variable="ii" part="value"/>
+		  </copy>
+		  <copy>
+		    <from expression="bpws:getVariableData('rr', 'value') - bpws:getVariableData('ii', 'value') + bpws:getVariableData('x', 'value')" />
+		    <to variable="z" part="r"/>
+		  </copy>
+		  <copy>
+		    <from expression="2 * bpws:getVariableData('ri', 'value') + bpws:getVariableData('y', 'value')" />
+		    <to variable="z" part="i"/>
+		  </copy>
+
+		  <copy>
+		    <from expression="bpws:getVariableData('counter', 'value') + 1" />
+		    <to variable="counter" part="value"/>
+		  </copy>
+		</assign>
+	    </while>
+
+	    <assign>
+	      <copy>
+		<from expression="concat(bpws:getVariableData('userResponse', 'result'),substring('.,-=#', bpws:getVariableData('counter', 'value'), 1))" />
+		<to variable="userResponse" part="result" query="/result" />
+	      </copy>
+
+	      <copy>
+		<from expression="bpws:getVariableData('x', 'value') + bpws:getVariableData('xstep', 'value')" />
+		<to variable="x" part="value"/>
+	      </copy>
+	    </assign>
+	  </sequence>
+	</while>
+
+	<assign name="newline">
+	  <copy>
+	    <from expression="concat(bpws:getVariableData('userResponse', 'result'), '\n')" />
+	    <to variable="userResponse" part="result" query="/result" />
+	  </copy>
+	  <copy>
+	    <from expression="bpws:getVariableData('y', 'value') + bpws:getVariableData('ystep', 'value')" />
+	    <to variable="y" part="value"/>
+	  </copy>
+	</assign>
+      </sequence>
+    </while>
+    <reply name="sendUserResponse" partnerLink="User"
+           portType="tns:apcTestPT" operation="test"
+           variable="userResponse">
+    </reply>
+  </sequence>
+</process>

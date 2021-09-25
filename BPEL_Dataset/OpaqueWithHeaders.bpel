@@ -1,0 +1,35 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Fri Jun 24 18:08:01 IST 2005
+  // Author:  nedatata
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="OpaqueWithHeaders" targetNamespace="http://xmlns.oracle.com/OpaqueWithHeaders" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/file/OpaqueInbound/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/file/OpaqueOutbound/" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/file/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:client="http://xmlns.oracle.com/OpaqueWithHeaders" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= -->
+  <partnerLinks>
+    <partnerLink myRole="Read_role" name="InboundPL" partnerLinkType="ns1:Read_plt"/>
+    <partnerLink name="OutboundPL" partnerRole="Write_role" partnerLinkType="ns3:Write_plt"/>
+  </partnerLinks><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= -->
+  <variables>
+    <variable name="inputHeader" messageType="ns2:InboundHeader_msg"/>
+    <variable name="Receive_Opaque_Data_Read_InputVariable" messageType="ns1:Read_msg"/>
+    <variable name="Invoke_Opaque_Write_InputVariable" messageType="ns3:Write_msg"/>
+    <variable name="outputHeader" messageType="ns2:OutboundHeader_msg"/>
+  </variables><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <sequence name="main">
+    <receive name="Receive_Opaque_Data" partnerLink="InboundPL" portType="ns1:Read_ptt" operation="Read" variable="Receive_Opaque_Data_Read_InputVariable" createInstance="yes" bpelx:headerVariable="inputHeader"/>
+    <assign name="Assign_data_and_header">
+      <copy>
+        <from variable="Receive_Opaque_Data_Read_InputVariable" part="opaque"/>
+        <to variable="Invoke_Opaque_Write_InputVariable" part="opaque"/>
+      </copy>
+      <copy>
+        <from variable="inputHeader" part="inboundHeader" query="/ns2:InboundFileHeaderType/ns2:fileName"/>
+        <to variable="outputHeader" part="outboundHeader" query="/ns2:OutboundFileHeaderType/ns2:fileName"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_Opaque" partnerLink="OutboundPL" portType="ns3:Write_ptt" operation="Write" inputVariable="Invoke_Opaque_Write_InputVariable" bpelx:inputHeaderVariable="outputHeader"/>
+  </sequence>
+</process>

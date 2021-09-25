@@ -1,0 +1,83 @@
+<process xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ns1="http://services.otn.com" xmlns:ns2="http://samples.otn.com" xmlns:client="http://xmlns.oracle.com/CRMService" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc" name="CRMService" targetNamespace="http://xmlns.oracle.com/CRMService">
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="CRMServiceProvider" name="CRMPartnerLink" plext:wsdlloc="CRMService.wsdl" partnerLinkType="ns1:CRMService"/>
+  </partnerLinks>
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <variables>
+    <variable name="input" messageType="ns1:CRMServiceEmailMessage"/>
+    <variable name="addressOutput" messageType="ns1:CRMServiceAddressMessage"/>
+    <variable name="creditCardOutput" messageType="ns1:CRMServiceCreditCardMessage"/>
+  </variables>
+
+<!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <sequence name="main">
+    <pick name="CRMPick" createInstance="yes">
+      <onMessage portType="ns1:CRMService" operation="getAddress" variable="input" partnerLink="CRMPartnerLink">
+        <sequence name="AddressSequence">
+          <assign name="AddressCopy">
+            <copy>
+              <from>
+                <address xmlns="http://samples.otn.com">
+    
+                  <name>Dave
+                  </name>
+    
+                  <street>1600 Bridge Parkway
+                  </street>
+    
+                  <city>Redwood Shores
+                  </city>
+    
+                  <zip>94065
+                  </zip>
+    
+                  <state>CA
+                  </state>
+
+                </address>
+              </from>
+              <to variable="addressOutput" part="payload"/>
+            </copy>
+          </assign>
+          <reply name="ReplyAddress" partnerLink="CRMPartnerLink" portType="ns1:CRMService" operation="getAddress" variable="addressOutput"/>
+        </sequence>
+      </onMessage>
+      <onMessage portType="ns1:CRMService" operation="getCreditCard" variable="input" partnerLink="CRMPartnerLink">
+        <sequence name="Sequence_1">
+          <assign name="creditCardAssign">
+            <copy>
+              <from>
+                <creditCard xmlns="http://samples.otn.com">
+    
+                  <number>1234567890123456
+                  </number>
+    
+                  <expiration>2006-10-01
+                  </expiration>
+
+                </creditCard>
+              </from>
+              <to variable="creditCardOutput" part="payload" query="/ns2:creditCard/ns2:number"/>
+            </copy>
+          </assign>
+          <reply name="ReplyCreditCard" partnerLink="CRMPartnerLink" portType="ns1:CRMService" operation="getCreditCard" variable="creditCardOutput"/>
+        </sequence>
+      </onMessage>
+    </pick>
+  </sequence>
+</process>

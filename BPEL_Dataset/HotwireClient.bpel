@@ -1,0 +1,119 @@
+<process name="HotwireClient"
+         targetNamespace="http://samples.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://samples.otn.com"
+         xmlns:flow="http://samples.otn.com"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+  <partnerLinks>
+    <partnerLink name="client"
+             partnerLinkType="tns:HotwireClient"
+             myRole="HotwireClientProvider"
+             partnerRole="HotwireClientRequester"/>
+    <partnerLink name="HotwireFlow"
+             partnerLinkType="flow:HotwireFlow"
+             myRole="HotwireFlowRequester"
+             partnerRole="HotwireFlowProvider"/>             
+  </partnerLinks>
+
+  <variables>
+    <variable name="input"
+               messageType="tns:HotwireClientRequestMessage"/>
+               
+    <variable name="request"
+               messageType="flow:HotwireFlowRequestMessage"/>  
+    <variable name="response"
+               messageType="flow:HotwireFlowResultMessage"/>               
+               
+    <variable name="offer"
+               messageType="flow:HotwireFlowOfferMessage"/> 
+               
+    <variable name="approved"
+               messageType="flow:HotwireFlowApproveMessage"/>
+    <variable name="canceled"
+               messageType="flow:HotwireFlowCancelMessage"/> 
+               
+    <variable name="output"
+               messageType="tns:HotwireClientResultMessage"/>
+  </variables>
+
+  <sequence>
+
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:HotwireClient"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+    
+    <scope name="GetFlightOffer" variableAccessSerializable="no">
+        <sequence>
+		    <!-- initialize the input of HotwireFlow -->
+		    <assign>
+		      <copy>
+		        <from variable="input" part="payload"/>
+		        <to variable="request" part="payload"/>
+		      </copy>
+		    </assign>             
+		             
+		    <!-- send the flight offer to requestor -->
+		    <invoke name="sendOffer" partnerLink="HotwireFlow"
+		            portType="flow:HotwireFlow"
+		            operation="initiate" inputVariable="request"/>             
+		    
+		    
+		    <!--  receive the result of the remote process -->
+		    <receive name="receiveOffer" partnerLink="HotwireFlow"
+		        portType="flow:HotwireFlowCallback"
+		        operation="onOffer" variable="offer"/> 
+	    </sequence> 
+	</scope>   
+    
+    <!-- wait for 30 seconds -->
+    <wait for="'PT30S'"/>  
+    
+    <scope name="SecectOffer" variableAccessSerializable="no">
+ 
+	    <!-- switch depends on the input value -->
+	    <switch>
+	      <case condition="bpws:getVariableData('offer', 'payload','/tns:offer') > 1000">
+	        <!-- send the cancelation to Hotwire -->
+	        <invoke name="canceled" partnerLink="HotwireFlow"
+	            portType="flow:HotwireFlow"
+	            operation="cancel" inputVariable="canceled"/>          
+	        </case>
+	        <otherwise>
+	        <!-- send the approval to Hotwire -->
+	        <invoke name="approved" partnerLink="HotwireFlow"
+	            portType="flow:HotwireFlow"
+	            operation="approve" inputVariable="approved"/>
+	      </otherwise>
+	    </switch>
+    </scope>    
+    
+     <scope name="ReceiveConfirmation" variableAccessSerializable="no">
+        <sequence>
+		    <!--  receive the result of the HotwireFlow -->
+		    <receive name="receiveResponse" partnerLink="HotwireFlow"
+		        portType="flow:HotwireFlowCallback"
+		        operation="onResult" variable="response"/>    
+		    
+		    <assign>
+		      <copy>
+		        <from variable="response" part="payload"/>
+		        <to variable="output" part="payload"/>
+		      </copy>
+		    </assign> 
+	    </sequence> 
+	</scope>         
+    
+    <!-- respond output to requestor -->
+    <invoke name="replyOutput" partnerLink="client"
+            portType="tns:HotwireClientCallback"
+            operation="onResult" inputVariable="output"/>
+            
+  </sequence>
+
+</process>
+

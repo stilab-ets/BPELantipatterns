@@ -1,0 +1,103 @@
+<!-- DynamicPartnerLink BPEL Process -->
+<process name="DynamicPartnerLink" targetNamespace="http://samples.otn.com" 
+       suppressJoinFailure="yes" xmlns:tns="http://samples.otn.com" 
+       xmlns:services="http://services.otn.com" 
+       xmlns:wsa="http://schemas.xmlsoap.org/ws/2003/03/addressing" 
+       xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+       xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" 
+       xmlns:auto="http://www.autoloan.com/ns/autoloan"
+       xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+	<!-- List of services participating in this BPEL process -->
+	<partnerLinks>
+		<!--
+        The 'client' role represents the requester of this service. It is
+        used for callback. The location and correlation information associated
+        with the client role are automatically set using WS-Addressing.
+        -->
+		<partnerLink name="client" partnerLinkType="tns:DynamicPartnerLink" myRole="DynamicPartnerLinkService" partnerRole="DynamicPartnerLinkRequester"/>
+		<partnerLink name="LoanService" partnerLinkType="services:LoanService" myRole="LoanServiceRequester" partnerRole="LoanServiceProvider"/>
+	</partnerLinks>
+	<!-- List of messages and XML documents used as part of this
+         BPEL process
+         -->
+	<variables>
+		<!-- Reference to the message passed as input during initiation -->
+		<variable name="input" messageType="tns:DynamicPartnerLinkRequestMessage"/>
+		<!-- Reference to the message that will be sent back to the
+             requestor during callback
+             -->
+		<variable name="output" messageType="tns:DynamicPartnerLinkResultMessage"/>
+		<variable name="request" messageType="services:LoanServiceRequestMessage"/>
+		<variable name="response" messageType="services:LoanServiceResultMessage"/>
+	</variables>
+	<!-- Orchestration Logic -->
+	<sequence>
+		<!-- Receive input from requestor.
+             Note: This maps to operation defined in DynamicPartnerLink.wsdl
+             -->
+		<receive name="receiveInput" partnerLink="client" portType="tns:DynamicPartnerLink" operation="initiate" variable="input" createInstance="yes"/>
+		<!-- initialize the input of LoanService -->
+		<assign name="setPayload">
+			<copy>
+				<from variable="input" part="payload" query="/tns:DynamicPartnerLinkRequest/auto:loanApplication"/>
+				<to variable="request" part="payload"/>
+			</copy>
+		</assign>
+		<!-- switch depends on the input value -->
+		<switch>
+			<case condition="bpws:getVariableData('input','payload','/tns:DynamicPartnerLinkRequest/tns:provider') = 'united'">
+				<assign>
+					<copy>
+						<from>
+							<EndpointReference xmlns="http://schemas.xmlsoap.org/ws/2003/03/addressing">
+								<Address>http://yin-8afafad92c9.gateway.2wire.net:9700/orabpel/default/UnitedLoan</Address>
+								<ServiceName xmlns:ns1="http://services.otn.com">ns1:UnitedLoan</ServiceName>
+							</EndpointReference>
+						</from>
+						<to partnerLink="LoanService"/>
+					</copy>
+				</assign>
+			</case>
+			<case condition="bpws:getVariableData('input','payload','/tns:DynamicPartnerLinkRequest/tns:provider') = 'american'">
+				<assign>
+					<copy>
+						<from>
+							<EndpointReference xmlns="http://schemas.xmlsoap.org/ws/2003/03/addressing">
+								<Address>http://yin-8afafad92c9.gateway.2wire.net:9700/orabpel/default/AmericanLoan</Address>
+								<ServiceName xmlns:ns1="http://services.otn.com">ns1:AmericanLoan</ServiceName>
+							</EndpointReference>
+						</from>
+						<to partnerLink="LoanService"/>
+					</copy>
+				</assign>
+			</case>
+			<otherwise>
+				<assign>
+					<copy>
+						<from>
+							<EndpointReference xmlns="http://schemas.xmlsoap.org/ws/2003/03/addressing">
+								<ServiceName xmlns:ns1="http://services.otn.com">ns1:StarLoan</ServiceName>
+							</EndpointReference>
+						</from>
+						<to partnerLink="LoanService"/>
+					</copy>
+				</assign>
+			</otherwise>
+		</switch>
+		<!--  initiate the remote process -->
+		<invoke name="invoke" partnerLink="LoanService" portType="services:LoanService" operation="initiate" inputVariable="request"/>
+		<!--  receive the result of the remote process -->
+		<receive name="receive_invoke" partnerLink="LoanService" portType="services:LoanServiceCallback" operation="onResult" variable="response"/>
+		<assign>
+			<copy>
+				<from variable="response" part="payload"/>
+				<to variable="output" part="payload"/>
+			</copy>
+		</assign>
+		<!-- Asynchronous callback to the requester.
+             Note: the callback location and correlation id is transparently handled
+             using WS-addressing.
+             -->
+		<invoke name="replyOutput" partnerLink="client" portType="tns:DynamicPartnerLinkCallback" operation="onResult" inputVariable="output"/>
+	</sequence>
+</process>

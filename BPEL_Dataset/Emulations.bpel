@@ -1,0 +1,121 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Thu May 11 16:40:34 PDT 2006
+  Author:  kmreddy
+  Purpose: Asynchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="Emulations" targetNamespace="http://xmlns.oracle.com/Emulations"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns4="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:ns1="http://xmlns.oracle.com/AsyncSubProcess"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns3="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:ns2="http://xmlns.oracle.com/SyncSubProcess"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:client="http://xmlns.oracle.com/Emulations"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <partnerLinks>
+        <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+        <partnerLink name="client" partnerLinkType="client:Emulations"
+                     myRole="EmulationsProvider"
+                     partnerRole="EmulationsRequester"/>
+        <partnerLink myRole="AsyncSubProcessRequester" name="AsyncSubProcess"
+                     partnerRole="AsyncSubProcessProvider"
+                     partnerLinkType="ns1:AsyncSubProcess"/>
+        <partnerLink name="SyncSubProcess" partnerRole="SyncSubProcessProvider"
+                     partnerLinkType="ns2:SyncSubProcess"/>
+    </partnerLinks>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        VARIABLES                                                        
+        List of messages and XML documents used within this BPEL process 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <variables>
+        <!-- Reference to the message passed as input during initiation -->
+        <variable name="inputVariable"
+                  messageType="client:EmulationsRequestMessage"/>
+        <!-- Reference to the message that will be sent back to the requester during callback -->
+        <variable name="outputVariable"
+                  messageType="client:EmulationsResponseMessage"/>
+        <variable name="asyncInput"
+                  messageType="ns1:AsyncSubProcessRequestMessage"/>
+        <variable name="asyncOutput"
+                  messageType="ns1:AsyncSubProcessResponseMessage"/>
+        <variable name="syncInput"
+                  messageType="ns2:SyncSubProcessRequestMessage"/>
+        <variable name="syncOutput"
+                  messageType="ns2:SyncSubProcessResponseMessage"/>
+    </variables>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ORCHESTRATION LOGIC                                               
+       Set of activities coordinating the flow of messages across the    
+       services integrated within this business process                  
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <sequence name="main">
+        <!-- Receive input from requestor. (Note: This maps to operation defined in Emulations.wsdl) -->
+        <receive name="receiveInput" partnerLink="client"
+                 portType="client:Emulations" operation="initiate"
+                 variable="inputVariable" createInstance="yes"/>
+        <!-- 
+          Asynchronous callback to the requester. (Note: the callback location and correlation id is transparently handled using WS-addressing.)
+        -->
+        <assign name="Assign_1">
+            <copy>
+                <from variable="inputVariable" part="payload"
+                      query="/client:EmulationsProcessRequest/client:input"/>
+                <to variable="asyncInput" part="payload"
+                    query="/ns1:AsyncSubProcessProcessRequest/ns1:input"/>
+            </copy>
+        </assign>
+        <invoke name="Invoke_1" partnerLink="AsyncSubProcess"
+                portType="ns1:AsyncSubProcess" operation="initiate"
+                inputVariable="asyncInput"/>
+        <receive name="Receive_1" createInstance="no"
+                 partnerLink="AsyncSubProcess"
+                 portType="ns1:AsyncSubProcessCallback" operation="onResult"
+                 variable="asyncOutput"/>
+        <assign name="Assign_2">
+            <copy>
+                <from variable="asyncOutput" part="payload"
+                      query="/ns1:AsyncSubProcessProcessResponse/ns1:result"/>
+                <to variable="syncInput" part="payload"
+                    query="/ns2:SyncSubProcessProcessRequest/ns2:input"/>
+            </copy>
+        </assign>
+        <invoke name="Invoke_2" partnerLink="SyncSubProcess"
+                portType="ns2:SyncSubProcess" operation="process"
+                inputVariable="syncInput" outputVariable="syncOutput"/>
+        <assign name="Assign_3">
+            <copy>
+                <from variable="syncOutput" part="payload"
+                      query="/ns2:SyncSubProcessProcessResponse/ns2:result"/>
+                <to variable="outputVariable" part="payload"
+                    query="/client:EmulationsProcessResponse/client:result"/>
+            </copy>
+        </assign>
+        <invoke name="callbackClient" partnerLink="client"
+                portType="client:EmulationsCallback" operation="onResult"
+                inputVariable="outputVariable"/>
+    </sequence>
+</process>

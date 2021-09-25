@@ -1,0 +1,104 @@
+<process xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         name="GoogleFlowWithSensors"
+         targetNamespace="http://xmlns.oracle.com/GoogleFlowWithSensors"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns1="urn:GoogleSearch"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns3="http://schemas.xmlsoap.org/soap/encoding/"
+         xmlns:ns2="http://www.w3.org/2001/XMLSchema"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:client="http://xmlns.oracle.com/GoogleFlowWithSensors"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="GoogleFlowWithSensorsProvider" name="client"
+                 partnerRole="GoogleFlowWithSensorsRequester"
+                 partnerLinkType="client:GoogleFlowWithSensors"/>
+    <partnerLink name="GoogleService" partnerRole="GoogleSearchPort_Role"
+                 partnerLinkType="ns1:GoogleSearchPort_PL"/>
+  </partnerLinks>
+  <!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <variables>
+    <variable name="input"
+              messageType="client:GoogleFlowWithSensorsRequestMessage"/>
+    <variable name="googleInput" messageType="ns1:doGoogleSearch"/>
+    <variable name="output"
+              messageType="client:GoogleFlowWithSensorsResponseMessage"/>
+    <variable name="googleOutput" messageType="ns1:doGoogleSearchResponse"/>
+  </variables>
+  <!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+-->
+  <sequence name="main">
+    <receive name="receiveInput" partnerLink="client"
+             portType="client:GoogleFlowWithSensors" operation="initiate"
+             variable="input" createInstance="yes"/>
+    <assign name="assignInput">
+      <copy>
+        <from variable="input" part="payload"
+              query="/client:GoogleFlowWithSensorsProcessRequest/client:query"/>
+        <to variable="googleInput" part="q"/>
+      </copy>
+      <copy>
+        <from expression="0"/>
+        <to variable="googleInput" part="start"/>
+      </copy>
+      <copy>
+        <from expression="boolean('false')"/>
+        <to variable="googleInput" part="filter"/>
+      </copy>
+      <copy>
+        <from expression="5"/>
+        <to variable="googleInput" part="maxResults"/>
+      </copy>
+      <copy>
+        <from expression="'lang_en'"/>
+        <to variable="googleInput" part="lr"/>
+      </copy>
+      <copy>
+        <from expression="boolean('false')"/>
+        <to variable="googleInput" part="safeSearch"/>
+      </copy>
+      <copy>
+        <from expression="'gBtrSzkZcxw60k4unl6uXDV7oK803zWY'"/>
+        <to variable="googleInput" part="key"/>
+      </copy>
+    </assign>
+    <invoke name="invokeGoogle" partnerLink="GoogleService"
+            portType="ns1:GoogleSearchPort" operation="doGoogleSearch"
+            inputVariable="googleInput" outputVariable="googleOutput"/>
+    <assign name="assignOutput">
+      <copy>
+        <from variable="googleOutput" part="return"
+              query="/return/estimatedTotalResultsCount"/>
+        <to variable="output" part="payload"
+            query="/client:GoogleFlowWithSensorsProcessResponse/client:result"/>
+      </copy>
+    </assign>
+    <invoke name="callbackClient" partnerLink="client"
+            portType="client:GoogleFlowWithSensorsCallback" operation="onResult"
+            inputVariable="output"/>
+  </sequence>
+</process>
+
+
+
+
+
+
+
+
+

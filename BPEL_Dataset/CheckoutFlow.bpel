@@ -1,0 +1,107 @@
+<!-- CheckoutFlow BPEL Process [Based on template version 0.4] -->
+<process name="CheckoutFlow" targetNamespace="http://samples.otn.com" suppressJoinFailure="yes" xmlns:tns="http://samples.otn.com" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:services="http://services.otn.com">
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNERLINKS:List of services participating in this BPEL process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<partnerLinks>
+		<!--
+        The 'client' role represents the requester of this service. It is 
+        used for callback. The location and correlation information associated
+        with the client role are automatically set using WS-Addressing.
+        -->
+		<partnerLink name="client" partnerLinkType="tns:CheckoutFlow" myRole="CheckoutFlowProvider" partnerRole="CheckoutFlowRequester"/>
+		<partnerLink name="CRMService" partnerLinkType="services:CRMService" partnerRole="CRMServiceProvider"/>
+	</partnerLinks>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     VARIABLES: List of messages and XML documents used in this process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<variables>
+		<!-- Reference to the message passed as input during initiation -->
+		<variable name="input" messageType="tns:CheckoutFlowRequestMessage"/>
+		<variable name="replyInput" messageType="tns:CheckoutFlowResponseMessage"/>
+		<variable name="continue" messageType="tns:CheckoutFlowContinueRequestMessage"/>
+		<variable name="replyContinue" messageType="tns:CheckoutFlowContinueResponseMessage"/>
+		<variable name="submit" messageType="tns:CheckoutFlowSubmitRequestMessage"/>
+		<variable name="replySubmit" messageType="tns:CheckoutFlowSubmitResponseMessage"/>
+		<!-- Reference to the message that will be sent back to the 
+             requester during callback
+             -->
+
+		<variable name="crmRequest" messageType="services:CRMServiceEmailMessage"/>
+		<variable name="crmAddressResponse" messageType="services:CRMServiceAddressMessage"/>
+		<variable name="crmCreditCardResponse" messageType="services:CRMServiceCreditCardMessage"/>		
+
+		<variable name="output" messageType="tns:CheckoutFlowResultMessage"/>		
+	</variables>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     ORCHESTRATION LOGIC: Set of activities coordinating the flow of 
+     messages across the services integrated within this business process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<sequence name="main">
+		<!-- Receive input from requestor. 
+             Note: This maps to operation defined in CheckoutFlow.wsdl 
+             -->
+		<receive name="receiveInput" partnerLink="client" portType="tns:CheckoutFlow" operation="initiate" variable="input" createInstance="yes"/>
+		<!-- Asynchronous callback to the requester.
+             Note: the callback location and correlation id is transparently handled 
+             using WS-addressing.
+             -->
+		<assign><copy>
+				<from variable="input" part="payload" query="/tns:order/tns:profile/tns:email">
+				</from>
+				<to variable="crmRequest" part="payload"/>
+			</copy>
+		</assign>
+		<invoke partnerLink="CRMService" portType="services:CRMService" operation="getAddress" inputVariable="crmRequest" outputVariable="crmAddressResponse"/>
+		<assign>
+			<copy>
+				<from variable="crmAddressResponse" part="payload">
+				</from>
+				<to variable="replyInput" part="payload"/>
+			</copy>
+		</assign>
+		<reply partnerLink="client" portType="tns:CheckoutFlow" operation="initiate" variable="replyInput"/>
+		<receive partnerLink="client" portType="tns:CheckoutFlow" operation="continue" variable="continue"/>
+
+		<invoke partnerLink="CRMService" 
+			portType="services:CRMService" 
+			operation="getCreditCard"
+			inputVariable="crmRequest" 
+			outputVariable="crmCreditCardResponse"/>
+		
+		<assign>
+			<copy>
+				<from variable="continue" part="payload"/>
+				<to variable="input" part="payload" query="/tns:order/tns:profile/tns:address"/>
+			</copy>
+			<copy>
+				<from variable="crmCreditCardResponse" part="payload"/>
+				<to variable="replyContinue" part="payload"/>
+			</copy>
+		</assign>
+		<reply partnerLink="client" portType="tns:CheckoutFlow" operation="continue" variable="replyContinue"/>
+		<receive partnerLink="client" portType="tns:CheckoutFlow" operation="submit" variable="submit"/>
+		<assign>
+			<copy>
+				<from variable="submit" part="payload"/>
+				<to variable="input" part="payload" query="/tns:order/tns:profile/tns:creditCard"/>
+			</copy>
+			<copy>
+				<from expression="'12345676890'"/>
+				<to variable="input" part="payload" query="/tns:order/tns:confirmationId"/>
+			</copy>			
+			<copy>
+				<from variable="input" part="payload"/>
+				<to variable="replySubmit" part="payload"/>
+			</copy>
+		</assign>
+		<reply partnerLink="client" portType="tns:CheckoutFlow" operation="submit" variable="replySubmit"/>
+		<assign>
+			<copy>
+				<from variable="input" part="payload"/>
+				<to variable="output" part="payload"/>
+			</copy>
+		</assign>
+		<invoke name="callbackClient" partnerLink="client" portType="tns:CheckoutFlowCallback" operation="onResult" inputVariable="output"/>
+	</sequence>
+</process>

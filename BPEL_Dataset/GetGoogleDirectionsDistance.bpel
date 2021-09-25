@@ -1,0 +1,211 @@
+<bpel:process 
+	name="GetGoogleDirectionsDistance"
+	targetNamespace="http://maps.googleapis.com/directions/GetGoogleDirectionsDistance/DomInd/definitions"
+	suppressJoinFailure="yes"
+	xmlns:tns="http://maps.googleapis.com/directions/GetGoogleDirectionsDistance/DomInd/definitions"
+	xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+	xmlns:partnerdef="http://maps.googleapis.com/directions/GetGoogleDirections/Core/definitions"
+	xmlns:partnertypes="http://maps.googleapis.com/directions/types" >
+	
+	<!-- 
+	   GetGoogleDirectionsDistance is a synchronous BPEL process representing a specialization of 
+	   the Core CIP GetGoogleDirections used to obtain the route distance. Since response message
+	   may contain many alternative routes, this CIP calculates the shortest distance for the route
+	    and blanks out all other returned elements.
+	  
+	   @Layer: Domain Independent CIPs
+	   @based on: GetGoogleDirections (Core CIPs)
+	  
+	   @System: Google Maps Web services
+	   @Component: Directions
+	   @Interface: directions
+	  
+	   
+	   @Author: Rodion Hagin
+	   @Created: 01.06.2011
+	  
+	  -->
+	  
+	<!-- WSDL IMPORTS -->
+	<bpel:import 
+		location="GetGoogleDirectionsDistanceArtifacts.wsdl" 
+		namespace="http://maps.googleapis.com/directions/GetGoogleDirectionsDistance/DomInd/definitions" 
+	    importType="http://schemas.xmlsoap.org/wsdl/" />
+	    
+	<bpel:import 
+		location="GetGoogleDirectionsArtifacts.wsdl" 
+		namespace="http://maps.googleapis.com/directions/GetGoogleDirections/Core/definitions" 
+	    importType="http://schemas.xmlsoap.org/wsdl/" />
+         
+
+    <!-- PARTNERLINKS -->                  
+    <bpel:partnerLinks>
+		
+		<!-- Represents the requester of this service. Used for callback. -->
+        <bpel:partnerLink 
+        	name="Client"
+            partnerLinkType="tns:GoogleDirectionsDistanceProviderPLT"
+            myRole="GoogleDirectionsDistanceProvider" />
+        
+        <!-- Represents GetGoogleDirections CIP. -->
+        <bpel:partnerLink 
+        	name="GoogleDirectionsProvider"
+            partnerLinkType="partnerdef:GoogleDirectionsProviderPLT"
+            partnerRole="GoogleDirectionsProvider"/>     
+    </bpel:partnerLinks>
+  
+
+	<!-- VARIABLES -->       
+    <bpel:variables>
+        
+        <!-- Business process input -->
+        <bpel:variable name="input"
+                  messageType="tns:GetGoogleDirectionsDistanceRequestMessage"/>
+                  
+        <!-- Business process output -->
+        <bpel:variable name="output"
+                  messageType="tns:GetGoogleDirectionsDistanceResponseMessage"/>
+        
+        <!-- Business process fault output -->
+        <bpel:variable name="fault"
+                  messageType="tns:GetGoogleDirectionsDistanceFaultMessage" />
+                  
+        <!-- GetGoogleDirections CIP input -->
+        <bpel:variable name="inputGDP"
+                  messageType="partnerdef:GetGoogleDirectionsRequestMessage"/>
+                  
+		<!-- GetGoogleDirections CIP output -->
+        <bpel:variable name="outputGDP"
+                  messageType="partnerdef:GetGoogleDirectionsResponseMessage"/>
+        
+    </bpel:variables>
+
+ 
+        <!-- FAULT HANDLING LOGIC --> 
+    <bpel:faultHandlers>
+      
+      <!-- Catch and process faults thrown by GetGoogleDirections CIP -->
+      <bpel:catch 
+        faultName="partnerdef:GetGoogleDirectionsFault" 
+        faultVariable="faultGDP"
+        faultMessageType="partnerdef:GetGoogleDirectionsFaultMessage">
+        
+        <bpel:sequence>
+          <bpel:assign validate="no" name="ProcessFaultFromGD">
+              <bpel:copy>
+                  <bpel:from part="payload" variable="faultGDP" />
+                  <bpel:to part="payload" variable="fault" />
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+            name="replyFaultOutput" 
+              partnerLink="Client"
+              portType="tns:GetGoogleDirectionsDistance"
+              operation="process"
+              variable="fault"
+              faultName="tns:GetGoogleDirectionsDistanceFault" />
+        </bpel:sequence>
+      </bpel:catch>
+      
+      
+      <!-- Catch all faults during current process execution, generate fault message and 
+         send back to the requester interface 
+        -->
+      <bpel:catchAll>
+        <bpel:sequence>
+          <bpel:assign validate="no" name="CreateNewFault">
+              <bpel:copy>
+                  <bpel:from>
+                    <bpel:literal>
+                      <tn:DirectionsFault xmlns:tn="http://maps.googleapis.com/directions/types"
+                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tn:status>GetGoogleDirectionsDistance error</tn:status>
+                      </tn:DirectionsFault>
+                    </bpel:literal>
+                  </bpel:from>
+                  <bpel:to part="payload" variable="fault" />
+              </bpel:copy>
+          </bpel:assign>
+          
+          <bpel:reply 
+            name="replyFaultOutput" 
+              partnerLink="Client"
+              portType="tns:GetGoogleDirectionsDistance"
+              operation="process"
+              variable="fault"
+              faultName="tns:GetGoogleDirectionsDistanceFault" />
+        </bpel:sequence>
+      </bpel:catchAll>
+      
+    </bpel:faultHandlers>
+            
+    <!-- ORCHESTRATION LOGIC -->
+    
+    <!-- Set of activities coordinating the flow of messages across the    
+       services integrated within this business process.  
+       
+       GetGoogleDirectionsDistance BPEL process extracts route duration returned by GetGoogleDirections CIP.
+      -->   
+    <bpel:sequence name="main">
+        
+        <bpel:receive 
+        	name="receiveInput" 
+        	partnerLink="Client"
+            portType="tns:GetGoogleDirectionsDistance"
+            operation="process" 
+            variable="input"
+            createInstance="yes" />
+            
+        <bpel:assign validate="no" name="PrepareInputToCIPGetGoogleDirections">
+            
+            <!-- Pre-initialization of the variable is not required. 
+        	   OW2 Orchestra. 
+        	  -->
+            <bpel:copy>
+            	<bpel:from part="payload" variable="input" />
+                <bpel:to part="payload" variable="inputGDP" />
+            </bpel:copy>
+        </bpel:assign>
+        
+        	
+        <bpel:invoke 
+        	name="InvokeCIPGetGoogleDirections" 
+        	partnerLink="GoogleDirectionsProvider" 
+        	operation="process" 
+        	portType="partnerdef:GetGoogleDirections" 
+        	inputVariable="inputGDP" 
+        	outputVariable="outputGDP" />
+        
+        <bpel:assign validate="no" name="CalculateRouteDistance">
+        	
+        	<!-- To manipulate variable contents it should be pre-initialized. -->
+            <bpel:copy>
+				<bpel:from>
+					<bpel:literal>
+						<tn:distance xmlns:tn="http://maps.googleapis.com/directions/types"
+							xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                          <tn:value></tn:value>
+                          <tn:text></tn:text>
+                        </tn:distance>
+					</bpel:literal>
+				</bpel:from>
+				<bpel:to part="payload" variable="output"></bpel:to>
+			</bpel:copy>
+
+			<!-- Extract route duration information using XSLT -->
+			<bpel:copy>
+				<bpel:from>bpel:doXslTransform("transform.xsl", $outputGDP.payload)</bpel:from>
+				<bpel:to part="payload" variable="output" />
+			</bpel:copy>
+        </bpel:assign>
+        
+        <bpel:reply 
+        	name="replyOutput" 
+            partnerLink="Client"
+            portType="tns:GetGoogleDirectionsDistance"
+            operation="process" 
+            variable="output" />
+    </bpel:sequence>
+</bpel:process>
+

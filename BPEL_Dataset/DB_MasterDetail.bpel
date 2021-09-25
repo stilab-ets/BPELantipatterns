@@ -1,0 +1,33 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Thu Feb 03 11:42:42 PST 2005
+  // Author:  smcritch
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="DB_MasterDetail" targetNamespace="http://xmlns.oracle.com/DB_MasterDetail" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/DBInbound" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/DBOutbound" xmlns:client="http://xmlns.oracle.com/DB_MasterDetail" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink myRole="DBInbound_role" name="DBAdapterInbound" plext:wsdlloc="DBInbound.wsdl" plext:inbport="DBInbound_ptt" plext:inbound="true" partnerLinkType="ns1:DBInbound_plt"/>
+    <partnerLink name="DBAdapterOutbound" partnerRole="DBOutbound_role" plext:wsdlloc="DBOutbound.wsdl" plext:inbport="DBOutbound_ptt" plext:inbound="false" partnerLinkType="ns2:DBOutbound_plt"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive_receive_InputVariable" messageType="ns1:ReceiverDeptCollection_msg"/>
+    <variable name="Invoke_merge_InputVariable" messageType="ns2:SenderDeptCollection_msg"/>
+  </variables>
+  <sequence name="main">
+    <receive name="Receive" partnerLink="DBAdapterInbound" portType="ns1:DBInbound_ptt" operation="receive" variable="Receive_receive_InputVariable" createInstance="yes"/>
+    <assign name="Transform_1">
+      <bpelx:annotation>
+        <bpelx:pattern>transformation
+        </bpelx:pattern>
+      </bpelx:annotation>
+      <copy>
+        <from expression="ora:processXSLT('Transformation_1.xsl',bpws:getVariableData('Receive_receive_InputVariable','ReceiverDeptCollection'))"/>
+        <to variable="Invoke_merge_InputVariable" part="SenderDeptCollection"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke" partnerLink="DBAdapterOutbound" portType="ns2:DBOutbound_ptt" operation="merge" inputVariable="Invoke_merge_InputVariable"/>
+  </sequence>
+</process>

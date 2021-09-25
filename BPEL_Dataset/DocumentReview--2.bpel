@@ -1,0 +1,424 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Mon Apr 04 16:52:18 PDT 2005
+  // Author:  rarangas
+  // Purpose: Asynchronous BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="DocumentReview" targetNamespace="http://xmlns.oracle.com/DocumentReview" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:client="http://xmlns.oracle.com/DocumentReview" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:identityservice="http://xmlns.oracle.com/pcbpel/identityservice/local" xmlns:taskmngr="http://xmlns.oracle.com/pcbpel/taskservice/taskmanager" xmlns:taskroutingservice="http://xmlns.oracle.com/pcbpel/taskservice/taskroutingservice" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:task="http://xmlns.oracle.com/pcbpel/taskservice/task" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc" xmlns:taskactionhandler="http://xmlns.oracle.com/pcbpel/taskservice/taskActionHandler"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= -->
+  <partnerLinks><!-- 
+    The 'client' role represents the requester of this service. It is 
+    used for callback. The location and correlation information associated
+    with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="client" partnerLinkType="client:DocumentReview" myRole="DocumentReviewProvider" partnerRole="DocumentReviewRequester"/>
+    <partnerLink myRole="TaskManagerCallbackListener" name="TaskManagerService" partnerRole="TaskManager" partnerLinkType="taskmngr:TaskManager"/>
+    <partnerLink name="TaskRoutingService" partnerRole="TaskRoutingService" partnerLinkType="taskroutingservice:TaskRoutingService"/>
+    <partnerLink myRole="HandleTaskActionRequester" name="TaskActionHandler" partnerRole="HandleTaskActionProvider" partnerLinkType="taskactionhandler:TaskActionHandler"/>
+    <partnerLink name="IdentityService" partnerRole="IdentityServiceProvider" partnerLinkType="identityservice:IdentityService"/>
+  </partnerLinks><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= -->
+  <variables><!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:DocumentReviewRequestMessage"/><!-- Reference to the message that will be sent back to the 
+    requester during callback
+    -->
+    <variable name="outputVariable" messageType="client:DocumentReviewResponseMessage"/>
+    <variable name="ParallelWorkflowWithFinalReviewerVar1" element="task:task"/>
+  </variables><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <sequence name="main"><!-- Receive input from requestor. 
+    Note: This maps to operation defined in DocumentReview.wsdl
+    -->
+    <receive name="receiveInput" partnerLink="client" portType="client:DocumentReview" operation="initiate" variable="inputVariable" createInstance="yes"/><!-- Asynchronous callback to the requester.
+     Note: the callback location and correlation id is transparently handled 
+     using WS-addressing.
+     -->
+    <scope name="ParallelWorkflowWithFinalReviewer1" variableAccessSerializable="no" xmlns:taskactionhandler="http://xmlns.oracle.com/pcbpel/taskservice/taskActionHandler" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpel="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:taskmngr="http://xmlns.oracle.com/pcbpel/taskservice/taskmanager" xmlns:task="http://xmlns.oracle.com/pcbpel/taskservice/task" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:wf="http://schemas.oracle.com/bpel/extension/workflow" wf:key="ParallelWorkflowWithFinalReviewerVar1;taskConfigParallelWorkflowWithFinalReviewer1.xml;Merge;Review for document &lt;%bpws:getVariableData('inputVariable','payload','/client:DocumentReviewProcessRequest/client:documentTitle')%&gt;;bpws:getVariableData('inputVariable', 'payload');;;;;">
+      <variables>
+        <variable name="oraBPMTaskMessage" messageType="taskmngr:taskMessage"/>
+        <variable name="oraBPMNumOfSubTasks" type="xsd:int"/>
+        <variable name="oraBPMAssignees" element="taskmngr:assigneeEntities"/>
+        <variable name="oraBPMReviewers" element="taskmngr:assigneeEntities"/>
+        <variable name="oraBPMTaskErroredFaultMessage" messageType="taskmngr:taskErroredMessage"/>
+        <variable name="oraBPMConDONE" type="xsd:int"/>
+        <variable name="oraBPMCompleteTaskMessage" messageType="taskmngr:completeTaskMessage"/>
+        <variable name="oraBPMTemporaryVariable" type="xsd:string"/>
+        <variable name="oraBPMConclusionPercentage" type="xsd:int"/>
+        <variable name="oraBPMDefaultConclusion" type="xsd:string"/>
+      </variables>
+      <correlationSets>
+        <correlationSet name="oraBPMTaskIdCor" properties="taskmngr:taskId"/>
+      </correlationSets>
+      <sequence>
+        <assign name="setUserDefinedAttributes">
+          <copy>
+            <from expression="concat(&quot;Review of &quot;,bpws:getVariableData('inputVariable','payload','/client:DocumentReviewProcessRequest/client:documentTitle')+1)"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:title"/>
+          </copy>
+          <copy>
+            <from expression="bpws:getVariableData('inputVariable', 'payload')+1"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:payload"/>
+          </copy>
+          <copy>
+            <from variable="oraBPMAssignees" query="/taskmngr:assigneeEntities/taskmngr:assignee[1]"/>
+            <to variable="oraBPMAssignees" query="/taskmngr:assigneeEntities/taskmngr:assignee[1]"/>
+          </copy>
+          <copy>
+            <from expression="ora:copyList('oraBPMAssignees', '/taskmngr:assigneeEntities/taskmngr:assignee',bpws:getVariableData('inputVariable','payload','/client:DocumentReviewProcessRequest/client:assignee')+1)"/>
+            <to variable="oraBPMTemporaryVariable"/>
+          </copy>
+          <copy>
+            <from variable="oraBPMReviewers" query="/taskmngr:assigneeEntities/taskmngr:assignee[1]"/>
+            <to variable="oraBPMReviewers" query="/taskmngr:assigneeEntities/taskmngr:assignee[1]"/>
+          </copy>
+          <copy>
+            <from expression="ora:copyList('oraBPMReviewers', '/taskmngr:assigneeEntities/taskmngr:assignee',bpws:getVariableData('inputVariable','payload','/client:DocumentReviewProcessRequest/client:reviewer')+1)"/>
+            <to variable="oraBPMTemporaryVariable"/>
+          </copy>
+          <copy>
+            <from expression="concat(ora:getProcessURL(), string('/taskConfigParallelWorkflowWithFinalReviewer1.xml'))"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:taskType"/>
+          </copy>
+          <copy>
+            <from>
+              <attachment xmlns="http://xmlns.oracle.com/pcbpel/taskservice/task">
+    
+                <name/>
+    
+                <URI/>
+    
+                <content/>
+
+              </attachment>
+            </from>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:attachment"/>
+          </copy>
+          <copy>
+            <from expression="ora:readFile(ParallelWorkflowWithFinalReviewerVar1+bpws:getVariableData( 'inputVariable','payload',' /client:DocumentReviewProcessRequest /client:URI'))"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:attachment[1]/task:content"/>
+          </copy>
+          <copy>
+            <from variable="inputVariable" part="payload" query="/client:DocumentReviewProcessRequest/client:documentName"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:attachment[1]/task:name"/>
+          </copy>
+        </assign>
+        <assign name="setOutcomeDeterminationPolicy">
+          <copy>
+            <from expression="number(0)"/>
+            <to variable="oraBPMConclusionPercentage"/>
+          </copy>
+          <copy>
+            <from expression="string('DONE')"/>
+            <to variable="oraBPMDefaultConclusion"/>
+          </copy>
+        </assign>
+        <assign name="setSystemDefinedAttributes">
+          <copy>
+            <from expression="ora:getInstanceId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:instanceId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processName"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessVersion()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processVersion"/>
+          </copy>
+          <copy>
+            <from expression="ora:getDomainId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:domainId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessOwnerId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processOwner"/>
+          </copy>
+          <copy>
+            <from expression="string('PARALLEL')"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:pattern"/>
+          </copy>
+          <copy>
+            <from expression="true()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:hasSubTasks"/>
+          </copy>
+          <copy>
+            <from expression="ora:countNodes('oraBPMAssignees', '/taskmngr:assigneeEntities/taskmngr:assignee')"/>
+            <to variable="oraBPMNumOfSubTasks"/>
+          </copy>
+          <copy>
+            <from expression="number(0)"/>
+            <to variable="oraBPMConDONE"/>
+          </copy>
+          <copy>
+            <from variable="ParallelWorkflowWithFinalReviewerVar1"/>
+            <to variable="oraBPMTaskMessage" part="payload"/>
+          </copy>
+        </assign>
+        <scope name="initiateMainTask">
+          <faultHandlers>
+            <catch faultName="taskmngr:taskErroredFault" faultVariable="oraBPMTaskErroredFaultMessage">
+              <assign name="readErroredTask">
+                <copy>
+                  <from variable="oraBPMTaskErroredFaultMessage" part="payload"/>
+                  <to variable="oraBPMTaskMessage" part="payload"/>
+                </copy>
+              </assign>
+            </catch>
+          </faultHandlers>
+          <sequence>
+            <invoke name="initiateMainTaskinvoke" partnerLink="TaskManagerService" portType="taskmngr:TaskManager" operation="initiateTask" inputVariable="oraBPMTaskMessage" outputVariable="oraBPMTaskMessage"/>
+            <assign name="readInitiatedTask">
+              <copy>
+                <from variable="oraBPMTaskMessage" part="payload"/>
+                <to variable="ParallelWorkflowWithFinalReviewerVar1"/>
+              </copy>
+            </assign>
+          </sequence>
+        </scope>
+        <scope name="executeSubTasks">
+          
+            <scope name="executeSubTask">
+              <variables>
+                <variable name="oraBPMInitiateSubTaskMessage" messageType="taskmngr:initiateSubTaskMessage"/>
+                <variable name="oraBPMSubTaskAssignmentVariable" element="taskmngr:taskAssignment"/>
+                <variable name="oraBPMSubTaskMngrMessage" messageType="taskmngr:taskMessage"/>
+              </variables>
+              <correlationSets>
+                <correlationSet name="oraBPMTaskIdCor" properties="taskmngr:taskId"/>
+              </correlationSets>
+              <sequence>
+                <assign name="setInitiateSubTaskMessage">
+                  <copy>
+                    <from variable="oraBPMAssignees" query="/taskmngr:assigneeEntities/taskmngr:assignee[bpws:getVariableData('index',' ')+1]"/>
+                    <to variable="oraBPMSubTaskAssignmentVariable" query="/taskmngr:taskAssignment/taskmngr:assigneeUsers[1]"/>
+                  </copy>
+                  <copy>
+                    <from variable="ParallelWorkflowWithFinalReviewerVar1"/>
+                    <to variable="oraBPMInitiateSubTaskMessage" part="payload"/>
+                  </copy>
+                  <copy>
+                    <from variable="oraBPMSubTaskAssignmentVariable"/>
+                    <to variable="oraBPMInitiateSubTaskMessage" part="taskAssignment"/>
+                  </copy>
+                </assign>
+                <scope name="initiateSubTaskForEachAssignee">
+                  <faultHandlers>
+                    <catch faultName="taskmngr:taskErroredFault" faultVariable="oraBPMTaskErroredFaultMessage">
+                      <assign name="readErroredTask">
+                        <copy>
+                          <from variable="oraBPMTaskErroredFaultMessage" part="payload"/>
+                          <to variable="oraBPMSubTaskMngrMessage" part="payload"/>
+                        </copy>
+                      </assign>
+                    </catch>
+                  </faultHandlers>
+                  <sequence>
+                    <invoke name="initiateSubTaskForEachAssigneeinvoke" partnerLink="TaskManagerService" portType="taskmngr:TaskManager" operation="initiateSubTask" inputVariable="oraBPMInitiateSubTaskMessage" outputVariable="oraBPMSubTaskMngrMessage"/>
+                  </sequence>
+                </scope>
+                <sequence>
+                  <invoke name="initiateTaskActionHandler" partnerLink="TaskActionHandler" portType="taskactionhandler:TaskActionHandler" operation="initiate" inputVariable="oraBPMSubTaskMngrMessage">
+                    <correlations>
+                      <correlation set="oraBPMTaskIdCor" initiate="yes" pattern="out"/>
+                    </correlations>
+                  </invoke>
+                  <receive name="receiveUpdatedTask2" partnerLink="TaskActionHandler" portType="taskactionhandler:TaskActionHandlerCallback" operation="onTaskCompleted" variable="oraBPMSubTaskMngrMessage" createInstance="no">
+                    <correlations>
+                      <correlation set="oraBPMTaskIdCor" initiate="no"/>
+                    </correlations>
+                  </receive>
+                </sequence>
+                <switch name="setOutcomeCount">
+                  <case>
+<condition>
+bpws:getVariableData('oraBPMSubTaskMngrMessage', 'payload', '/task:task/task:state') = 'COMPLETED' and bpws:getVariableData('oraBPMSubTaskMngrMessage', 'payload', '/task:task/task:conclusion') = 'DONE'
+</condition>
+                    <bpelx:annotation>
+                      <bpelx:pattern>Task is COMPLETED and outcome is DONE
+                      </bpelx:pattern>
+                    </bpelx:annotation>
+                    <sequence>
+                      <assign name="setNumberOfOutcomeDONE">
+                        <copy>
+                          <from expression=" bpws:getVariableData('oraBPMConDONE',' ')+1"/>
+                          <to variable="oraBPMConDONE"/>
+                        </copy>
+                      </assign>
+                    </sequence>
+                  </case>
+                </switch>
+              </sequence>
+            </scope>
+          
+        </scope>
+        <scope name="completeMainTask">
+          <faultHandlers>
+            <catch faultName="taskmngr:taskErroredFault" faultVariable="oraBPMTaskErroredFaultMessage">
+              <assign name="readErroredTask">
+                <copy>
+                  <from variable="oraBPMTaskErroredFaultMessage" part="payload"/>
+                  <to variable="oraBPMTaskMessage" part="payload"/>
+                </copy>
+              </assign>
+            </catch>
+          </faultHandlers>
+          <sequence>
+            <switch name="setTaskConclusion">
+              <case>
+ <condition>
+number(100 * (bpws:getVariableData('oraBPMConDONE') div bpws:getVariableData('oraBPMNumOfSubTasks'))) &gt;= bpws:getVariableData('oraBPMConclusionPercentage'锛?')
+</condition>
+               <bpelx:annotation>
+                  <bpelx:pattern>Number of tasks with outcome DONE is greater than the percentage of total tasks specified in the outcome determination policy
+                  </bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                  <assign name="setOutcomeToDONE">
+                    <copy>
+                      <from expression="string('DONE')"/>
+                      <to variable="oraBPMCompleteTaskMessage" part="conclusion"/>
+                    </copy>
+                  </assign>
+                </sequence>
+              </case>
+              <otherwise>
+                <bpelx:annotation>
+                  <bpelx:pattern>Set default conclusion
+                  </bpelx:pattern>
+                </bpelx:annotation>
+                <sequence>
+                  <assign name="setDefaultOutcome">
+                    <copy>
+                      <from expression="bpws:getVariableData('oraBPMDefaultConclusion',' ')+1"/>
+                      <to variable="oraBPMCompleteTaskMessage" part="conclusion"/>
+                    </copy>
+                  </assign>
+                </sequence>
+              </otherwise>
+            </switch>
+            <assign name="createTaskCompleteMessage">
+              <copy>
+                <from variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:taskId"/>
+                <to variable="oraBPMCompleteTaskMessage" part="taskId"/>
+              </copy>
+            </assign>
+            <invoke name="completeTask" partnerLink="TaskManagerService" portType="taskmngr:TaskManager" operation="completeTask" inputVariable="oraBPMCompleteTaskMessage" outputVariable="oraBPMTaskMessage"/>
+          </sequence>
+        </scope>
+        <assign name="readUpdatedTask3">
+          <copy>
+            <from variable="oraBPMTaskMessage" part="payload"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1"/>
+          </copy>
+        </assign>
+        <assign name="setReviewer">
+          <copy>
+            <from expression="ora:copyList('ParallelWorkflowWithFinalReviewerVar1', '/task:task/task:assigneeUsers', bpws:getVariableData('oraBPMReviewers', '/taskmngr:assigneeEntities/taskmngr:assignee')+1)"/>
+            <to variable="oraBPMTemporaryVariable"/>
+          </copy>
+        </assign>
+        <assign name="setSystemDefinedAttributes1">
+          <copy>
+            <from expression="ora:getInstanceId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:instanceId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processName"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessVersion()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processVersion"/>
+          </copy>
+          <copy>
+            <from expression="ora:getDomainId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:domainId"/>
+          </copy>
+          <copy>
+            <from expression="ora:getProcessOwnerId()"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:processOwner"/>
+          </copy>
+          <copy>
+            <from variable="ParallelWorkflowWithFinalReviewerVar1"/>
+            <to variable="oraBPMTaskMessage" part="payload"/>
+          </copy>
+        </assign>
+        <scope name="initiateTask">
+          <faultHandlers>
+            <catch faultName="taskmngr:taskErroredFault" faultVariable="oraBPMTaskErroredFaultMessage">
+              <assign name="readErroredTask">
+                <copy>
+                  <from variable="oraBPMTaskErroredFaultMessage" part="payload"/>
+                  <to variable="oraBPMTaskMessage" part="payload"/>
+                </copy>
+              </assign>
+            </catch>
+          </faultHandlers>
+          <sequence>
+            <invoke name="reinitiateTask" partnerLink="TaskManagerService" portType="taskmngr:TaskManager" operation="reinitiateTask" inputVariable="oraBPMTaskMessage" outputVariable="oraBPMTaskMessage"/>
+          </sequence>
+        </scope>
+        <sequence>
+          <invoke name="initiateTaskActionHandler2" partnerLink="TaskActionHandler" portType="taskactionhandler:TaskActionHandler" operation="initiate" inputVariable="oraBPMTaskMessage">
+            <correlations>
+              <correlation set="oraBPMTaskIdCor" initiate="yes" pattern="out"/>
+            </correlations>
+          </invoke>
+          <receive name="receiveUpdatedTask" partnerLink="TaskActionHandler" portType="taskactionhandler:TaskActionHandlerCallback" operation="onTaskCompleted" variable="oraBPMTaskMessage" createInstance="no">
+            <correlations>
+              <correlation set="oraBPMTaskIdCor" initiate="no"/>
+            </correlations>
+          </receive>
+        </sequence>
+        <assign name="readUpdatedTask2">
+          <copy>
+            <from variable="oraBPMTaskMessage" part="payload"/>
+            <to variable="ParallelWorkflowWithFinalReviewerVar1"/>
+          </copy>
+        </assign>
+      </sequence>
+    </scope>
+    <switch name="taskSwitch" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:tt="http://xmlns.oracle.com/pcbpel/taskservice/tasktype" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <case>
+<condition>
+bpws:getVariableData('ParallelWorkflowWithFinalReviewerVar1',                     '/task:task/task:state') = 'COMPLETED' and            bpws:getVariableData('ParallelWorkflowWithFinalReviewerVar1',                     '/task:task/task:conclusion') = 'DONE'
+</condition>
+        <bpelx:annotation>
+          <bpelx:pattern>Task outcome is DONE
+          </bpelx:pattern>
+        </bpelx:annotation>
+        <sequence>
+          <assign name="copyPayloadFromTask">
+            <copy>
+              <from variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:payload"/>
+              <to variable="inputVariable" part="payload"/>
+            </copy>
+          </assign>
+        </sequence>
+      </case>
+      <otherwise>
+        <bpelx:annotation>
+          <bpelx:pattern>Task is EXPIRED, WITHDRAWN or ERRORED
+          </bpelx:pattern>
+        </bpelx:annotation>
+        <sequence>
+          <assign name="copyPayloadFromTask2">
+            <copy>
+              <from variable="ParallelWorkflowWithFinalReviewerVar1" query="/task:task/task:payload"/>
+              <to variable="inputVariable" part="payload"/>
+            </copy>
+          </assign>
+        </sequence>
+      </otherwise>
+    </switch>
+    <invoke name="callbackClient" partnerLink="client" portType="client:DocumentReviewCallback" operation="onResult" inputVariable="outputVariable"/>
+  </sequence>
+</process>

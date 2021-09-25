@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://SpeedTest/speedtest/public" xmlns:ns1="http://schemas.active-endpoints.com/sample/LoanMod" xmlns:ns11="http://schemas.active-endpoints.com/sample/LoanMod/1" xmlns:ns2="http://SpeedTest/speedtest" xmlns:ns21="http://schemas.active-endpoints.com/sample/LoanMod/2" xmlns:ns3="http://schemas.active-endpoints.com/sample/LoanMod/2009/loanMod.xsd" xmlns:ns31="http://schemas.active-endpoints.com/sample/LoanMod/3" xmlns:xsd="http://www.w3.org/2001/XMLSchema" aei:editStyle="BPMN" ext1:linksAreTransitions="yes" ext:createTargetXPath="yes" ext:disableSelectionFailure="yes" name="LoanModification" suppressJoinFailure="yes" targetNamespace="http://SpeedTest">
+   <bpel:documentation>This sample demonstrates the following scenario. &#13;
+&#13;
+Susan is a Customer Service Representative for the consumer loans&#13;
+department at a bank.  Existing customers who call to request&#13;
+a refinance of their existing loan are routed to the CSR group for&#13;
+processing.&#13;
+&#13;
+Susan enters the customer information into a request form&#13;
+which kicks-off the Loan Modification process.  The process calls&#13;
+existing services to look-up the current terms, check eligibility and&#13;
+provides guidance for the best terms and rates available for this&#13;
+particular customer.  Mark, a loan representative, contacts the&#13;
+customer via phone and negotiates a new term and/or rate with the&#13;
+customer.  If the customer agrees to the loan modification, he&#13;
+enters the new rates and terms into the system which updates the&#13;
+customer records.</bpel:documentation>
+   <b4p:humanInteractions xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://SpeedTest/speedtest/public" xmlns:ns1="http://schemas.active-endpoints.com/sample/LoanMod" xmlns:ns11="http://schemas.active-endpoints.com/sample/LoanMod/1" xmlns:ns2="http://SpeedTest/speedtest" xmlns:ns21="http://schemas.active-endpoints.com/sample/LoanMod/2" xmlns:ns3="http://schemas.active-endpoints.com/sample/LoanMod/2009/loanMod.xsd" xmlns:ns31="http://schemas.active-endpoints.com/sample/LoanMod/3" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <htd:logicalPeopleGroups>
+         <htd:logicalPeopleGroup name="LoanNegotiator"/>
+      </htd:logicalPeopleGroups>
+      <htd:tasks>
+         <htd:task name="NegotiateNewTerms">
+            <htd:interface xmlns:ns="http://schemas.active-endpoints.com/sample/LoanMod/3" operation="NegotiateNewTerms" portType="ns:NegotiateNewTerms"/>
+            <htd:peopleAssignments>
+               <htd:potentialOwners>
+                  <htd:from logicalPeopleGroup="LoanNegotiator"/>
+               </htd:potentialOwners>
+            </htd:peopleAssignments>
+            <htd:presentationElements>
+               <htd:name>Negotiate Terms</htd:name>
+               <htd:presentationParameters>
+                  <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="firstName" type="ns:string">htd:getInput('NegotiateNewTermsRequest')/ns3:loanInfo/ns3:mortgagee/ns3:firstName</htd:presentationParameter>
+                  <htd:presentationParameter xmlns:ns="http://www.w3.org/2001/XMLSchema" name="lastName" type="ns:string">htd:getInput('NegotiateNewTermsRequest')/ns3:loanInfo/ns3:mortgagee/ns3:lastName</htd:presentationParameter>
+               </htd:presentationParameters>
+               <htd:subject>for {$firstName} {$lastName}</htd:subject>
+            </htd:presentationElements>
+            <htd:renderings>
+               <htd:rendering xmlns:ns="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" type="ns:AjaxForm">
+                  <avcform:ajaxFormRendering xmlns:avcform="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" developmentMode="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd" xmlns:ns1="http://schemas.active-endpoints.com/sample/LoanMod" xmlns:ns11="http://schemas.active-endpoints.com/sample/LoanMod/1" xmlns:ns2="http://SpeedTest/speedtest" xmlns:ns21="http://schemas.active-endpoints.com/sample/LoanMod/2" xmlns:ns3="http://schemas.active-endpoints.com/sample/LoanMod/2009/loanMod.xsd" xmlns:ns31="http://schemas.active-endpoints.com/sample/LoanMod/3" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                           <avcform:location>project:/CustomerService/form/task/NegotiateNewTerms.html</avcform:location>
+                        </avcform:ajaxFormRendering>
+               </htd:rendering>
+            </htd:renderings>
+         </htd:task>
+      </htd:tasks>
+      <htd:notifications/>
+   </b4p:humanInteractions>
+   <bpmndi:BPMNDiagram aei:bpelDigest="" aei:editStyle="BPMN" aei:layoutNeeded="false" aei:modelVersion="4" aei:objectId="132095662248000305" aei:processInitiatorSim="" isHorizontal="false" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI">
+      <bpmndi:BPMNPlane>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="1307464911029129099" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="1307464911029129099"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="1307464911029129111" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="1307464911029129111"/>
+         <bpmndi:BPMNShape aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:objectId="1307464911029129123" aei:type="PARTNER_LINK" aei:visible="false,false,false,false,false," bpmnElement="1307464911029129123"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {45,40}" aei:absoluteSize="DIM {171,23}" aei:font="FONT {Tahoma,14,1}" aei:fontColor="RGB {128,128,128}" aei:objectId="132103743971406109" aei:parentElement="process" aei:text="Loan Modification" aei:type="DATAANNOTATION" bpmnElement="132103743971406109">
+            <dc:Bounds height="23" width="171" x="35" y="30"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {15,15}" aei:absoluteSize="DIM {919,289}" aei:objectId="130694182664107539" aei:type="SEQUENCE" bpmnElement="130694182664107539" isHorizontal="true">
+            <dc:Bounds height="289" width="919" x="5" y="5"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {25,129}" aei:absoluteSize="DIM {70,60}" aei:attachments="" aei:name="Loan Modification Request" aei:objectId="130694182664107541" aei:principal="" aei:type="RECEIVE" bpmnElement="130694182664107541">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {36,183}" aei:absoluteSize="DIM {126,26}" aei:anchor.location="1" aei:anchor.objectId="130694182664107541" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132095662251200453" aei:relative.location="LOC {-32,57}" aei:sizeToFit="true" aei:text="Loan Modification Request" bpmnElement="130694182664107541label">
+               <dc:Bounds height="26" width="126" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {120,133}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:name="Get Loan Info from BLS" aei:objectId="130694182665107545" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="130694182665107545">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182665107551" aei:type="ASSIGN" bpmnElement="130694182665107551">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$loanModificationRequest" aei:fromType="3" aei:objectId="1307476920944145117" aei:toPart="Request_Loan_InfoRequest" aei:toQuery="ns3:loan" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920944145117"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {270,133}" aei:absoluteSize="DIM {125,53}" aei:attachments="" aei:bpmNotation="RuleTask" aei:name="Determine Eligibility" aei:objectId="130694182665107555" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="130694182665107555">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182665107561" aei:type="ASSIGN" bpmnElement="130694182665107561">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$loanInfo" aei:fromType="3" aei:objectId="1307476920944145127" aei:toPart="initialEligiblityRequestRequest" aei:toQuery="ns3:currentLoan" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920944145127"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {420,25}" aei:absoluteSize="DIM {504,269}" aei:name="Could they be eligible?" aei:objectId="130694182665107565" aei:type="IF" bpmnElement="130694182665107565" isHorizontal="true">
+            <dc:Bounds height="269" width="504" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {472,150}" aei:absoluteSize="DIM {107,26}" aei:anchor.location="4" aei:anchor.objectId="130694182665107565" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132095662251200477" aei:relative.location="LOC {7,-3}" aei:sizeToFit="true" aei:text="Could they be eligible?" bpmnElement="130694182665107565label">
+               <dc:Bounds height="26" width="107" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:IF_EXPRESSION="$initialEligiblityResponse/ns3:mayBeEligible='true'" aei:IF_EXPR_LANG="" aei:absoluteLocation="LOC {490,25}" aei:absoluteSize="DIM {374,126}" aei:objectId="132095662251200479" aei:text="Yes" aei:type="ELSE_IF" bpmnElement="130694182665107565ifDef">
+            <dc:Bounds height="126" width="374" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {460,69}" aei:absoluteSize="DIM {56,13}" aei:anchor.location="4" aei:anchor.objectId="130694182666107569" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132095662252700533" aei:relative.location="LOC {-59,-29}" aei:sizeToFit="true" aei:text="Yes" bpmnElement="130694182665107565ifDeflabel">
+               <dc:Bounds height="13" width="56" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {529,44}" aei:absoluteSize="DIM {335,88}" aei:objectId="130694182666107571" aei:type="SEQUENCE" bpmnElement="130694182666107571" isHorizontal="true">
+            <dc:Bounds height="93" width="340" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {539,58}" aei:absoluteSize="DIM {70,60}" aei:name="Reply with: Under Review" aei:objectId="130694182666107573" aei:type="REPLY" bpmnElement="130694182666107573">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {505,107}" aei:absoluteSize="DIM {135,26}" aei:anchor.location="1" aei:anchor.objectId="130694182666107573" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132095662251200485" aei:relative.location="LOC {-79,39}" aei:sizeToFit="true" aei:text="Reply with: Under Review" bpmnElement="130694182666107573label">
+               <dc:Bounds height="26" width="135" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182666107581" aei:type="ASSIGN" bpmnElement="130694182666107581">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&quot;under review&quot;" aei:fromType="3" aei:objectId="1307476920954145147" aei:toPart="Request_Loan_ModificationResponse" aei:toQuery="ns3:initialResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145147"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {634,54}" aei:absoluteSize="DIM {125,68}" aei:expanded="false" aei:expandedSize="DIM {645,100}" aei:name="Process Loan Modification" aei:objectId="132103852778014177" aei:showTerminationHandler="false" aei:type="SCOPE" bpmnElement="132103852778014177" isHorizontal="true">
+            <dc:Bounds height="100" width="645" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:anchor.location="11" aei:anchor.objectId="132103852778014177" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132103852779514195" aei:relative.location="LOC {-320,64}" aei:text="Process Loan Modification" bpmnElement="132103852778014177label">
+               <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:objectId="132103852779514197" aei:type="SEQUENCE" bpmnElement="132103852779514197" isHorizontal="true">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {0,0}" aei:absoluteSize="DIM {-1,-1}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="132103852779514199" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="132103852779514199">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:attachments="" aei:name="Get Loan Modification Constraints" aei:objectId="130694182666107585" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="130694182666107585">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182667107591" aei:type="ASSIGN" bpmnElement="130694182667107591">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$loanInfo" aei:fromType="3" aei:objectId="1307476920954145157" aei:toPart="Request_ConstraintsRequest" aei:toQuery="ns3:currentLoan" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145157"/>
+         <bpmndi:BPMNShape aei:actualOwnerSim="" aei:bpmNotation="UserTask" aei:extensionActivityId="com.activee.bpel4peopleep.activities.peopleActivity" aei:name="Negotiate New Terms" aei:objectId="130694182667107595" aei:paSimulationFaultName="" aei:paSimulationOutput="" aei:paSimulationOutputAttachments="" aei:paSimulationResult="0" aei:type="EXTENSION_ACTIVITY" bpmnElement="130694182667107595">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182667107601" aei:type="ASSIGN" bpmnElement="130694182667107601">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$loanInfo" aei:fromType="3" aei:objectId="1307476920954145167" aei:toPart="NegotiateNewTermsRequest" aei:toQuery="ns3:loanInfo" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145167"/>
+         <bpmndi:BPMNShape aei:fromExpression="$modificationConstraints" aei:fromType="3" aei:objectId="1307476920954145169" aei:toPart="NegotiateNewTermsRequest" aei:toQuery="ns3:modificationConstraints" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145169"/>
+         <bpmndi:BPMNShape aei:name="Modify the Loan in the BLS" aei:objectId="130694182667107607" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="130694182667107607">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182668107613" aei:type="ASSIGN" bpmnElement="130694182668107613">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="$loanInfo" aei:fromType="3" aei:objectId="1307476920954145179" aei:toPart="newLoanTerms" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145179"/>
+         <bpmndi:BPMNShape aei:fromExpression="$negotiationResult/ns3:newTerms" aei:fromType="3" aei:objectId="1307476920954145181" aei:toPart="newLoanTerms" aei:toQuery="ns3:terms" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145181"/>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {0,0}" aei:absoluteSize="DIM {-1,-1}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="132103852779514201" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="132103852779514201">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {784,58}" aei:absoluteSize="DIM {70,60}" aei:backgroundColor="RGB {226,226,226}" aei:backgroundImageLocation="icons/bpmn/activity/ActivityBlock.png" aei:borderColor="RGB {0,0,255}" aei:bpmNotation="NoneEvent" aei:collapsed="false" aei:drawBorder="false" aei:font="${system.default}" aei:fontColor="RGB {0,0,0}" aei:imageDisplay="true" aei:imageTextGap="4" aei:joinCondition="" aei:joinConditionLang="" aei:name="" aei:objectId="130694182668107619" aei:scaleImage="false" aei:sizeToFit="true" aei:text="" aei:textAlignment="1" aei:textFormat="1" aei:textPlacement="16" aei:transparent="true" aei:type="NONE_EVENT" bpmnElement="130694182668107619">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {490,176}" aei:absoluteSize="DIM {374,118}" aei:objectId="130694182668107625" aei:text="No" aei:type="ELSE" bpmnElement="130694182665107565elseDef">
+            <dc:Bounds height="118" width="279" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {465,243}" aei:absoluteSize="DIM {19,13}" aei:anchor.location="4" aei:anchor.objectId="130694182668107625" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132095662252700555" aei:relative.location="LOC {-54,-2}" aei:sizeToFit="true" aei:text="No" bpmnElement="130694182665107565elseDeflabel">
+               <dc:Bounds height="13" width="19" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {529,195}" aei:absoluteSize="DIM {240,80}" aei:objectId="130694182668107627" aei:type="SEQUENCE" bpmnElement="130694182668107627" isHorizontal="true">
+            <dc:Bounds height="85" width="245" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {539,209}" aei:absoluteSize="DIM {125,53}" aei:name="Record Rejection with the BLS" aei:objectId="130694182668107629" aei:subprocessPath="" aei:type="INVOKE" bpmnElement="130694182668107629">
+            <dc:Bounds height="53" width="125" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:absoluteLocation="LOC {689,205}" aei:absoluteSize="DIM {70,60}" aei:name="Reply with: Request Denied" aei:objectId="130694182668107633" aei:type="REPLY" bpmnElement="130694182668107633">
+            <dc:Bounds height="60" width="70" x="0" y="0"/>
+            <bpmndi:BPMNLabel aei:absoluteLocation="LOC {727,250}" aei:absoluteSize="DIM {154,39}" aei:anchor.location="1" aei:anchor.objectId="130694182668107633" aei:backgroundColor="RGB {255,255,255}" aei:objectId="132095662252700545" aei:relative.location="LOC {-7,35}" aei:sizeToFit="true" aei:text="Reply with: Request Denied" bpmnElement="130694182668107633label">
+               <dc:Bounds height="39" width="154" x="0" y="0"/>
+            </bpmndi:BPMNLabel>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:implicitScopeIO="INPUT" aei:objectId="130694182669107641" aei:type="ASSIGN" bpmnElement="130694182669107641">
+            <dc:Bounds height="-1" width="-1" x="0" y="0"/>
+         </bpmndi:BPMNShape>
+         <bpmndi:BPMNShape aei:fromExpression="&quot;ineligible&quot;" aei:fromType="3" aei:objectId="1307476920954145207" aei:toPart="Request_Loan_ModificationResponse" aei:toQuery="ns3:initialResponse" aei:toVariable="parameters" aei:type="ASSIGN_COPY" bpmnElement="1307476920954145207"/>
+      </bpmndi:BPMNPlane>
+   </bpmndi:BPMNDiagram>
+   <bpel:extensions>
+      <bpel:extension mustUnderstand="no" namespace="http://www.activebpel.org/2009/02/bpel/extension/ignorable"/>
+      <bpel:extension mustUnderstand="no" namespace="http://www.omg.org/spec/BPMN/20100524/DI"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2006/09/bpel/extension/query_handling"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.activebpel.org/2009/06/bpel/extension/links"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/BPEL4People"/>
+      <bpel:extension mustUnderstand="yes" namespace="http://www.example.org/WS-HT"/>
+   </bpel:extensions>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/LoanModification.public.wsdl" namespace="http://SpeedTest/speedtest/public"/>
+   <bpel:import aei:implicit="true" importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bpel/LoanModification.private.wsdl" namespace="http://SpeedTest/speedtest"/>
+   <bpel:import importType="http://www.w3.org/2001/XMLSchema" location="../schema/loanMod.xsd" namespace="http://schemas.active-endpoints.com/sample/LoanMod/2009/loanMod.xsd"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/loanModification.wsdl" namespace="http://schemas.active-endpoints.com/sample/LoanMod"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/bankLoanService.wsdl" namespace="http://schemas.active-endpoints.com/sample/LoanMod/1"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/mortgageModificationService.wsdl" namespace="http://schemas.active-endpoints.com/sample/LoanMod/2"/>
+   <bpel:import importType="http://schemas.xmlsoap.org/wsdl/" location="../wsdl/negotiateNewTerms.wsdl" namespace="http://schemas.active-endpoints.com/sample/LoanMod/3"/>
+   <bpel:import importType="res:/text/html" location="../form/task/NegotiateNewTerms.html" namespace="http://schemas.active-endpoints.com/avc/2009/07/avoscentral-forms.xsd"/>
+   <bpel:partnerLinks>
+      <bpel:partnerLink aei:id="1307464911029129099" aei:interface="ns1:LoanModificationRequest" myRole="Provider" name="LoanModification" partnerLinkType="ns:LoanModificationRequestPLT"/>
+      <bpel:partnerLink aei:id="1307464911029129111" aei:interface="ns11:BankLoanService" name="BLS" partnerLinkType="ns2:BankLoanServicePLT" partnerRole="Provider"/>
+      <bpel:partnerLink aei:id="1307464911029129123" aei:interface="ns21:MortgageModificationService" name="MortgageModService" partnerLinkType="ns2:MortgageModificationServicePLT" partnerRole="Provider"/>
+   </bpel:partnerLinks>
+   <bpel:variables>
+      <bpel:variable element="ns3:loanModificationRequest" name="loanModificationRequest"/>
+      <bpel:variable element="ns3:loanInfo" name="loanInfo"/>
+      <bpel:variable element="ns3:initialEligiblityResponse" name="initialEligiblityResponse"/>
+      <bpel:variable element="ns3:modificationConstraints" name="modificationConstraints"/>
+      <bpel:variable element="ns3:negotiationResult" name="negotiationResult"/>
+   </bpel:variables>
+   <bpel:sequence aei:id="130694182664107539">
+      <bpel:receive aei:id="130694182664107541" createInstance="yes" name="Loan_Modification_Request" operation="Request_Loan_Modification" partnerLink="LoanModification" variable="loanModificationRequest">
+         <bpel:documentation>This process is used by Customer Service Representative to submit a loan modification &#13;
+request on behalf of an existing customer. </bpel:documentation>
+      </bpel:receive>
+      <bpel:scope aei:implicit="true" name="Get_Loan_Info_from_BLS">
+         <bpel:variables>
+            <bpel:variable messageType="ns11:Request_Loan_InfoRequest" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="130694182665107551">
+               <bpel:copy aei:id="1307476920944145117">
+                  <bpel:from>$loanModificationRequest</bpel:from>
+                  <bpel:to part="Request_Loan_InfoRequest" variable="parameters">
+                     <bpel:query>ns3:loan</bpel:query>
+                  </bpel:to>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:invoke aei:id="130694182665107545" inputVariable="parameters" name="Get_Loan_Info_from_BLS" operation="RequestLoanInfo" outputVariable="loanInfo" partnerLink="BLS">
+               <bpel:documentation>The 'Banking Loan Service' is used to obtain the current rate and terms of the existing loan.  &#13;
+&#13;
+A loan modification request is passed as input, and loan info is returned. &#13;
+&#13;
+The loan modification request includes:&#13;
+		loanNumber&#13;
+		mortgagee: SSN, firstName, lastName, dayPhone, nightPhone, email&#13;
+&#13;
+The loan info includes optional info including:&#13;
+		loanNumber&#13;
+		mortgagee: SSN, firstName, lastName, dayPhone, nightPhone, email&#13;
+		property: address, city, state, zip, assessment&#13;
+		terms: rate type, term duration, rate</bpel:documentation>
+            </bpel:invoke>
+         </bpel:sequence>
+      </bpel:scope>
+      <bpel:scope aei:implicit="true" name="Determine_Eligibility">
+         <bpel:variables>
+            <bpel:variable messageType="ns21:initialEligiblityRequestRequest" name="parameters"/>
+         </bpel:variables>
+         <bpel:sequence>
+            <bpel:assign aei:id="130694182665107561">
+               <bpel:copy aei:id="1307476920944145127">
+                  <bpel:from>$loanInfo</bpel:from>
+                  <bpel:to part="initialEligiblityRequestRequest" variable="parameters">
+                     <bpel:query>ns3:currentLoan</bpel:query>
+                  </bpel:to>
+               </bpel:copy>
+            </bpel:assign>
+            <bpel:invoke aei:id="130694182665107555" inputVariable="parameters" name="Determine_Eligibility" operation="initialEligiblityRequest" outputVariable="initialEligiblityResponse" partnerLink="MortgageModService">
+               <bpel:documentation>The Mortgage Modification Service is invoked to determine inititial eligibility for a &#13;
+loan, or obtain constraints in place. &#13;
+&#13;
+The request is accompanied with loan info as input. If eligible, 'yes" is returned, &#13;
+otherwise 'no' is.&#13;
+&#13;
+Loan contraint information return will include the rate type, terms in months, and &#13;
+a percentage rate.</bpel:documentation>
+            </bpel:invoke>
+         </bpel:sequence>
+      </bpel:scope>
+      <bpel:if aei:id="130694182665107565" name="Could_they_be_eligible">
+         <bpel:documentation>Determines from the Eligiblity Response from the mayBeEligible element whether 'true' or 'false' is present and processes the request accordingly.</bpel:documentation>
+         <bpel:condition>$initialEligiblityResponse/ns3:mayBeEligible='true'</bpel:condition>
+         <bpel:sequence aei:id="130694182666107571">
+            <bpel:scope aei:implicit="true" name="Reply_with_Under_Review">
+               <bpel:variables>
+                  <bpel:variable messageType="ns1:Request_Loan_ModificationResponse" name="parameters"/>
+               </bpel:variables>
+               <bpel:sequence>
+                  <bpel:assign aei:id="130694182666107581">
+                     <bpel:copy aei:id="1307476920954145147">
+                        <bpel:from>"under review"</bpel:from>
+                        <bpel:to part="Request_Loan_ModificationResponse" variable="parameters">
+                           <bpel:query>ns3:initialResponse</bpel:query>
+                        </bpel:to>
+                     </bpel:copy>
+                  </bpel:assign>
+                  <bpel:reply aei:id="130694182666107573" name="Reply_with_Under_Review" operation="Request_Loan_Modification" partnerLink="LoanModification" variable="parameters">
+                     <bpel:documentation>Responds indicating that the loan modification is "under review".</bpel:documentation>
+                  </bpel:reply>
+               </bpel:sequence>
+            </bpel:scope>
+            <bpel:scope aei:id="132103852778014177" name="Process_Loan_Modification">
+               <bpel:documentation>This subprocess first obtains constraints in place on the loan. It then tasks the &#13;
+Loan Negotiator's group to review and negotiate new terms. The result of this &#13;
+negotiation is recorded with the Bank Loan Service. </bpel:documentation>
+               <bpel:sequence aei:id="132103852779514197">
+                  <bpel:empty aei:id="132103852779514199"/>
+                  <bpel:scope aei:implicit="true" name="Get_Loan_Modification_Constraints">
+                     <bpel:variables>
+                        <bpel:variable messageType="ns21:Request_ConstraintsRequest" name="parameters"/>
+                     </bpel:variables>
+                     <bpel:sequence>
+                        <bpel:assign aei:id="130694182667107591">
+                           <bpel:copy aei:id="1307476920954145157">
+                              <bpel:from>$loanInfo</bpel:from>
+                              <bpel:to part="Request_ConstraintsRequest" variable="parameters">
+                                 <bpel:query>ns3:currentLoan</bpel:query>
+                              </bpel:to>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:invoke aei:id="130694182666107585" inputVariable="parameters" name="Get_Loan_Modification_Constraints" operation="RequestConstraints" outputVariable="modificationConstraints" partnerLink="MortgageModService">
+                           <bpel:documentation>Returns loan constraints</bpel:documentation>
+                        </bpel:invoke>
+                     </bpel:sequence>
+                  </bpel:scope>
+                  <bpel:scope aei:implicit="true" name="Negotiate_New_Terms">
+                     <bpel:variables>
+                        <bpel:variable messageType="ns31:NegotiateNewTermsRequest" name="parameters"/>
+                     </bpel:variables>
+                     <bpel:sequence>
+                        <bpel:assign aei:id="130694182667107601">
+                           <bpel:copy aei:id="1307476920954145167">
+                              <bpel:from>$loanInfo</bpel:from>
+                              <bpel:to part="NegotiateNewTermsRequest" variable="parameters">
+                                 <bpel:query>ns3:loanInfo</bpel:query>
+                              </bpel:to>
+                           </bpel:copy>
+                           <bpel:copy aei:id="1307476920954145169">
+                              <bpel:from>$modificationConstraints</bpel:from>
+                              <bpel:to part="NegotiateNewTermsRequest" variable="parameters">
+                                 <bpel:query>ns3:modificationConstraints</bpel:query>
+                              </bpel:to>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:extensionActivity>
+                           <b4p:peopleActivity aei:id="130694182667107595" inputVariable="parameters" name="Negotiate_New_Terms" outputVariable="negotiationResult">
+                              <bpel:documentation>The Loan Negotiators group is tasked to review the loan info, the modification request, &#13;
+and respond with renegotiated terms. </bpel:documentation>
+                              <b4p:localTask reference="NegotiateNewTerms" xmlns:aei="http://www.activebpel.org/2009/02/bpel/extension/ignorable" xmlns:b4p="http://www.example.org/BPEL4People" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ext="http://www.activebpel.org/2006/09/bpel/extension/query_handling" xmlns:ext1="http://www.activebpel.org/2009/06/bpel/extension/links" xmlns:htd="http://www.example.org/WS-HT" xmlns:ns="http://SpeedTest/speedtest/public" xmlns:ns1="http://schemas.active-endpoints.com/sample/LoanMod" xmlns:ns11="http://schemas.active-endpoints.com/sample/LoanMod/1" xmlns:ns2="http://SpeedTest/speedtest" xmlns:ns21="http://schemas.active-endpoints.com/sample/LoanMod/2" xmlns:ns3="http://schemas.active-endpoints.com/sample/LoanMod/2009/loanMod.xsd" xmlns:ns31="http://schemas.active-endpoints.com/sample/LoanMod/3" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                                 <htd:peopleAssignments>
+                                    <htd:potentialOwners>
+                                       <htd:from logicalPeopleGroup="LoanNegotiator"/>
+                                    </htd:potentialOwners>
+                                    <htd:businessAdministrators>
+                                       <htd:from logicalPeopleGroup="LoanNegotiator"/>
+                                    </htd:businessAdministrators>
+                                 </htd:peopleAssignments>
+                              </b4p:localTask>
+                           </b4p:peopleActivity>
+                        </bpel:extensionActivity>
+                     </bpel:sequence>
+                  </bpel:scope>
+                  <bpel:scope aei:implicit="true" name="Modify_the_Loan_in_the_BLS">
+                     <bpel:variables>
+                        <bpel:variable messageType="ns11:LoanModifiedMsg" name="parameters"/>
+                     </bpel:variables>
+                     <bpel:sequence>
+                        <bpel:assign aei:id="130694182668107613">
+                           <bpel:copy aei:id="1307476920954145179">
+                              <bpel:from>$loanInfo</bpel:from>
+                              <bpel:to part="newLoanTerms" variable="parameters"/>
+                           </bpel:copy>
+                           <bpel:copy aei:id="1307476920954145181">
+                              <bpel:from>$negotiationResult/ns3:newTerms</bpel:from>
+                              <bpel:to part="newLoanTerms" variable="parameters">
+                                 <bpel:query>ns3:terms</bpel:query>
+                              </bpel:to>
+                           </bpel:copy>
+                        </bpel:assign>
+                        <bpel:invoke aei:id="130694182667107607" inputVariable="parameters" name="Modify_the_Loan_in_the_BLS" operation="LoanModified" partnerLink="BLS">
+                           <bpel:documentation>Records loan information and terms with the Bank Loan Service.</bpel:documentation>
+                        </bpel:invoke>
+                     </bpel:sequence>
+                  </bpel:scope>
+                  <bpel:empty aei:id="132103852779514201"/>
+               </bpel:sequence>
+            </bpel:scope>
+            <bpel:empty aei:id="130694182668107619"/>
+         </bpel:sequence>
+         <bpel:else aei:id="130694182668107625">
+            <bpel:sequence aei:id="130694182668107627">
+               <bpel:invoke aei:id="130694182668107629" name="Record_Rejection_with_the_BLS" operation="ModificationRejected" partnerLink="BLS">
+                  <bpel:documentation>Call the Bank Loan Service to record rejection of the loan. </bpel:documentation>
+               </bpel:invoke>
+               <bpel:scope aei:implicit="true" name="Reply_with_Request_Denied">
+                  <bpel:variables>
+                     <bpel:variable messageType="ns1:Request_Loan_ModificationResponse" name="parameters"/>
+                  </bpel:variables>
+                  <bpel:sequence>
+                     <bpel:assign aei:id="130694182669107641">
+                        <bpel:copy aei:id="1307476920954145207">
+                           <bpel:from>"ineligible"</bpel:from>
+                           <bpel:to part="Request_Loan_ModificationResponse" variable="parameters">
+                              <bpel:query>ns3:initialResponse</bpel:query>
+                           </bpel:to>
+                        </bpel:copy>
+                     </bpel:assign>
+                     <bpel:reply aei:id="130694182668107633" name="Reply_with_Request_Denied" operation="Request_Loan_Modification" partnerLink="LoanModification" variable="parameters">
+                        <bpel:documentation>Responds indicating that the loan is "ineligible" for modification.</bpel:documentation>
+                     </bpel:reply>
+                  </bpel:sequence>
+               </bpel:scope>
+            </bpel:sequence>
+         </bpel:else>
+      </bpel:if>
+   </bpel:sequence>
+</bpel:process>

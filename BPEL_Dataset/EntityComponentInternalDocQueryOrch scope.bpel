@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="EntityComponentInternalDocQueryOrch"
+    targetNamespace="urn:gov:hhs:fha:nhinc:gateway:entityinternalorchbpel:entitycomponentinternaldocqueryorch"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+    xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+    xmlns:sxeh="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/ErrorHandling"
+    xmlns:tns="urn:gov:hhs:fha:nhinc:gateway:entityinternalorchbpel:entitycomponentinternaldocqueryorch" 
+    xmlns:ns0="urn:oasis:names:tc:ebxml-regrep:xsd:query:3.0" 
+    xmlns:ns1="urn:gov:hhs:fha:nhinc:common:nhinccommon" 
+    xmlns:ns2="urn:gov:hhs:fha:nhinc:common:nhinccommonproxy" 
+    xmlns:ns3="urn:gov:hhs:fha:nhinc:common:entitycommoninternalorch" 
+    xmlns:ns4="urn:gov:hhs:fha:nhinc:common:aggregator" 
+    xmlns:ns6="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+    xmlns:ns7="urn:gov:hhs:fha:nhinc:common:nhinccommondocumenttransform" xmlns:ns8="urn:gov:hhs:fha:nhinc:gateway:aggregator" xmlns:ns9="urn:gov:hhs:fha:nhinc:common:connectionmanagerinfo">
+    <import namespace="urn:gov:hhs:fha:nhinc:entitycomponentinternaldocqueryorch" location="Interfaces/wsdl/EntityComponentInternalDocQueryOrch.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:nhincproxydocquery" location="Interfaces/wsdl/NhincProxyDocQuery.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:nhinccomponentaggregator" location="Interfaces/wsdl/NhincComponentAggregator.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:nhinccomponentdocumenttransform" location="Interfaces/wsdl/NhincComponentDocumentTransform.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" location="Interfaces/wsdl/NhincComponentConnectionManager.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+        <partnerLink name="DocTransformPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentdocumenttransform" partnerLinkType="tns:NhincComponentDocumentTransform" partnerRole="NhincComponentDocumentTransformPortTypeRole"/>
+        <partnerLink name="ConnectionManagerPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" partnerLinkType="tns:NhincComponentConnectionManager" partnerRole="NhincComponentConnectionManagerPortTypeRole"/>
+        <partnerLink name="NhinProxyDocQueryPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhincproxydocquery" partnerLinkType="tns:NhincProxyDocQuery" partnerRole="NhincProxyDocQueryPortTypeRole"/>
+        <partnerLink name="AggregatorPL" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentaggregator" partnerLinkType="tns:NhincComponentAggregator" partnerRole="NhincComponentAggregatorPortTypeRole"/>
+        <partnerLink name="InternalDocQueryOrchPL" xmlns:tns="urn:gov:hhs:fha:nhinc:entitycomponentinternaldocqueryorch" partnerLinkType="tns:EntityComponentInternalDocQueryOrch" myRole="EntityComponentInternalDocQueryOrchPortTypeRole"/>
+    </partnerLinks>
+    <variables>
+        <variable name="SendAdhocQueryOut" xmlns:tns="urn:gov:hhs:fha:nhinc:entitycomponentinternaldocqueryorch" messageType="tns:SendAdhocQueryResponseMessage"/>
+        <variable name="SendAdhocQueryIn" xmlns:tns="urn:gov:hhs:fha:nhinc:entitycomponentinternaldocqueryorch" messageType="tns:SendAdhocQueryRequestMessage"/>
+    </variables>
+    <sequence>
+        <receive name="ReceiveInternalDocQuery" createInstance="yes" partnerLink="InternalDocQueryOrchPL" operation="SendAdhocQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:entitycomponentinternaldocqueryorch" portType="tns:EntityComponentInternalDocQueryOrchPortType" variable="SendAdhocQueryIn"/>
+        <scope name="InternalDocQueryScope">
+            <variables>
+                <variable name="GetHomeCommunityByAssigningAuthorityOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" messageType="tns:GetHomeCommunityByAssigningAuthorityResponseMessage"/>
+                <variable name="GetHomeCommunityByAssigningAuthorityIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" messageType="tns:GetHomeCommunityByAssigningAuthorityRequestMessage"/>
+                <variable name="ReplaceAdhocQueryPatientIdOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentdocumenttransform" messageType="tns:ReplaceAdhocQueryPatientIdResponse"/>
+                <variable name="ReplaceAdhocQueryPatientIdIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentdocumenttransform" messageType="tns:ReplaceAdhocQueryPatientIdRequest"/>
+                <variable name="SetResponseMsgDocQueryOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentaggregator" messageType="tns:SetResponseMsgDocQueryResponseMessage"/>
+                <variable name="SetResponseMsgDocQueryIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentaggregator" messageType="tns:SetResponseMsgDocQueryRequestMessage"/>
+                <variable name="Proxy_CrossGatewayQueryOut" xmlns:tns="urn:gov:hhs:fha:nhinc:nhincproxydocquery" messageType="tns:RespondingGateway_CrossGatewayQueryResponseMessage"/>
+                <variable name="Proxy_CrossGatewayQueryIn" xmlns:tns="urn:gov:hhs:fha:nhinc:nhincproxydocquery" messageType="tns:RespondingGateway_CrossGatewayQueryRequestMessage"/>
+            </variables>
+            <faultHandlers>
+                <catch faultName="sxeh:systemFault" faultVariable="systemFaultVar" faultMessageType="sxeh:faultMessage">
+                    <sequence name="SystemFaultSeq">
+                        <assign name="AssignResponseFromError">
+                            <sxt:trace>
+                                <sxt:log level="info" location="onStart">
+                                    <from>'EntityComponentInternalDocQueryOrch.bpel - A system fault was encountered sending an individual document query message. Fault details follow...'</from>
+                                </sxt:log>
+                                <sxt:log level="warning" location="onStart">
+                                    <ns6:from variable="systemFaultVar"/>
+                                </sxt:log>
+                            </sxt:trace>
+                            <copy>
+                                <from>'ERROR'</from>
+                                <to>$SendAdhocQueryOut.SendAdhocQueryResponse/ns3:Status</to>
+                            </copy>
+                        </assign>
+                    </sequence>
+                </catch>
+            </faultHandlers>
+            <sequence name="InternalDocQuerySeq">
+                <empty name="TODO_LookupCommunityFromAssigningAuth"/>
+                <assign name="AssignAssingningAuthority">
+                    <copy>
+                        <from>$SendAdhocQueryIn.SendAdhocQueryRequest/ns1:QualifiedSubjectIdentifier/ns1:AssigningAuthorityIdentifier</from>
+                        <to>$GetHomeCommunityByAssigningAuthorityIn.GetHomeCommunityByAssigningAuthorityRequest/ns9:AssigningAuthorities/ns1:assigningAuthorityId</to>
+                    </copy>
+                </assign>
+                <invoke name="InvokeGetHomeCommunityId" partnerLink="ConnectionManagerPL" operation="GetHomeCommunityByAssigningAuthority" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentconnectionmanager" portType="tns:NhincComponentConnectionManagerPortType" inputVariable="GetHomeCommunityByAssigningAuthorityIn" outputVariable="GetHomeCommunityByAssigningAuthorityOut"/>
+                <assign name="AssignDocTransformInput">
+                    <sxt:trace>
+                        <sxt:log level="info" location="onStart">
+                            <ns6:from>'@@@ EntityComponentInternalDocQueryOrch - processing a message'</ns6:from>
+                        </sxt:log>
+                    </sxt:trace>
+                    <copy>
+                        <from>$SendAdhocQueryIn.SendAdhocQueryRequest/ns0:AdhocQueryRequest</from>
+                        <to>$ReplaceAdhocQueryPatientIdIn.ReplaceAdhocQueryPatientIdRequest/ns0:AdhocQueryRequest</to>
+                    </copy>
+                    <copy>
+                        <from>$SendAdhocQueryIn.SendAdhocQueryRequest/ns1:QualifiedSubjectIdentifier</from>
+                        <to>$ReplaceAdhocQueryPatientIdIn.ReplaceAdhocQueryPatientIdRequest/ns7:QualifiedSubjectIdentifier</to>
+                    </copy>
+                    <copy>
+                        <from>$GetHomeCommunityByAssigningAuthorityOut.GetHomeCommunityByAssigningAuthorityResponse/ns9:HomeCommunity/ns1:homeCommunityId</from>
+                        <to>$ReplaceAdhocQueryPatientIdIn.ReplaceAdhocQueryPatientIdRequest/ns7:HomeCommunityId</to>
+                    </copy>
+                </assign>
+                <invoke name="InvokeDocTransform" partnerLink="DocTransformPL" operation="ReplaceAdhocQueryPatientId" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentdocumenttransform" portType="tns:NhincComponentDocumentTransformPortType" inputVariable="ReplaceAdhocQueryPatientIdIn" outputVariable="ReplaceAdhocQueryPatientIdOut"/>
+                <assign name="AssignProxyDocQueryInput">
+                    <sxt:trace>
+                        <sxt:log level="info" location="onStart">
+                            <ns6:from>concat("Lookup on assigning authority '", $SendAdhocQueryIn.SendAdhocQueryRequest/ns1:QualifiedSubjectIdentifier/ns1:AssiginingAuthorityIdentifier, "' found home community id: ", $GetHomeCommunityByAssigningAuthorityOut.GetHomeCommunityByAssigningAuthorityResponse/ns9:HomeCommunity/ns1:homeCommunityId)</ns6:from>
+                        </sxt:log>
+                    </sxt:trace>
+                    <copy>
+                        <from>$SendAdhocQueryIn.SendAdhocQueryRequest/ns1:Assertion</from>
+                        <to>$Proxy_CrossGatewayQueryIn.RespondingGateway_CrossGatewayQueryRequest/ns2:assertion</to>
+                    </copy>
+                    <copy>
+                        <from>$ReplaceAdhocQueryPatientIdOut.ReplaceAdhocQueryPatientIdResponse/ns0:AdhocQueryRequest</from>
+                        <to>$Proxy_CrossGatewayQueryIn.RespondingGateway_CrossGatewayQueryRequest/ns0:AdhocQueryRequest</to>
+                    </copy>
+                    <copy>
+                        <from>$GetHomeCommunityByAssigningAuthorityOut.GetHomeCommunityByAssigningAuthorityResponse/ns9:HomeCommunity/ns1:homeCommunityId</from>
+                        <to>$Proxy_CrossGatewayQueryIn.RespondingGateway_CrossGatewayQueryRequest/ns2:nhinTargetSystem/ns1:homeCommunity/ns1:homeCommunityId</to>
+                    </copy>
+                </assign>
+                <invoke name="InvokeNhinProxyDocQuery" partnerLink="NhinProxyDocQueryPL" operation="RespondingGateway_CrossGatewayQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:nhincproxydocquery" portType="tns:NhincProxyDocQueryPortType" inputVariable="Proxy_CrossGatewayQueryIn" outputVariable="Proxy_CrossGatewayQueryOut">
+                    <sxt:trace>
+                        <sxt:log level="warning" location="onStart">
+                            <ns6:from>'@@@ Sending a message to the doc query proxy'</ns6:from>
+                        </sxt:log>
+                    </sxt:trace>
+                </invoke>
+                <assign name="AssignAggregatorInput">
+                    <sxt:trace>
+                        <sxt:log level="warning" location="onStart">
+                            <ns6:from>'@@@ Response from NhinProxyQuery'</ns6:from>
+                        </sxt:log>
+                        <sxt:log level="info" location="onStart">
+                            <ns6:from variable="Proxy_CrossGatewayQueryOut"/>
+                        </sxt:log>
+                    </sxt:trace>
+                    <copy>
+                        <from variable="Proxy_CrossGatewayQueryOut" part="RespondingGateway_CrossGatewayQueryResponse"/>
+                        <to>$SetResponseMsgDocQueryIn.SetResponseMsgDocQueryRequest/ns0:AdhocQueryResponse</to>
+                    </copy>
+                    <copy>
+                        <from>$SendAdhocQueryIn.SendAdhocQueryRequest/ns3:TransactionId</from>
+                        <to>$SetResponseMsgDocQueryIn.SetResponseMsgDocQueryRequest/ns8:transactionId</to>
+                    </copy>
+                    <copy>
+                        <from>$SendAdhocQueryIn.SendAdhocQueryRequest/ns1:QualifiedSubjectIdentifier</from>
+                        <to>$SetResponseMsgDocQueryIn.SetResponseMsgDocQueryRequest/ns8:qualifiedPatientIdentifier</to>
+                    </copy>
+                    <copy>
+                        <from>$GetHomeCommunityByAssigningAuthorityOut.GetHomeCommunityByAssigningAuthorityResponse/ns9:HomeCommunity/ns1:homeCommunityId</from>
+                        <to>$SetResponseMsgDocQueryIn.SetResponseMsgDocQueryRequest/ns8:homeCommunityId</to>
+                    </copy>
+                </assign>
+                <invoke name="InvokeAggregatorResponse" partnerLink="AggregatorPL" operation="SetResponseMsgDocQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:nhinccomponentaggregator" portType="tns:NhincComponentAggregatorPortType" inputVariable="SetResponseMsgDocQueryIn" outputVariable="SetResponseMsgDocQueryOut">
+                    <sxt:trace>
+                        <sxt:log level="info" location="onStart">
+                            <ns6:from>'@@@ Calling set aggregator response'</ns6:from>
+                        </sxt:log>
+                    </sxt:trace>
+                </invoke>
+                <assign name="AssignResponseStatus">
+                    <copy>
+                        <from>$SetResponseMsgDocQueryOut.SetResponseMsgDocQueryResponse/ns8:status</from>
+                        <to>$SendAdhocQueryOut.SendAdhocQueryResponse/ns3:Status</to>
+                    </copy>
+                </assign>
+            </sequence>
+        </scope>
+        <reply name="ReplySendAdhocQuery" partnerLink="InternalDocQueryOrchPL" operation="SendAdhocQuery" xmlns:tns="urn:gov:hhs:fha:nhinc:entitycomponentinternaldocqueryorch" portType="tns:EntityComponentInternalDocQueryOrchPortType" variable="SendAdhocQueryOut"/>
+    </sequence>
+</process>

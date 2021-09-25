@@ -1,0 +1,104 @@
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     AggregatedCatalog is a synchronous BPEL service which invokes two
+	 asynchronous BPEL search services in parallel. The purpose of this
+	 sample is to show how invoking services in parallel reduces the total
+	 processing time. 
+	 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<process name="AggregatedCatalog" 
+         targetNamespace="http://samples.otn.com" 
+         suppressJoinFailure="yes" 
+         xmlns:tns="http://samples.otn.com" 
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" 
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:yahoo="http://yahoo.com/search"
+         xmlns:google="http://google.com/search"
+         xmlns:search="http://search.org"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNERLINKS: Each partnerLink represents a message exchange pattern
+	 (aka interaction) between this BPEL process and external web services.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <partnerLinks>
+        <partnerLink name="client" 
+             partnerLinkType="tns:AggregatedCatalog" 
+             myRole="AggregatedCatalogProvider"/>
+
+        <partnerLink name="YahooSearch"
+             partnerLinkType="yahoo:YahooSearch"
+             partnerRole="YahooSearchProvider"/>
+    
+        <partnerLink name="GoogleSearch"
+             partnerLinkType="google:GoogleSearch"
+             partnerRole="GoogleSearchProvider"/>
+
+    </partnerLinks>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     VARIABLES: List of messages and XML documents used in this process 
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <variables>
+
+        <variable name="input"         messageType="tns:AggregatedCatalogRequestMessage"     />
+        <variable name="output"        messageType="tns:AggregatedCatalogResponseMessage"    />
+
+        <variable name="yahooInMsg"    messageType="yahoo:YahooSearchRequestMessage"         />
+        <variable name="yahooOutMsg"   messageType="yahoo:YahooSearchResponseMessage"        />
+
+        <variable name="googleInMsg"   messageType="google:GoogleSearchRequestMessage"       />
+        <variable name="googleOutMsg"  messageType="google:GoogleSearchResponseMessage"      />
+
+    </variables>
+
+    <sequence name="main">
+	    <!-- Receive input message generated through BPEL console -->
+        <receive name="receiveInput" 
+                 partnerLink="client" 
+                 portType="tns:AggregatedCatalog" 
+                 operation="process" 
+                 variable="input" 
+                 createInstance="yes"
+                 />
+				 
+        <!-- Split the process into 2 parallel branches of execution -->
+        <flow>
+			<!-- The invoke calls the Google BPEL service and should
+			     take 3 seconds to complete.
+				 -->
+            <invoke name="initiateGoogle"
+		            partnerLink="GoogleSearch"
+		            portType="google:GoogleSearch"
+		            operation="process"
+		            inputVariable="googleInMsg"
+		            outputVariable="googleOutMsg"/>
+
+			<!-- The invoke calls the Yahoo BPEL service and should
+			     take 4 seconds to complete.
+				 -->
+		    <invoke name="initiateYahoo"
+		            partnerLink="YahooSearch"
+		            portType="yahoo:YahooSearch"
+		            operation="process"
+		            inputVariable="yahooInMsg"
+		            outputVariable="yahooOutMsg"/>
+        </flow>
+
+		<!-- Combine the yahoo and google response -->
+		<assign>
+			<copy>
+				<from expression="concat(ora:getNodeValue( bpws:getVariableData( 'yahooOutMsg', 'payload', '/search:SearchResponse/search:result' ) ),' and ',ora:getNodeValue( bpws:getVariableData( 'googleOutMsg', 'payload', '/search:SearchResponse/search:result')))"/>
+				<to variable="output" part="payload" query="/search:SearchResponse/search:result"/>
+			</copy>
+		</assign>
+
+        <!-- Generate reply to synchronous request -->
+        <reply name="replyOutput" 
+               partnerLink="client" 
+               portType="tns:AggregatedCatalog" 
+               operation="process" 
+               variable="output"
+               />
+    </sequence>
+</process>

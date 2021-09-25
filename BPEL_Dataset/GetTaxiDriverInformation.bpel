@@ -1,0 +1,308 @@
+<bpel:process name="GetTaxiDriverInformation"
+  targetNamespace="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/definitions"
+  suppressJoinFailure="yes"
+  xmlns:tns="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/definitions"
+  xmlns:types="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/types"
+  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+  xmlns:pns="http://www.ict-ccast.eu/CMF/ContextBroker/GetBrokerContextInclude/DomInd/definitions"
+  xmlns:ptns="http://www.ict-ccast.eu/CMF/ContextBroker/GetBrokerContextInclude/DomInd/types"
+  xmlns:cbtns="http://www.ict-ccast.eu/CMF/ContextBroker/types"
+  xmlns:contextML="http://ContextML/1.7" >
+
+
+  <!-- 
+   GetTaxiDriverInformation is a synchronous BPEL process. It returns profile information
+   of a particular taxi driver including contact details. This context integration process 
+   accepts an input parameter that holds the information identifying a particular taxi driver.
+   GetTaxiDriverInformation relies on the Domain Independent CIP GetBrokerContextInclude of
+   the C-CAST CMF.
+   
+  
+   @Layer: Domain Specific CIPs
+   @Based on: GetBrokerContextInclude (Domain Independent CIP) 
+   
+   @System: C-CAST CMF
+   @Component: ContextBroker
+   @Interface: GetContext
+  
+   
+   @Author: Rodion Hagin
+   @Created: 01.06.2011
+  
+  -->
+	  
+  <!-- WSDL IMPORTS -->
+  <bpel:import location="GetTaxiDriverInformationArtifacts.wsdl"
+    namespace="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <bpel:import location="GetBrokerContextIncludeArtifacts.wsdl"
+    namespace="http://www.ict-ccast.eu/CMF/ContextBroker/GetBrokerContextInclude/DomInd/definitions"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+
+
+
+  <!-- PARTNERLINKS -->
+  <bpel:partnerLinks>
+    
+    <!-- Represents the requester of this service. Used for callback. -->
+    <bpel:partnerLink name="Client"
+      partnerLinkType="tns:TaxiDriverInformationProviderPLT" myRole="TaxiDriverInformationProvider" />
+	
+	<!-- Represents GetBrokerContextInclude CIP. -->
+    <bpel:partnerLink name="BrokerContextIncludeProvider"
+      partnerLinkType="pns:BrokerContextIncludeProviderPLT" partnerRole="BrokerContextIncludeProvider" />
+  </bpel:partnerLinks>
+
+
+  <!-- VARIABLES -->
+  <bpel:variables>
+    <!-- Business process input -->
+    <bpel:variable name="input"
+      messageType="tns:GetTaxiDriverInformationRequestMessage" />
+
+    <!-- Business process output -->
+    <bpel:variable name="output"
+      messageType="tns:GetTaxiDriverInformationResponseMessage" />
+
+    <!-- Business process fault output -->
+    <bpel:variable name="fault"
+      messageType="tns:GetTaxiDriverInformationFaultMessage" />
+
+    <!-- GetBrokerContextInclude CIP input -->
+    <bpel:variable name="inputBCI"
+      messageType="pns:GetBrokerContextIncludeRequestMessage" />
+
+    <!-- GetBrokerContextInclude CIP output -->
+    <bpel:variable name="outputBCI"
+      messageType="pns:GetBrokerContextIncludeResponseMessage" />
+
+  </bpel:variables>
+
+
+  <!-- FAULT HANDLING LOGIC -->
+  <bpel:faultHandlers>
+    
+    <!-- Catch and process faults thrown by GetBrokerContextInclude CIP -->
+    <bpel:catch faultName="pns:GetBrokerContextIncludeFault"
+      faultVariable="faultBCI" faultMessageType="pns:GetBrokerContextIncludeFaultMessage">
+
+      <bpel:sequence>
+        <bpel:assign validate="no" name="ProcessFaultFromBCI">
+          
+          <!-- To manipulate variable contents it should be pre-initiliazed. 
+        	   Apache ODE requirement. 
+        	  -->
+          <bpel:copy>
+            <bpel:from>
+              <bpel:literal>
+                <tn:GetTaxiDriverInformationFault
+                  xmlns:tn="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/types"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                  <tn:status></tn:status>
+                </tn:GetTaxiDriverInformationFault>
+              </bpel:literal>
+            </bpel:from>
+            <bpel:to part="payload" variable="fault" />
+          </bpel:copy>
+          <bpel:copy>
+            <bpel:from>
+                    <![CDATA[$faultBCI.payload//contextML:resp/@msg]]>
+            </bpel:from>
+            <bpel:to part="payload" variable="fault">
+              <bpel:query
+                queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                    <![CDATA[types:status]]>
+              </bpel:query>
+            </bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply name="replyFaultOutput" partnerLink="Client"
+          portType="tns:GetTaxiDriverInformation" operation="process"
+          variable="fault" faultName="tns:GetTaxiDriverInformationFault" />
+      </bpel:sequence>
+    </bpel:catch>
+
+	<!-- Catch all faults during current process execution, generate fault message and 
+         send back to the requester interface 
+        -->
+    <bpel:catchAll>
+      <bpel:sequence>
+        <bpel:assign validate="no" name="CreateNewFault">
+          <bpel:copy>
+            <bpel:from>
+              <bpel:literal>
+                <tn:GetTaxiDriverInformationFault
+                  xmlns:tn="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/types"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                  <tn:status>GetTaxiDriverInformation process error</tn:status>
+                </tn:GetTaxiDriverInformationFault>
+              </bpel:literal>
+            </bpel:from>
+            <bpel:to part="payload" variable="fault" />
+          </bpel:copy>
+        </bpel:assign>
+
+        <bpel:reply name="replyFaultOutput" partnerLink="Client"
+          portType="tns:GetTaxiDriverInformation" operation="process"
+          variable="fault" faultName="tns:GetTaxiDriverInformationFault" />
+      </bpel:sequence>
+    </bpel:catchAll>
+
+  </bpel:faultHandlers>
+
+
+  <!-- ORCHESTRATION LOGIC -->
+    
+  <!-- Set of activities coordinating the flow of messages across the    
+     services integrated within this business process.  
+     
+     GetTaxiDriverInformation BPEL process invokes GetBrokerContextInclude CIP
+     to obtain profile information of a particular taxi driver including contact
+     details. The response of the GetBrokerContextInclude CIP is then processed
+     to create reply message for the requester of this CIP.
+    -->
+  <bpel:sequence name="main">
+
+    <bpel:receive name="receiveInput" partnerLink="Client"
+      portType="tns:GetTaxiDriverInformation" operation="process"
+      variable="input" createInstance="yes" />
+
+    <bpel:assign validate="no" name="PrepareInputToCIPGetBrokerContextInclude">
+      
+      <!-- To manipulate variable contents it should be pre-initialized. 
+    	   Apache ODE requirement. 
+    	  -->
+      <!-- TaxiDriver is an entity of type imei. Contact information is stored as userProfile
+      	context scope. -->
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal>
+            <tn:GetBrokerContextIncludeRequest
+              xmlns:tn="http://www.ict-ccast.eu/CMF/ContextBroker/GetBrokerContextInclude/DomInd/types"
+              xmlns:tn1="http://www.ict-ccast.eu/CMF/ContextBroker/types"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              <tn:entityList>
+                <tn1:entity>
+                  <tn1:id></tn1:id>
+                  <tn1:type>imei</tn1:type>
+                </tn1:entity>
+              </tn:entityList>
+              <tn:scopeList>
+                <tn1:scope>userProfile</tn1:scope>
+              </tn:scopeList>
+              <tn:parameterList />
+            </tn:GetBrokerContextIncludeRequest>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputBCI" />
+      </bpel:copy>
+
+      <bpel:copy>
+        <bpel:from>
+          <![CDATA[$input.payload/types:taxiID]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="inputBCI">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                  <![CDATA[ptns:entityList/cbtns:entity/cbtns:id]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+
+    </bpel:assign>
+	
+	<!-- Retrieve the contact details of a taxi driver -->
+    <bpel:invoke name="InvokeCIPGetBrokerContextInclude" partnerLink="BrokerContextIncludeProvider"
+      operation="process" portType="pns:GetBrokerContextInclude"
+      inputVariable="inputBCI" outputVariable="outputBCI" />
+
+	<!-- Process response message to create reply message for the requester of this CIP -->
+    <bpel:assign validate="no" name="ProcessOutputFromCIPGetBrokerContextInclude">
+      
+      <!-- To manipulate variable contents it should be pre-initialized. 
+      	   Apache ODE requirement. 
+      	  -->
+      <bpel:copy>
+        <bpel:from>
+          <bpel:literal>
+            <tn:GetTaxiDriverInformationResponse
+              xmlns:tn="http://www.ict-ccast.eu/CMF/GetTaxiDriverInformation/DomSpec/types"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              <tn:taxiID></tn:taxiID>
+              <tn:firstName></tn:firstName>
+              <tn:lastName></tn:lastName>
+              <tn:email></tn:email>
+              <tn:mobile></tn:mobile>
+            </tn:GetTaxiDriverInformationResponse>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to part="payload" variable="output" />
+      </bpel:copy>
+      
+      <bpel:copy>
+        <bpel:from>
+          <![CDATA[$input.payload/types:taxiID]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="output">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+              <![CDATA[types:taxiID]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>
+          <![CDATA[$outputBCI.payload//contextML:ctxEl/contextML:dataPart/contextML:par[@n='firstName']/node()]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="output">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+              <![CDATA[types:firstName]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>
+          <![CDATA[$outputBCI.payload//contextML:ctxEl/contextML:dataPart/contextML:par[@n='lastName']/node()]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="output">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+              <![CDATA[types:lastName]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+      
+      <!-- Eclipde BPEL Designer: cannot resolve the XPath string. 
+          -->
+      <bpel:copy>
+        <bpel:from>
+          <![CDATA[$outputBCI.payload//contextML:ctxEl/contextML:dataPart/contextML:parA[@n='emails']/contextML:parS[1]/contextML:par[@n='email']/node()]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="output">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+              <![CDATA[types:email]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+      
+      <!-- Eclipde BPEL Designer: cannot resolve the XPath string. 
+          -->
+      <bpel:copy>
+        <bpel:from>
+          <![CDATA[$outputBCI.payload//contextML:ctxEl/contextML:dataPart/contextML:parA[@n='mobiles']/contextML:parS[1]/contextML:par[@n='mobile']/node()]]>
+        </bpel:from>
+        <bpel:to part="payload" variable="output">
+          <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+              <![CDATA[types:mobile]]>
+          </bpel:query>
+        </bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+	
+	<!--  Send reply message containing taxi driver contact details -->
+    <bpel:reply name="replyOutput" partnerLink="Client"
+      portType="tns:GetTaxiDriverInformation" operation="process"
+      variable="output" />
+
+  </bpel:sequence>
+</bpel:process>
+

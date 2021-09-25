@@ -1,0 +1,144 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Wed Jul 12 00:25:13 PDT 2006
+  Author:  smcritch
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="InsertWithClobs"
+         targetNamespace="http://xmlns.oracle.com/InsertWithClobs"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/db/top/readMovie"
+         xmlns:ids="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns5="http://xmlns.oracle.com/pcbpel/adapter/db/top/readMovieAsClob"
+         xmlns:client="http://xmlns.oracle.com/InsertWithClobs"
+         xmlns:ns6="http://xmlns.oracle.com/pcbpel/adapter/db/top/insertMovieAsClob"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:hwf="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/readMovie/"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/db/readMovieAsClob/"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/insertMovieAsClob/"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="client" partnerLinkType="client:InsertWithClobs"
+                 myRole="InsertWithClobsProvider"/>
+    <partnerLink name="readMovie" partnerRole="readMovie_role"
+                 partnerLinkType="ns1:readMovie_plt"/>
+    <partnerLink name="insertMovieAsClob" partnerRole="insertMovieAsClob_role"
+                 partnerLinkType="ns2:insertMovieAsClob_plt"/>
+    <partnerLink name="readMovieAsClob" partnerRole="readMovieAsClob_role"
+                 partnerLinkType="ns3:readMovieAsClob_plt"/>
+  </partnerLinks>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable"
+              messageType="client:InsertWithClobsRequestMessage"/>
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable"
+              messageType="client:InsertWithClobsResponseMessage"/>
+    <variable name="Invoke_1_readMovieSelect_title_param_InputVariable"
+              messageType="ns1:readMovieSelect_title_param_inparameters"/>
+    <variable name="Invoke_1_readMovieSelect_title_param_OutputVariable"
+              messageType="ns1:MoviesCollection_msg"/>
+    <variable name="Invoke_2_merge_InputVariable"
+              messageType="ns2:MoviesAsClobsCollection_msg"/>
+    <variable name="Invoke_3_readMovieAsClobSelect_title_param_InputVariable"
+              messageType="ns3:readMovieAsClobSelect_title_param_inparameters"/>
+    <variable name="Invoke_3_readMovieAsClobSelect_title_param_OutputVariable"
+              messageType="ns3:MoviesAsClobsCollection_msg"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <!-- Receive input from requestor. (Note: This maps to operation defined in InsertWithClobs.wsdl) -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="client:InsertWithClobs" operation="process"
+             variable="inputVariable" createInstance="yes"/>
+    <!-- Generate reply to synchronous request -->
+    <assign name="Assign_1">
+      <copy>
+        <from variable="inputVariable" part="payload"/>
+        <to variable="Invoke_1_readMovieSelect_title_param_InputVariable"
+            part="readMovieSelect_title_param_inparameters"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_1" partnerLink="readMovie" portType="ns1:readMovie_ptt"
+            operation="readMovieSelect_title_param"
+            inputVariable="Invoke_1_readMovieSelect_title_param_InputVariable"
+            outputVariable="Invoke_1_readMovieSelect_title_param_OutputVariable"/>
+    <assign name="Assign_2">
+      <copy>
+        <from variable="Invoke_1_readMovieSelect_title_param_OutputVariable"
+              part="MoviesCollection"
+              query="/ns4:MoviesCollection/ns4:Movies/ns4:title"/>
+        <to variable="Invoke_2_merge_InputVariable"
+            part="MoviesAsClobsCollection"
+            query="/ns6:MoviesAsClobsCollection/ns6:MoviesAsClobs/ns6:title"/>
+      </copy>
+      <copy>
+        <from expression="ora:getContentAsString(bpws:getVariableData('Invoke_1_readMovieSelect_title_param_OutputVariable','MoviesCollection'))"/>
+        <to variable="Invoke_2_merge_InputVariable"
+            part="MoviesAsClobsCollection"
+            query="/ns6:MoviesAsClobsCollection/ns6:MoviesAsClobs/ns6:xml"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_2" partnerLink="insertMovieAsClob"
+            portType="ns2:insertMovieAsClob_ptt" operation="merge"
+            inputVariable="Invoke_2_merge_InputVariable"/>
+    <assign name="Assign_3">
+      <copy>
+        <from variable="Invoke_2_merge_InputVariable"
+              part="MoviesAsClobsCollection"
+              query="/ns6:MoviesAsClobsCollection/ns6:MoviesAsClobs/ns6:title"/>
+        <to variable="Invoke_3_readMovieAsClobSelect_title_param_InputVariable"
+            part="readMovieAsClobSelect_title_param_inparameters"
+            query="/ns5:readMovieAsClobSelect_title_paramInputParameters/ns5:title_param"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_3" partnerLink="readMovieAsClob"
+            portType="ns3:readMovieAsClob_ptt"
+            operation="readMovieAsClobSelect_title_param"
+            inputVariable="Invoke_3_readMovieAsClobSelect_title_param_InputVariable"
+            outputVariable="Invoke_3_readMovieAsClobSelect_title_param_OutputVariable"/>
+    <assign name="Assign_4">
+      <copy>
+        <from expression="ora:parseEscapedXML(bpws:getVariableData('Invoke_3_readMovieAsClobSelect_title_param_OutputVariable','MoviesAsClobsCollection','/ns5:MoviesAsClobsCollection/ns5:MoviesAsClobs/ns5:xml'))"/>
+        <to variable="outputVariable" part="payload"
+            query="/ns4:MoviesCollection"/>
+      </copy>
+    </assign>
+    <reply name="replyOutput" partnerLink="client"
+           portType="client:InsertWithClobs" operation="process"
+           variable="outputVariable"/>
+  </sequence>
+</process>

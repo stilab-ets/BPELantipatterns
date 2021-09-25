@@ -1,0 +1,151 @@
+<!--
+ *
+ * Copyright(C) OASIS(R) 2009, 2010. All Rights Reserved.
+ * OASIS trademark, IPR and other policies apply.    
+ *   
+ * BPEL Implementation of ClientInterface_0002
+-->
+<!--
+	BPEL process 
+	1 service with TestInvocation interface
+	1 reference with Service1 interface
+-->
+<process name="ClientInterface_0001"
+    targetNamespace="http://docs.oasis-open.org/ns/opencsa/scatests/bpel/200903"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://docs.oasis-open.org/ns/opencsa/scatests/bpel/200903"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://test.sca.oasisopen.org/"
+    xmlns:sca-bpel="http://docs.oasis-open.org/ns/opencsa/sca-bpel/200801"
+    queryLanguage="urn:oasis:names:tc:ws2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:ws2.0:sublang:xpath2.0">  
+
+   	<extensions>
+		<extension namespace="http://docs.oasis-open.org/ns/opencsa/sca-bpel/200801"
+			mustUnderstand="yes" />
+	</extensions> 
+
+  	<import location="TestInvocation.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"
+     	namespace="http://test.sca.oasisopen.org/"/>
+    <import location="Service1.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"
+     	namespace="http://test.sca.oasisopen.org/"/>
+     
+   <partnerLinks>
+      <partnerLink name="TestInvocation" partnerLinkType="test:TestInocationPartnerLinkType" myRole="Application" />    
+      <partnerLink name="reference1" partnerLinkType="test:Service1PartnerLinkType" partnerRole="Provider" initializePartnerRole="yes" />  
+   </partnerLinks>
+    
+   <variables>
+     <variable name="requestRename" messageType="test:invokeTest"/>
+     <variable name="requestResponse" messageType="test:invokeTestResponse"/>
+     <variable name="serviceInput" messageType="test:operation1"/>
+     <variable name="serviceOutput" messageType="test:operation1Response"/>
+     <variable name="tmpVar" type="xsd:string"/>
+     <variable name="response" type="xsd:string"/>
+     <variable name="inputVar" element="test:invokeTest"/>
+     <!-- SCA property with name=testName -->
+     <variable name="testName" type="xsd:string" sca-property="yes"/>
+     <variable name="fault" messageType="test:TestException"/>
+   </variables>
+   
+   <faultHandlers>
+   		<catchAll>
+   			<assign>
+   				<copy>
+   					<from><literal>
+   						<test:TestException>
+   							<message>Exception occurred during BPEL process execution</message>
+   						</test:TestException>
+   					</literal></from>
+   					<to variable="fault" part="TestException"/>
+   				</copy>
+   			</assign>
+   			<reply name="fault"  
+	        	  operation="invokeTest"
+	              partnerLink="TestInvocation"
+	              portType="test:TestInvocation" 
+	              faultName="TestException"
+	              variable="fault"/>
+   		</catchAll>
+   </faultHandlers>
+
+   <sequence>
+   		<assign name="initializeResponse">
+          <copy>
+          	<from>
+          		<literal>
+    	      		<test:invokeTestResponse>
+        	  			<return xmlns=""></return>
+          			</test:invokeTestResponse>
+          		</literal>
+          	</from>
+          	<to>$requestResponse.parameters</to>
+          </copy>
+       </assign>
+   
+       <receive
+          name="startreceive"
+          createInstance="yes"
+          operation="invokeTest"
+          variable="requestRename"
+          partnerLink="TestInvocation"
+          portType="test:TestInvocation" />
+ 
+       <assign name="assignTemp">
+          <copy>
+          	<from variable="requestRename" part="parameters"></from>
+          	<to>$inputVar</to>
+          </copy>
+       </assign>
+       
+       <assign name="extractData">
+       		<copy>
+       			<from variable="inputVar">/test:invokeTest/arg0</from>
+       			<to>$tmpVar</to>
+       		</copy>
+       </assign>
+       
+       <assign name="initializeServiceRequest">
+       		<copy>
+       			<from><literal>
+       				<test:operation1><arg0 xmlns="">requestRename</arg0></test:operation1>
+       			</literal></from>
+       			<to variable="serviceInput" part="operation1"/>
+       		</copy>
+       </assign>
+       
+       <!-- Invoke target test service -->
+       <invoke name="invokeTest"
+       		partnerLink="reference1"
+       		operation="operation1"
+       		inputVariable="serviceInput"
+       		outputVariable="serviceOutput"/>
+       
+       <assign name="getReseponse">
+       		<copy>
+       			<!--from><literal>service1 operation1 invoked</literal></from-->
+       			<!--from>$serviceOutput.operation1Response/test:operation1Response/return</from-->
+       			<from variable="serviceOutput" part="operation1Response">
+       				<query>/message/operation1Response/test:operation1Response/return</query>
+       			</from>
+       			<to>$response</to>
+       		</copy>
+       </assign>
+       
+       <assign name="assignResponse">
+       		<copy>
+       			<from>concat($testName, ' ', $tmpVar, ' ', $response)</from>
+       			<to variable="requestResponse" part="parameters">
+       				<query>/message/parameters/test:invokeTestResponse/return</query>
+       			</to>
+       		</copy>
+       </assign>
+       
+       <reply name="end"  
+              operation="invokeTest"
+              partnerLink="TestInvocation"
+              portType="test:TestInvocation" 
+              variable="requestResponse"/>
+   </sequence>
+</process>

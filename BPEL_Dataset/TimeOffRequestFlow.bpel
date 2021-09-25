@@ -1,0 +1,205 @@
+<process name="TimeOffRequestFlow" targetNamespace="http://samples.otn.com" 
+       suppressJoinFailure="yes" xmlns:tns="http://samples.otn.com" 
+       xmlns:services="http://services.otn.com" 
+       xmlns:task="http://services.oracle.com/bpel/task" 
+       xmlns:mail="http://services.oracle.com/bpel/mail" 
+       xmlns:ora="http://schemas.oracle.com/xpath/extension" 
+       xmlns:time="http://samples.otn.com/TimeOffRequest"
+       xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+       xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+	<!-- This process initiates timeOff request service, waits for asynchronous
+            manager approval task, handles potential faults and sends
+            email notification to requestor.
+    -->
+	<partnerLinks>
+		<partnerLink name="client" partnerLinkType="tns:TimeOffRequestFlow" myRole="TimeOffRequestFlowProvider" partnerRole="TimeOffRequestFlowRequester"/>
+
+		<!-- Reference to the email service used to notify manager-->
+		<partnerLink name="mailService" partnerLinkType="mail:MailService" partnerRole="MailServiceProvider"/>
+
+		<partnerLink name="reviewManager" partnerLinkType="task:TaskManager" partnerRole="TaskManager" myRole="TaskManagerRequester"/>
+
+		<partnerLink name="hrService" partnerLinkType="services:HRService" partnerRole="HRServiceProvider"/>
+	</partnerLinks>
+
+	<variables>
+		<variable name="input" messageType="tns:TimeOffRequestFlowRequestMessage"/>
+		<variable name="output" messageType="tns:TimeOffRequestFlowResultMessage"/>
+		<variable name="hrRequest" messageType="services:HRServiceRequestMessage"/>
+	</variables>
+
+	<sequence>
+		<!-- receive input from the client -->
+		<receive name="receiveInput" partnerLink="client" portType="tns:TimeOffRequestFlow" operation="initiate" variable="input" createInstance="yes"/>
+
+		<!-- assign unique id for this request -->
+		<assign name="generateId">
+			<copy>
+				<from expression="ora:generateGUID()"/>
+				<to variable="input" part="payload" query="/tns:xmlRequest/time:id"/>
+			</copy>
+		</assign>
+
+		<scope name="TimeOffApproval" variableAccessSerializable="no">
+			<variables>
+				<variable name="mailRequest" messageType="mail:mailEnvelope"/>
+				<variable name="reviewTask" element="task:task"/>
+			</variables>
+
+			<sequence>
+				<assign name="prepareEmail">
+					<!-- load email template from xml file -->
+					<copy>
+						<from expression="ora:doc('templates/email-template.xml')"/>
+						<to variable="mailRequest" part="payload"/>
+					</copy>
+					<!-- copy from address to the mail message to element -->
+					<copy>
+						<from variable="input" part="payload" query="/tns:xmlRequest/time:approvalInfo/time:employee/time:email"/>
+						<to variable="mailRequest" part="payload" query="/mail:mailMessage/mail:to/mail:address/mail:email"/>
+					</copy>
+					<!-- copy the title to the mail message subject -->
+					<copy>
+						<from expression="concat('TimeOff Approval for ',mailRequest+bpws:getVariableData('input','payload','/tns:xmlRequest/time:submitterInfo/time:employee/time:employeeName'))"/>
+				        <to variable="mailRequest" part="payload" query="/mail:mailMessage/mail:subject"/>
+				    </copy>
+					<!-- use XSLT transformation to generate HTML email message body -->
+					<copy>
+						<from expression="ora:processXSLT('transform/emailContent.xslt',mailRequest+bpws:getVariableData('input','payload'))"/>
+						<to variable="mailRequest" part="payload" query="/mail:mailMessage/mail:content/mail:multiPart/mail:bodyPart[1]/mail:content"/>
+					</copy>
+					<!-- assign payload xml document to email attachment -->
+					<copy>
+						<from variable="input" part="payload"/>
+						<to variable="mailRequest" part="payload" query="/mail:mailMessage/mail:content/mail:multiPart/mail:bodyPart[2]/mail:content"/>
+					</copy>
+				</assign>
+
+				<!-- invoke the remote smtp service which will send the loan mail message -->
+				<invoke name="sendMail" partnerLink="mailService" portType="mail:MailService" operation="sendMessage" inputVariable="mailRequest"/>
+				<assign name="prepareTask">
+					<!-- Assign 'title' to task request -->
+					<copy>
+						<from expression="string( 'TimeOff Approval' )"/>
+						<to variable="reviewTask" query="/task:task/task:title"/>
+					</copy>
+					<!-- Assign 'creator' to task request -->
+					<copy>
+						<from expression="string( 'TimeOffRequestFlow' )"/>
+						<to variable="reviewTask" query="/task:task/task:creator"/>
+					</copy>
+					<!-- Assign 'assignee' to task request -->
+					<copy>
+						<from variable="input" part="payload" query="/tns:xmlRequest/time:approvalInfo/time:employee/time:email"/>
+						<to variable="reviewTask" query="/task:task/task:assignee"/>
+					</copy>
+					<!-- Assign 'duration' to task request -->
+					<copy>
+						<from expression="string( 'PT5M' )"/>
+						<to variable="reviewTask" query="/task:task/task:duration"/>
+					</copy>
+					<!-- Assign 'priority' to task request -->
+					<copy>
+						<from expression="3"/>
+						<to variable="reviewTask" query="/task:task/task:priority"/>
+					</copy>
+					<!-- Assign 'attachment' to task request -->
+					<copy>
+						<from variable="input" part="payload" query="/tns:xmlRequest"/>
+						<to variable="reviewTask" query="/task:task/task:attachment"/>
+					</copy>
+					<!-- Assign 'customKey' to task request -->
+					<copy>
+						<from variable="input" part="payload" query="/tns:xmlRequest/time:id"/>
+						<to variable="reviewTask" query="/task:task/task:customKey"/>
+					</copy>
+				</assign>
+
+				<scope name="reviewUserInteraction" variableAccessSerializable="no">
+					<variables>
+						<variable name="taskRequest" messageType="task:taskMessage"/>
+						<variable name="taskResponse" messageType="task:taskMessage"/>
+						<variable name="taskExpired" messageType="task:taskMessage"/>
+						<variable name="taskUpdate" messageType="task:taskMessage"/>
+					</variables>
+					<sequence>
+						<!-- Assign task document to task message -->
+						<assign name="setPayload">
+							<copy>
+								<from variable="reviewTask"/>
+								<to variable="taskRequest" part="payload"/>
+							</copy>
+						</assign>
+						<!--  initiate task -->
+						<invoke name="initiateTask" partnerLink="reviewManager" portType="task:TaskManager" operation="initiateTask" inputVariable="taskRequest"/>
+						<!--  Receive the outcome of the task -->
+						<scope name="reviewTask">
+							<eventHandlers>
+								<onMessage partnerLink="reviewManager" portType="task:TaskManagerCallback" operation="onTaskExpired" variable="taskRequest">
+									<sequence>
+										<assign name="reassignTask">
+											<!-- Assign 'assignee' to task request -->
+											<copy>
+												<from expression="string( 'director@test.com' )"/>
+												<to variable="taskRequest" part="payload" query="/task:task/task:assignee"/>
+											</copy>
+											<!-- Assign 'duration' to task request -->
+											<copy>
+												<from expression="string( 'PT1H' )"/>
+												<to variable="taskRequest" part="payload" query="/task:task/task:duration"/>
+											</copy>
+											<!-- Assign 'status' to task request -->
+											<copy>
+												<from expression="string( 'active' )"/>
+												<to variable="taskRequest" part="payload" query="/task:task/task:status"/>
+											</copy>
+										</assign>
+										<invoke name="reassign" partnerLink="reviewManager" portType="task:TaskManager" operation="updateTask" inputVariable="taskRequest"/>
+									</sequence>
+								</onMessage>
+							</eventHandlers>
+							<receive name="receiveTaskResult" partnerLink="reviewManager" portType="task:TaskManagerCallback" operation="onTaskResult" variable="taskResponse"/>
+						</scope>
+						<!-- Read task document from task message -->
+						<assign name="readPayload">
+							<copy>
+								<from variable="taskResponse" part="payload"/>
+								<to variable="reviewTask"/>
+							</copy>
+						</assign>
+					</sequence>
+				</scope>
+				<!-- Check conclusion status -->
+				<!-- switch depends on the input value -->
+				<switch>
+					<case> 
+<condition>
+bpws:getVariableData('reviewTask','/task:task/task:conclusion') = 'approved'
+</condition>
+						<sequence>
+							<assign>
+								<copy>
+									<from variable="reviewTask" query="/task:task/task:attachment"/>
+									<to variable="hrRequest" part="payload" query="/services:hrServiceRequest"/>
+								</copy>
+							</assign>
+							<!--  Initiate HR service -->
+							<invoke name="hrRequest" partnerLink="hrService" portType="services:HRService" operation="process" inputVariable="hrRequest"/>
+						</sequence>
+					</case>
+					<otherwise>
+						<empty/>
+					</otherwise>
+				</switch>
+				<assign>
+					<copy>
+						<from variable="reviewTask" query="/task:task/task:attachment"/>
+						<to variable="output" part="payload" query="/tns:result"/>
+					</copy>
+				</assign>
+			</sequence>
+		</scope>
+		<!-- callback initiator of this flow with digital receipt -->
+		<invoke partnerLink="client" portType="tns:TimeOffRequestFlowCallback" operation="onResult" inputVariable="output"/>
+	</sequence>
+</process>

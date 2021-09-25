@@ -1,0 +1,58 @@
+<process name="AxisFlow" 
+         targetNamespace="http://samples.otn.com"
+         xmlns:tns="http://samples.otn.com"
+         xmlns:services="http://services.otn.com"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+         
+<!-- This process invokes Apache Axis web service -->
+
+  <partnerLinks>
+    <partnerLink name="client" 
+        partnerLinkType="tns:AxisFlow"
+        myRole="AxisFlowProvider"
+        partnerRole="AxisFlowRequester"/>
+    <partnerLink name="CreditRatingService" 
+        partnerLinkType="services:CreditRatingService"
+        partnerRole="CreditRatingServiceProvider"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="input" messageType="tns:AxisFlowRequestMessage"/>
+    <variable name="output" messageType="tns:AxisFlowResultMessage"/>
+    <variable name="request" messageType="services:getRatingRequest"/>
+    <variable name="response" messageType="services:getRatingResponse"/>
+  </variables>
+
+  <sequence name="sequence">
+    <receive name="receive" partnerLink="client" portType="tns:AxisFlow" 
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+             
+    <assign>
+      <copy>
+        <from variable="input" part="payload" query="/tns:ssn"/>
+        <to variable="request" part="in0"/>
+      </copy>
+    </assign>             
+
+    <!--  invoke the remote Axis web service 
+          This service returns credit rating-->
+    <invoke name="invokeAxis" partnerLink="CreditRatingService" portType="services:CreditRatingService"
+            operation="getRating" inputVariable="request"
+            outputVariable="response"/>
+
+    <assign>
+      <copy>
+        <from variable="response" part="getRatingReturn"/>
+        <to variable="output" part="payload" query="/tns:rating"/>
+      </copy>
+    </assign>            
+           
+     <!-- respond output to requestor -->
+     <invoke name="reply" partnerLink="client"
+             portType="tns:AxisFlowCallback"
+            operation="onResult" inputVariable="output"/>             
+  </sequence>
+
+</process>

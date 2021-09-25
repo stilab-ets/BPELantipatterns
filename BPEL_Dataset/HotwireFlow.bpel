@@ -1,0 +1,152 @@
+<process name="HotwireFlow"
+         targetNamespace="http://samples.otn.com"
+         suppressJoinFailure="yes"
+         xmlns:tns="http://samples.otn.com"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         >
+
+  <!-- This process invoke twice the LoanService in a parallel flow. -->
+
+  <partnerLinks>
+    <partnerLink name="client"
+             partnerLinkType="tns:HotwireFlow"
+             myRole="HotwireFlowProvider"
+             partnerRole="HotwireFlowRequester"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="input"
+               messageType="tns:HotwireFlowRequestMessage"/>
+               
+    <variable name="offer"
+               messageType="tns:HotwireFlowOfferMessage"/> 
+               
+    <variable name="approved"
+               messageType="tns:HotwireFlowApproveMessage"/>
+    <variable name="canceled"
+               messageType="tns:HotwireFlowCancelMessage"/> 
+               
+    <variable name="output"
+               messageType="tns:HotwireFlowResultMessage"/>
+  </variables>
+
+  <sequence>
+
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:HotwireFlow"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+ 
+    <!-- wait for 30 seconds -->
+    <wait for="'PT30S'"/>
+      <scope name="HandleFlightRequest" variableAccessSerializable="no">
+        <sequence>   
+		    <!-- switch depends on the input value -->
+		    <switch>
+		      <case>
+ <condition>
+string(bpws:getVariableData('input', 'payload','/tns:flightRequest/tns:business')) = 'true'
+</condition>
+		        <assign>
+		           <copy>
+		             <from expression="number(1500)"/>
+		             <to variable="offer" part="payload"
+		                query="/tns:offer"/>
+		           </copy>               
+		        </assign>  
+		      </case>
+		      <otherwise>
+		        <assign>
+		          <copy>
+		            <from expression="number(500)"/>
+		            <to variable="offer" part="payload"
+		                query="/tns:offer"/>
+		          </copy>               
+		        </assign> 
+		      </otherwise>
+		    </switch>     
+		        
+		    <!-- send the flight offer to requestor -->
+		    <invoke name="sendOffer" partnerLink="client"
+		            portType="tns:HotwireFlowCallback"
+		            operation="onOffer" inputVariable="offer"/> 
+	    </sequence> 
+	</scope>             
+            
+      <scope name="HandleSelectedOffer" variableAccessSerializable="no">
+        <sequence>           
+		    <!-- initialize the response variable -->
+		    <assign>
+		      <copy>
+		        <from variable="offer" part="payload" query="/offer"/>
+		        <to variable="input" part="payload"
+		            query="/tns:flightRequest/tns:price"/>
+		      </copy>          
+		    </assign>            
+		
+		    
+		    <!--  receive the result of the remote process -->
+		    <pick name="receiveOffer">
+		      <onMessage partnerLink="client"
+		                 portType="tns:HotwireFlow"
+		                 operation="approve" variable="approved">
+		        <assign>
+		          <copy>
+		            <from expression="string('Approved')"/>
+		            <to variable="input" part="payload"
+		                query="/tns:flightRequest/tns:status"/>
+		          </copy>
+		          <copy>
+		            <from expression="string('12345')"/>
+		            <to variable="input" part="payload"
+		                query="/tns:flightRequest/tns:confirmationId"/>
+		          </copy>                
+		        </assign> 
+		      </onMessage>
+		      <onMessage partnerLink="client"
+		                 portType="tns:HotwireFlow"
+		                 operation="cancel" variable="canceled">
+		        <assign>
+		          <copy>
+		            <from expression="string('Canceled')"/>
+		            <to variable="input" part="payload"
+		                query="/tns:flightRequest/tns:status"/>
+		          </copy>               
+		        </assign> 
+		      </onMessage>       
+		      <onAlarm for="'PT30M'">
+		        <assign>
+		          <copy>
+		            <from expression="string('Canceled')"/>
+		            <to variable="input" part="payload"
+		                query="/tns:flightRequest/tns:status"/>
+		            </copy>               
+		          </assign> 
+		       </onAlarm>
+		    </pick>
+	    </sequence> 
+	</scope>          
+
+    <!-- wait for 30 seconds -->
+    <wait for="'PT30S'"/>
+
+    
+    <!-- initialize the response variable -->
+    <assign>
+      <copy>
+        <from variable="input" part="payload"/>
+        <to variable="output" part="payload"/>
+      </copy>
+    </assign>      
+    
+    <!-- respond output to requestor -->
+    <invoke name="replyOutput" partnerLink="client"
+            portType="tns:HotwireFlowCallback"
+            operation="onResult" inputVariable="output"/>
+
+  </sequence>
+
+</process>
+

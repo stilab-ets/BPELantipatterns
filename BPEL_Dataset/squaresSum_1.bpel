@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2012 Álvaro Cortijo García
+
+Permission is hereby granted, free of charge, to any person obtaining a 
+copy of this software and associated documentation files (the "Software"), 
+to deal in the Software without restriction, including without limitation 
+the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, and to permit persons to whom the 
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in 
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<process xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor" 
+xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+xmlns:tns="http://enterprise.netbeans.org/bpel/SquaresSum/squaresSum" 
+xmlns:ns0="http://xml.netbeans.org/schema/squaresSum" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+name="squaresSum1" 
+targetNamespace="http://enterprise.netbeans.org/bpel/SquaresSum/squaresSum">
+
+<import importType="http://schemas.xmlsoap.org/wsdl/" location="squaresSum.wsdl" namespace="http://j2ee.netbeans.org/wsdl/squaresSum"/>
+<partnerLinks>
+  <partnerLink xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" myRole="squaresSumPortTypeRole" name="client" partnerLinkType="tns:squaresSum"/>
+</partnerLinks>
+<variables>
+  <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" messageType="tns:squaresSumOperationResponse" name="output"/>
+  <variable xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" messageType="tns:squaresSumOperationRequest" name="input"/>
+  <variable name="counter" type="xsd:unsignedInt"/>
+  <variable name="currentResult" type="xsd:unsignedInt"/>
+  <variable name="newItem" element="ns0:element">
+    <from>
+      <literal xml:space="preserve">
+	<tns:element xmlns:tns="http://xml.netbeans.org/schema/squaresSum" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">0</tns:element>
+      </literal>
+    </from>
+  </variable>
+</variables>
+<sequence>
+  <receive xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" createInstance="yes" name="ReceiveRequest" operation="squaresSumOperation" partnerLink="client" portType="tns:squaresSumPortType" variable="input"/>
+    <assign name="InitializeEmptyResult">
+      <copy>
+	<from>
+	  <literal>
+	    <ns0:squaresSumResponse>
+	      <ns0:sum>0</ns0:sum>
+	      <ns0:elements>
+		<ns0:element>0</ns0:element>
+	      </ns0:elements>
+	    </ns0:squaresSumResponse>
+	  </literal>
+	</from>
+	<to part="response" variable="output"/>
+      </copy>
+      <copy>
+	<from>1</from>
+	<to>$counter</to>
+      </copy>
+    </assign>
+    <forEach counterName="i" name="GenerateResults" parallel="yes">
+      <startCounterValue>1</startCounterValue>
+      <finalCounterValue>number($input.request/ns0:n)</finalCounterValue>
+      <scope isolated="yes" name="ResultLoopBody">
+	<sequence>
+	  <assign name="SquareElement">
+	    <copy>
+	      <from>$i * $i</from>
+	      <to>$currentResult</to>
+	    </copy>
+	  </assign>
+	  <assign name="AddResult">
+	    <copy>
+	      <from variable="currentResult"></from>
+              <to variable="newItem"></to>
+            </copy>
+            <copy>
+              <from>
+              	<![CDATA[bpel:doXslTransform("project:/xslt/addElement.xsl", $output.response/ns0:elements, "newItem", $newItem)]]>
+              </from>
+              <to>$output.response/ns0:elements</to>
+            </copy>
+	  </assign>
+	</sequence>
+      </scope>
+    </forEach>
+
+    <forEach counterName="i" name="GenerateSum" parallel="yes">
+      <startCounterValue>1</startCounterValue>
+      <finalCounterValue>number($input.request/ns0:n)</finalCounterValue>
+	<scope isolated="yes" name="ResultSum">
+	  <sequence>
+	    <assign name="IncreaseCounter">
+	      <copy>
+		<from>$counter + 1</from>
+		<to>$counter</to>
+	      </copy>
+	    </assign>
+	    <assign name="AddResultII">
+	      <copy>
+		<from>$output.response/ns0:elements/ns0:element[$counter] + $output.response/ns0:sum</from>
+		<to>$output.response/ns0:sum</to>
+	      </copy>
+	    </assign>
+	  </sequence>
+	</scope>
+      </forEach>
+      <reply xmlns:tns="http://j2ee.netbeans.org/wsdl/squaresSum" name="SendResult" operation="squaresSumOperation" partnerLink="client" portType="tns:squaresSumPortType" variable="output"/>
+    </sequence>
+</process>

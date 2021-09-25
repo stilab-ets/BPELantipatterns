@@ -1,0 +1,1771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    name="ASTROBookStore"
+    targetNamespace="http://enterprise.netbeans.org/bpel/ASTROBookStore/ASTROBookStore"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://enterprise.netbeans.org/bpel/ASTROBookStore/ASTROBookStore"
+   xmlns:ns1="http://j2ee.netbeans.org/wsdl/ASTROBookStore/ASTROBookStore"
+    xmlns:ns0="http://xml.netbeans.org/schema/ASTROCartSCHEMA"
+    xmlns:ns2="http://xml.netbeans.org/schema/ASTROSearchSCHEMA"
+    xmlns:bankJPG="http://j2ee.netbeans.org/wsdl/VPOS_MPS/ASTROBookBank"
+    xmlns:ASTROBookCart="http://j2ee.netbeans.org/wsdl/ASTROBookCart"
+    xmlns:ASTROBookSearch="http://j2ee.netbeans.org/wsdl/ASTROSearch/ASTROBookSearch">
+
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROBookStore/ASTROBookStore" location="ASTROBookStore.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://xml.netbeans.org/schema/ASTROCartSCHEMA" location="ASTROCartSCHEMA.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+    <import namespace="http://xml.netbeans.org/schema/ASTROSearchSCHEMA" location="ASTROSearchSCHEMA.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/VPOS_MPS/ASTROBookBank" location="ASTROBookBank.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROBookCart" location="ASTROBookCart.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/ASTROSearch/ASTROBookSearch" location="ASTROBookSearch.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+      <partnerLink myRole="bankJPG_Customer" name="bankJPG_PLT" partnerLinkType="bankJPG:bankJPG_PLT" partnerRole="bankJPG_Service"/>
+      <partnerLink myRole="ASTROBookCart_Customer" name="ASTROBookCart_PLT" partnerLinkType="ASTROBookCart:ASTROBookCart_PLT" partnerRole="ASTROBookCart_Service"/>
+      <partnerLink myRole="ASTROBookSearch_Customer" name="ASTROBookSearch_PLT" partnerLinkType="ASTROBookSearch:ASTROBookSearch_PLT" partnerRole="ASTROBookSearch_Service"/>
+      <partnerLink myRole="ASTROBookStore_Service" name="ASTROBookStore_PLT" partnerLinkType="ns1:ASTROBookStore_PLT" partnerRole="ASTROBookStore_Customer"/>
+   </partnerLinks>
+   <variables>
+      <variable messageType="ASTROBookSearch:loginMsg" name="_ASTROBookSearch_login"/>
+      <variable messageType="ns1:loginErrorMsg" name="_ASTROBookStore_loginError"/>
+      <variable messageType="ASTROBookSearch:loginErrMsg" name="_ASTROBookSearch_loginErr"/>
+      <variable messageType="ns1:loginAckMsg" name="_ASTROBookStore_loginAck"/>
+      <variable messageType="ASTROBookCart:cartCreateMsg" name="_ASTROBookCart_cartCreate"/>
+      <variable messageType="ASTROBookCart:cartCreateErrMsg" name="_ASTROBookCart_cartCreateErr"/>
+      <variable messageType="ASTROBookSearch:itemSearchRequestMsg" name="_ASTROBookSearch_itemSearchRequest"/>
+      <variable messageType="ns1:searchErrorMsg" name="_ASTROBookStore_searchError"/>
+      <variable messageType="ASTROBookSearch:itemSearchErrMsg" name="_ASTROBookSearch_itemSearchErr"/>
+      <variable messageType="ns1:searchResultMsg" name="_ASTROBookStore_searchResult"/>
+      <variable messageType="ASTROBookCart:cartAddMsg" name="_ASTROBookCart_cartAdd"/>
+      <variable messageType="ns1:addErrorMsg" name="_ASTROBookStore_addError"/>
+      <variable messageType="ASTROBookCart:cartAddErrMsg" name="_ASTROBookCart_cartAddErr"/>
+      <variable messageType="ns1:addAckMsg" name="_ASTROBookStore_addAck"/>
+      <variable messageType="ns1:logoutMsg" name="_ASTROBookStore_logout"/>
+      <variable messageType="ASTROBookCart:cartGetMsg" name="_ASTROBookCart_cartGet"/>
+      <variable messageType="bankJPG:startTransactionMsg" name="_bankJPG_startTransaction"/>
+      <variable messageType="ns1:checkoutAckMsg" name="_ASTROBookStore_checkoutAck"/>
+      <variable messageType="bankJPG:requestSubmittedMsg" name="_bankJPG_requestSubmitted"/>
+      <variable messageType="bankJPG:requestNotAvailableMsg" name="_bankJPG_requestNotAvailable"/>
+      <variable messageType="bankJPG:confirmMsg" name="_bankJPG_confirm"/>
+      <variable messageType="bankJPG:requestAvailableAckMsg" name="_bankJPG_requestAvailableAck"/>
+      <variable messageType="ASTROBookCart:clearMsg" name="_ASTROBookCart_clear"/>
+      <variable messageType="ns1:sentMsg" name="_ASTROBookStore_sent"/>
+      <variable messageType="bankJPG:confirmAckMsg" name="_bankJPG_confirmAck"/>
+      <variable messageType="ns1:confirmErrorMsg" name="_ASTROBookStore_confirmError"/>
+      <variable messageType="bankJPG:confirmErrMsg" name="_bankJPG_confirmErr"/>
+      <variable messageType="bankJPG:requestAvailableMsg" name="_bankJPG_requestAvailable"/>
+      <variable messageType="ns1:requestSubmittedMsg" name="_ASTROBookStore_requestSubmitted"/>
+      <variable messageType="bankJPG:startTransactionAckMsg" name="_bankJPG_startTransactionAck"/>
+      <variable messageType="ASTROBookCart:nopMsg" name="_ASTROBookCart_nop"/>
+      <variable messageType="bankJPG:startTransactionErrMsg" name="_bankJPG_startTransactionErr"/>
+      <variable messageType="ASTROBookCart:cartGetResponseMsg" name="_ASTROBookCart_cartGetResponse"/>
+      <variable messageType="ASTROBookSearch:logoutMsg" name="_ASTROBookSearch_logout"/>
+      <variable messageType="ns1:checkoutErrorMsg" name="_ASTROBookStore_checkoutError"/>
+      <variable messageType="ASTROBookCart:cartGetErrMsg" name="_ASTROBookCart_cartGetErr"/>
+      <variable messageType="ns1:checkoutMsg" name="_ASTROBookStore_checkout"/>
+      <variable messageType="ASTROBookCart:cartAddResponseMsg" name="_ASTROBookCart_cartAddResponse"/>
+      <variable messageType="ASTROBookCart:cartCreateResponseMsg" name="_ASTROBookCart_cartCreateResponse"/>
+      <variable messageType="ns1:addMsg" name="_ASTROBookStore_add"/>
+      <variable messageType="ASTROBookSearch:itemSearchResponseMsg" name="_ASTROBookSearch_itemSearchResponse"/>
+      <variable messageType="ns1:searchMsg" name="_ASTROBookStore_search"/>
+      <variable messageType="ASTROBookSearch:loginAckMsg" name="_ASTROBookSearch_loginAck"/>
+      <variable messageType="ns1:loginMsg" name="_ASTROBookStore_login"/>
+      <variable name="_local1_ASTROBookStore_add_quantity" type="xsd:positiveInteger"/>
+      <variable name="_local1_ASTROBookStore_add_ASIN" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_addError_error" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_addAck_SubTotal" type="xsd:string"/>
+      <variable element="ns2:ItemSearchResponse" name="_local1_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local2_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local4_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local3_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local5_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local7_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local8_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable element="ns2:ItemSearchResponse" name="_local6_ASTROBookSearch_itemSearchResponse_body"/>
+      <variable name="_local2_ASTROBookStore_add_quantity" type="xsd:positiveInteger"/>
+      <variable name="_local2_ASTROBookStore_add_ASIN" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_addError_error" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_addAck_SubTotal" type="xsd:string"/>
+      <variable name="_local_ASTROBookStore_checkoutAck_SubTotal" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_checkoutAck_SubTotal" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_checkoutAck_SubTotal" type="xsd:string"/>
+      <variable name="_local1_ASTROBookStore_checkoutError_error" type="xsd:string"/>
+      <variable name="_local2_ASTROBookStore_checkoutError_error" type="xsd:string"/>
+      <variable name="key" type="xsd:string"/>
+      <variable messageType="ns1:searchMsg" name="searchMsg"/>
+      <variable messageType="ns1:searchResultMsg" name="searchResultMsg"/>
+      <variable messageType="ns1:searchErrorMsg" name="searchErrorMsg"/>
+      <variable messageType="ns1:checkoutMsg" name="checkoutMsg"/>
+      <variable messageType="ns1:checkoutAckMsg" name="checkoutAckMsg"/>
+      <variable messageType="ns1:requestSubmittedMsg" name="requestSubmittedMsg"/>
+      <variable messageType="ns1:sentMsg" name="sentMsg"/>
+      <variable messageType="ns1:confirmErrorMsg" name="confirmErrorMsg"/>
+      <variable messageType="ns1:checkoutErrorMsg" name="checkoutErrorMsg"/>
+      <variable messageType="ns1:addMsg" name="addMsg"/>
+      <variable messageType="ns1:addAckMsg" name="addAckMsg"/>
+      <variable messageType="ns1:addErrorMsg" name="addErrorMsg"/>
+      <variable messageType="ns1:logoutMsg" name="logoutMsg"/>
+      <variable name="numBusquedas" type="xsd:positiveInteger"/>
+      <variable name="numArticulos" type="xsd:positiveInteger"/>
+	
+   </variables>
+   <correlationSets>
+      <correlationSet name="_CS_bankJPG_PLT" properties="bankJPG:key"/>
+      <correlationSet name="_CS_ASTROBookCart_PLT" properties="ASTROBookCart:key"/>
+      <correlationSet name="_CS_ASTROBookSearch_PLT" properties="ASTROBookSearch:key"/>
+      <correlationSet name="_CS_ASTROBookStore_PLT" properties="ns1:key"/>
+      <correlationSet name="bookstore" properties="ns1:key"/>
+   </correlationSets>
+   <sequence>
+      <receive createInstance="yes" name="receive_ASTROBookStore_login" operation="login" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="_ASTROBookStore_login">
+         <correlations>
+            <correlation initiate="yes" set="_CS_ASTROBookStore_PLT"/>
+         </correlations>
+      </receive>
+    <empty/>
+    <assign>
+      <copy>
+	<from>0</from>
+	<to variable="numArticulos"/>
+      </copy>
+    </assign>
+    <assign>
+      <copy>
+	<from>0</from>
+	<to variable="numBusquedas"/>
+      </copy>
+    </assign>
+      <assign>
+         <copy>
+            <from part="key" variable="_ASTROBookStore_login"/>
+            <to variable="key"/>
+         </copy>
+      </assign>
+      <assign>
+         <copy>
+            <from part="customerId" variable="_ASTROBookStore_login"/>
+            <to part="customerId" variable="_ASTROBookSearch_login"/>
+         </copy>
+      </assign>
+      <assign>
+         <copy>
+            <from variable="key"/>
+            <to part="key" variable="_ASTROBookSearch_login"/>
+         </copy>
+      </assign>
+      <invoke inputVariable="_ASTROBookSearch_login" name="invoke_ASTROBookSearch_login" operation="login" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+         <correlations>
+            <correlation pattern="request" initiate="yes" set="_CS_ASTROBookSearch_PLT"/>
+         </correlations>
+   </invoke>
+   <pick>
+       <onMessage operation="loginErr" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_loginErr">
+            <correlations>
+               <correlation set="_CS_ASTROBookSearch_PLT"/>
+            </correlations>
+            <sequence>
+               <assign>
+                  <copy>
+                     <from variable="key"/>
+                     <to part="key" variable="_ASTROBookStore_loginError"/>
+                  </copy>
+               </assign>
+              <invoke inputVariable="_ASTROBookStore_loginError" name="invoke_ASTROBookStore_loginError" operation="loginError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                  </correlations>
+               </invoke>
+               <empty/>
+            </sequence>
+         </onMessage>
+        
+
+        <onMessage operation="loginAck" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_loginAck">
+            <correlations>
+               <correlation set="_CS_ASTROBookSearch_PLT"/>
+            </correlations>
+          <sequence>
+               <assign>
+                  <copy>
+                     <from variable="key"/>
+                     <to part="key" variable="_ASTROBookStore_loginAck"/>
+                  </copy>
+               </assign>
+              
+               <invoke inputVariable="_ASTROBookStore_loginAck" name="invoke_ASTROBookStore_loginAck" operation="loginAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                  <correlations>
+                     <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                  </correlations>
+               </invoke>
+               <while> 
+                  <condition>($numBusquedas) &lt; 1</condition>
+                   <sequence> 
+	           <assign>
+	           <copy>
+	           <from>$numBusquedas + 1</from>
+	           <to variable="numBusquedas"/>
+	           </copy>
+	           </assign>
+                  <sequence>
+                     <pick name="Pick">
+                        <onMessage operation="search" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="searchMsg">
+                           <correlations>
+                              <correlation initiate="yes" set="bookstore"/>
+                           </correlations>
+                           <sequence>
+                              <assign>
+	                             <copy> 
+				      <from><literal>
+				      <ns2:ItemSearch>
+					<ns2:MarketplaceDomain>MarketPlaceDomain</ns2:MarketplaceDomain>
+					<ns2:AWSAccessKeyId>JHESK34DSAQ</ns2:AWSAccessKeyId>
+					<ns2:SubscriptionId>SubscriptionId</ns2:SubscriptionId>
+					<ns2:AssociateTag>LiteraturaEspaniola</ns2:AssociateTag>
+					<ns2:XMLEscaping>XMLscaping</ns2:XMLEscaping>
+					<ns2:Validate>validate</ns2:Validate>
+				      <ns2:Shared>
+					<ns2:Author>Perez Reverte</ns2:Author>
+					<ns2:BrowseNode>BrowseNode</ns2:BrowseNode>
+					<ns2:Keywords>Platero y yo</ns2:Keywords>
+					<ns2:Publisher>anaya</ns2:Publisher>
+					<ns2:ResponseGroup>anaya</ns2:ResponseGroup>
+					<ns2:SearchIndex>Index</ns2:SearchIndex>
+					<ns2:Title>Platero y yo</ns2:Title>
+				      </ns2:Shared>
+				      <ns2:Request>
+	                                <ns2:Author>Perez Reverte</ns2:Author>
+					<ns2:BrowseNode>BrowseNode</ns2:BrowseNode>
+					<ns2:Keywords>Platero y yo</ns2:Keywords>
+					<ns2:Publisher>anaya</ns2:Publisher>
+					<ns2:ResponseGroup>anaya</ns2:ResponseGroup>
+					<ns2:SearchIndex>Index</ns2:SearchIndex>
+					<ns2:Title>Platero y yo</ns2:Title>
+                                     </ns2:Request>
+				</ns2:ItemSearch>
+				</literal></from>
+				<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+				</copy>
+                                <copy>
+                                 <from>"Ana Frank"</from>
+                                 <to part="author" variable="_ASTROBookStore_search"/>
+                                </copy>
+                                 <copy>
+                                    <from part="author" variable="_ASTROBookStore_search"/>
+                                    <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                         <query>/ns2:ItemSearch/ns2:Request/ns2:Author</query>
+                                    </to>
+
+                                 </copy>
+				  <copy> 
+				     <from><literal>
+					<ns2:ItemSearch>
+					  <ns2:MarketplaceDomain/>
+					  <ns2:AWSAccessKeyId/>
+                                          <ns2:SubscriptionId/>
+					  <ns2:AssociateTag/>
+					  <ns2:XMLEscaping/>
+					  <ns2:Validate/>
+					<ns2:Shared>
+					   <ns2:Author/>
+					   <ns2:BrowseNode/>
+					   <ns2:Keywords/>
+					   <ns2:Publisher/>
+					   <ns2:ResponseGroup/>
+					   <ns2:SearchIndex/>
+					   <ns2:Title/>
+				       </ns2:Shared>
+					   <ns2:Request>
+					   <ns2:Author/>
+					   <ns2:BrowseNode/>
+					   <ns2:Keywords/>
+					   <ns2:Publisher/>
+					   <ns2:ResponseGroup/>
+					   <ns2:SearchIndex/>
+			                <ns2:Title></ns2:Title>											
+					</ns2:Request>
+				   </ns2:ItemSearch>
+				</literal></from>
+				<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+				</copy>	
+                                 <copy>
+                                 <from>"diario Ana Frank"</from>
+                                 <to part="keyword" variable="_ASTROBookStore_search"/>
+                                </copy>							 
+                                 <copy>
+                                    <from part="keyword" variable="_ASTROBookStore_search"/>
+                                    <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                        <query>/ns2:ItemSearch/ns2:Request/ns2:Keywords</query>
+                                    </to>
+                                 </copy>
+				<copy> 
+				<from><literal>
+				<ns2:ItemSearch>
+				  <ns2:MarketplaceDomain/>
+				  <ns2:AWSAccessKeyId/>
+				  <ns2:SubscriptionId/>
+				  <ns2:AssociateTag/>
+				  <ns2:XMLEscaping/>
+				  <ns2:Validate/>
+				<ns2:Shared>
+				  <ns2:Author/>
+				  <ns2:BrowseNode/>
+				  <ns2:Keywords/>
+				  <ns2:Publisher/>
+				  <ns2:ResponseGroup/>
+				  <ns2:SearchIndex/>
+				  <ns2:Title/>
+				</ns2:Shared>
+				<ns2:Request>
+				   <ns2:Author/>
+				   <ns2:BrowseNode/>
+				   <ns2:Keywords/>
+				   <ns2:Publisher/>
+				   <ns2:ResponseGroup/>
+				   <ns2:SearchIndex/>
+			        <ns2:Title></ns2:Title>												
+				</ns2:Request>
+				</ns2:ItemSearch>
+				</literal></from>
+				<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+				 </copy>
+                                 <copy>
+                                 <from>"deBolsillo"</from>
+                                 <to part="publisher" variable="_ASTROBookStore_search"/>
+                                </copy>									 
+                                 <copy>
+                                    <from part="publisher" variable="_ASTROBookStore_search"/>
+                                    <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                        <query>/ns2:ItemSearch/ns2:Request/ns2:Publisher</query>
+                                    </to>
+                                 </copy>
+				 <copy> 
+				<from><literal>
+				<ns2:ItemSearch>
+				   <ns2:MarketplaceDomain/>
+				   <ns2:AWSAccessKeyId/>
+				   <ns2:SubscriptionId/>
+				   <ns2:AssociateTag/>
+				   <ns2:XMLEscaping/>
+				   <ns2:Validate/>
+				<ns2:Shared>
+				   <ns2:Author/>
+				   <ns2:BrowseNode/>
+				   <ns2:Keywords/>
+				   <ns2:Publisher/>
+				   <ns2:ResponseGroup/>
+				   <ns2:SearchIndex/>
+				   <ns2:Title/>
+				   </ns2:Shared>
+				<ns2:Request>
+				   <ns2:Author/>
+				   <ns2:BrowseNode/>
+				   <ns2:Keywords/>
+				   <ns2:Publisher/>
+				   <ns2:ResponseGroup/>
+				   <ns2:SearchIndex/>
+				<ns2:Title></ns2:Title>												
+				</ns2:Request>
+				</ns2:ItemSearch>
+				</literal></from>
+				<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+				</copy>	
+                                 <copy>
+                                 <from>"El diario de Anna Frank"</from>
+                                 <to part="title" variable="_ASTROBookStore_search"/>
+                                </copy>								 
+                                 <copy>
+                                    <from part="title" variable="_ASTROBookStore_search"/>
+                                    <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                        <query>/ns2:ItemSearch/ns2:Request/ns2:Title</query>
+                                    </to>
+                                 </copy>
+                              </assign>
+                              <assign>
+                                 <copy>
+                                    <from variable="key"/>
+                                    <to part="key" variable="_ASTROBookSearch_itemSearchRequest"/>
+                                 </copy>
+                              </assign>
+                              <invoke inputVariable="_ASTROBookSearch_itemSearchRequest" name="invoke_ASTROBookSearch_itemSearchRequest" operation="itemSearchRequest" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                 <correlations>
+                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                 </correlations>
+                              </invoke>
+                              <pick>
+                                 <onMessage operation="itemSearchErr" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchErr">
+                                    <correlations>
+                                       <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                    </correlations>
+                                    <sequence>
+                                       <assign>
+                                          <copy>
+                                             <from part="error" variable="_ASTROBookSearch_itemSearchErr">
+                                                 <query>/ns2:Errors/ns2:Error/ns2:Message</query>
+                                             </from>
+                                             <to part="error" variable="_ASTROBookStore_searchError"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="key"/>
+                                             <to part="key" variable="_ASTROBookStore_searchError"/>
+                                          </copy>
+                                       </assign>
+                                     <invoke inputVariable="_ASTROBookStore_searchError" name="invoke_ASTROBookStore_searchError" operation="searchError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                          <correlations>
+                                             <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                          </correlations>
+                                       </invoke>
+                                    </sequence>
+                                 </onMessage>
+                                 <onMessage operation="itemSearchResponse" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchResponse">
+                                    <correlations>
+                                       <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                    </correlations>
+                                    <sequence>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local1_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local1_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:TotalResults</query>
+                                             </from>
+                                             <to part="numItems" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local2_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local2_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ASIN</query>
+                                             </from>
+                                             <to part="ASIN" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local3_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local4_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local4_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:Author[1]</query>
+                                             </from>
+                                             <to part="author" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local3_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:DetailPageURL</query>
+                                             </from>
+                                             <to part="detailPageURL" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local5_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local5_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:Title</query>
+                                             </from>
+                                             <to part="title" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local6_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local7_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local7_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:ISBN</query>
+                                             </from>
+                                             <to part="ISBN" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                             <to variable="_local8_ASTROBookSearch_itemSearchResponse_body"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local8_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:ListPrice/ns2:FormattedPrice</query>
+                                             </from>
+                                             <to part="price" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="_local6_ASTROBookSearch_itemSearchResponse_body">
+                                                 <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:Publisher</query>
+                                             </from>
+                                             <to part="publisher" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <assign>
+                                          <copy>
+                                             <from variable="key"/>
+                                             <to part="key" variable="_ASTROBookStore_searchResult"/>
+                                          </copy>
+                                       </assign>
+                                       <invoke inputVariable="_ASTROBookStore_searchResult" name="invoke_ASTROBookStore_searchResult" operation="searchResult" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                          <correlations>
+                                             <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                                          </correlations>
+                                       </invoke>
+                                    </sequence>
+                                 </onMessage>
+                              </pick>
+                           </sequence>
+                        </onMessage>
+                        <onMessage operation="add" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="addMsg">
+                           <correlations>
+                              <correlation initiate="yes" set="bookstore"/> 
+                           </correlations>
+                          <empty/>
+                        </onMessage>
+                        <onMessage operation="logout" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="logoutMsg">
+                           <correlations>
+                              <correlation initiate="yes" set="bookstore"/>
+                           </correlations>
+                           <sequence>
+                              <assign>
+                                 <copy>
+                                    <from variable="key"/>
+                                    <to part="key" variable="_ASTROBookSearch_logout"/>
+                                 </copy>
+                              </assign>
+                              <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                 <correlations>
+                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                                 </correlations>
+                              </invoke>
+                              <empty/>
+                           </sequence>
+                        </onMessage>
+                     </pick>
+                  </sequence>
+		</sequence>
+               </while>
+               <sequence>
+                  <assign>
+                     <copy>
+                        <from>50</from>
+                        <to part="quantity" variable="_ASTROBookStore_add"/>
+                     </copy>
+                     <copy>
+                        <from part="quantity" variable="_ASTROBookStore_add"/>
+                        <to variable="_local1_ASTROBookStore_add_quantity"/>
+                     </copy>
+                  </assign>
+                  <assign>
+                     <copy>
+                        <from>"ASIN"</from>
+                        <to part="ASIN" variable="_ASTROBookStore_add"/>
+                     </copy>
+                     <copy>
+                        <from part="ASIN" variable="_ASTROBookStore_add"/>
+                        <to variable="_local1_ASTROBookStore_add_ASIN"/>
+                     </copy>
+                  </assign>
+                  <assign>
+			<copy> 
+			   <from><literal>
+				<ns0:CartCreate>
+		                   <ns0:AWSAccessKeyId/>
+					<ns0:Request>
+						<ns0:Items>
+				        		<ns0:Item>
+								<ns0:ASIN>ASIN</ns0:ASIN>
+								<ns0:Quantity>50</ns0:Quantity>
+							</ns0:Item>
+						</ns0:Items>
+					</ns0:Request>
+				</ns0:CartCreate>
+			   </literal></from>
+			   <to variable="_ASTROBookCart_cartCreate" part="body"/>
+    			 </copy>				  
+                     <copy>
+                        <from variable="_local1_ASTROBookStore_add_ASIN"/>
+                        <to part="body" variable="_ASTROBookCart_cartCreate">
+                            <query>/ns0:CartCreate/ns0:Request/ns0:Items/ns0:Item/ns0:ASIN</query>
+                        </to>
+                     </copy>
+			<copy> 
+			   <from><literal>
+				<ns0:CartCreate>
+					<ns0:AWSAccessKeyId/>
+					<ns0:Request>
+						<ns0:Items>
+							<ns0:Item>
+								<ns0:ASIN>ASIN</ns0:ASIN>
+								<ns0:Quantity>50</ns0:Quantity>
+							</ns0:Item>
+						</ns0:Items>
+					</ns0:Request>
+				</ns0:CartCreate>
+			   </literal></from>
+			   <to variable="_ASTROBookCart_cartCreate" part="body"/>
+			 </copy>					 
+                     <copy>
+                        <from variable="_local1_ASTROBookStore_add_quantity"/>
+                        <to part="body" variable="_ASTROBookCart_cartCreate">
+                             <query>/ns0:CartCreate/ns0:Request/ns0:Items/ns0:Item/ns0:Quantity</query>
+                        </to>
+                     </copy>
+                  </assign>
+                  <assign>
+                     <copy>
+                        <from variable="key"/>
+                        <to part="key" variable="_ASTROBookCart_cartCreate"/>
+                     </copy>
+                  </assign>
+                  <invoke inputVariable="_ASTROBookCart_cartCreate" name="invoke_ASTROBookCart_cartCreate" operation="cartCreate" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                     <correlations>
+                        <correlation initiate="yes" pattern="request" set="_CS_ASTROBookCart_PLT"/>
+                     </correlations>
+                  </invoke>
+                 <pick name="Pick_gross">
+                     <onMessage operation="cartCreateErr" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartCreateErr">
+                        <correlations>
+                           <correlation set="_CS_ASTROBookCart_PLT"/>
+                        </correlations>
+                        <sequence>
+                          <assign>
+                              <copy>
+                                 <from part="error" variable="_ASTROBookCart_cartCreateErr">
+                                     <query>/ns0:Errors/ns0:Error/ns0:Message</query>
+                                 </from>
+                                 <to variable="_local1_ASTROBookStore_addError_error"/>
+                              </copy>
+                           </assign>
+                           <assign>
+                              <copy>
+                                 <from variable="_local1_ASTROBookStore_addError_error"/>
+                                 <to part="error" variable="_ASTROBookStore_addError"/>
+                              </copy>
+                           </assign>
+                           <assign>
+                              <copy>
+                                 <from variable="key"/>
+                                 <to part="key" variable="_ASTROBookSearch_logout"/>
+                              </copy>
+                           </assign>
+                          <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                              <correlations>
+                                 <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                              </correlations>
+                           </invoke>
+                           <assign>
+                              <copy>
+                                 <from variable="key"/>
+                                 <to part="key" variable="_ASTROBookStore_addError"/>
+                              </copy>
+                           </assign>
+                          <invoke inputVariable="_ASTROBookStore_addError" name="invoke_ASTROBookStore_addError" operation="addError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                              <correlations>
+                                 <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                              </correlations>
+                           </invoke>  
+                           <empty/>
+                         </sequence>
+                     </onMessage>
+                 <onMessage operation="cartCreateResponse" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartCreateResponse">
+                        <correlations>
+                           <correlation set="_CS_ASTROBookCart_PLT"/>
+                        </correlations>
+                        <sequence>
+                           <assign>
+                              <copy>
+                                 <from part="body" variable="_ASTROBookCart_cartCreateResponse">
+                                     <query>/ns0:CartCreateResponse/ns0:Cart/ns0:SubTotal/ns0:FormattedPrice</query>
+                                 </from>
+                                 <to variable="_local1_ASTROBookStore_addAck_SubTotal"/>
+                              </copy>
+                           </assign>
+                           <assign>
+                              <copy>
+                                 <from variable="_local1_ASTROBookStore_addAck_SubTotal"/>
+                                 <to part="SubTotal" variable="_ASTROBookStore_addAck"/>
+                              </copy>
+                           </assign>
+                           <assign>
+                              <copy>
+                                 <from variable="key"/>
+                                 <to part="key" variable="_ASTROBookStore_addAck"/>
+                              </copy>
+                           </assign>
+                         <invoke inputVariable="_ASTROBookStore_addAck" name="invoke_ASTROBookStore_addAck" operation="addAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                              <correlations>
+                                 <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                              </correlations>
+                           </invoke>
+                           <while>
+                               <condition>($numArticulos) &lt; 1</condition>
+                               <sequence> 
+	                       <assign>
+	                       <copy>
+	                       <from>$numArticulos + 1</from>
+	                       <to variable="numArticulos"/>
+	                       </copy>
+	                       </assign>
+                              <sequence>
+                                 <pick name="Pick">
+                                    <onMessage operation="search" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="searchMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <assign>
+					 <copy> 
+					<from><literal>
+					<ns2:ItemSearch>
+						<ns2:MarketplaceDomain/>
+						<ns2:AWSAccessKeyId/>
+						<ns2:SubscriptionId/>
+						<ns2:AssociateTag/>
+						<ns2:XMLEscaping/>
+						<ns2:Validate/>
+						<ns2:Shared>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>
+						</ns2:Shared>
+						<ns2:Request>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>												
+						</ns2:Request>
+					</ns2:ItemSearch>
+					</literal></from>
+					<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+					 </copy>
+										  
+                                             <copy>
+                                                <from part="author" variable="_ASTROBookStore_search"/>
+                                                <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                                    <query>/ns2:ItemSearch/ns2:Request/ns2:Author</query>
+                                                </to>
+                                             </copy>
+					     <copy> 
+					     <from><literal>
+					     <ns2:ItemSearch>
+						<ns2:MarketplaceDomain/>
+						<ns2:AWSAccessKeyId/>
+						<ns2:SubscriptionId/>
+						<ns2:AssociateTag/>
+						<ns2:XMLEscaping/>
+						<ns2:Validate/>
+						<ns2:Shared>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>
+						</ns2:Shared>
+						<ns2:Request>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>												
+						</ns2:Request>
+						</ns2:ItemSearch>
+						</literal></from>
+						<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+						</copy>
+											 
+                                             <copy>
+                                                <from part="keyword" variable="_ASTROBookStore_search"/>
+                                                <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                                    <query>/ns2:ItemSearch/ns2:Request/ns2:Keywords</query>
+                                                </to>
+                                             </copy>
+					     <copy> 
+					     <from><literal>
+					     <ns2:ItemSearch>
+						<ns2:MarketplaceDomain/>
+						<ns2:AWSAccessKeyId/>
+						<ns2:SubscriptionId/>
+						<ns2:AssociateTag/>
+						<ns2:XMLEscaping/>
+						<ns2:Validate/>
+						<ns2:Shared>
+							<ns2:Author/>
+						        <ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>
+						</ns2:Shared>
+						<ns2:Request>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>												
+						</ns2:Request>
+						</ns2:ItemSearch>
+						</literal></from>
+						<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+						</copy>
+											 
+                                             <copy>
+                                                <from part="publisher" variable="_ASTROBookStore_search"/>
+                                                <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                                    <query>/ns2:ItemSearch/ns2:Request/ns2:Publisher</query>
+                                                </to>
+                                             </copy>
+				             <copy> 
+					     <from><literal>
+					     <ns2:ItemSearch>
+						<ns2:MarketplaceDomain/>
+						<ns2:AWSAccessKeyId/>
+						<ns2:SubscriptionId/>
+						<ns2:AssociateTag/>
+						<ns2:XMLEscaping/>
+						<ns2:Validate/>
+						<ns2:Shared>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>
+						</ns2:Shared>
+						<ns2:Request>
+							<ns2:Author/>
+							<ns2:BrowseNode/>
+							<ns2:Keywords/>
+							<ns2:Publisher/>
+							<ns2:ResponseGroup/>
+							<ns2:SearchIndex/>
+							<ns2:Title/>												
+						</ns2:Request>
+						</ns2:ItemSearch>
+						</literal></from>
+						<to variable="_ASTROBookSearch_itemSearchRequest" part="body"/>
+   						 </copy>
+											 
+                                             <copy>
+                                                <from part="title" variable="_ASTROBookStore_search"/>
+                                                <to part="body" variable="_ASTROBookSearch_itemSearchRequest">
+                                                    <query>/ns2:ItemSearch/ns2:Request/ns2:Title</query>
+                                                </to>
+                                             </copy>
+                                          </assign>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookSearch_itemSearchRequest"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookSearch_itemSearchRequest" name="invoke_ASTROBookSearch_itemSearchRequest" operation="itemSearchRequest" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                                             </correlations>
+                                          </invoke>
+                                         <pick>
+                                             <onMessage operation="itemSearchErr" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchErr">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="error" variable="_ASTROBookSearch_itemSearchErr">
+                                                             <query>/ns2:Errors/ns2:Error/ns2:Message</query>
+                                                         </from>
+                                                         <to part="error" variable="_ASTROBookStore_searchError"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookStore_searchError"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookStore_searchError" name="invoke_ASTROBookStore_searchError" operation="searchError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                                                      </correlations>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                             <onMessage operation="itemSearchResponse" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_CallbackPT" variable="_ASTROBookSearch_itemSearchResponse">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookSearch_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local1_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local1_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:TotalResults</query>
+                                                         </from>
+                                                         <to part="numItems" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local2_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local2_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ASIN</query>
+                                                         </from>
+                                                         <to part="ASIN" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local3_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local4_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local4_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:Author[1]</query>
+                                                         </from>
+                                                         <to part="author" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local3_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:DetailPageURL</query>
+                                                         </from>
+                                                         <to part="detailPageURL" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local5_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local5_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:Title</query>
+                                                         </from>
+                                                         <to part="title" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local6_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local7_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local7_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:ISBN</query>
+                                                         </from>
+                                                         <to part="ISBN" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookSearch_itemSearchResponse"/>
+                                                         <to variable="_local8_ASTROBookSearch_itemSearchResponse_body"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local8_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:ListPrice/ns2:FormattedPrice</query>
+                                                         </from>
+                                                         <to part="price" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local6_ASTROBookSearch_itemSearchResponse_body">
+                                                             <query>/ns2:ItemSearchResponse/ns2:Items/ns2:Item[1]/ns2:ItemAttributes/ns2:Publisher</query>
+                                                         </from>
+                                                         <to part="publisher" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookStore_searchResult"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookStore_searchResult" name="invoke_ASTROBookStore_searchResult" operation="searchResult" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/>
+                                                      </correlations>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                          </pick>
+                                       </sequence>
+                                    </onMessage>
+                                    <onMessage operation="add" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="addMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <assign>
+                                             <copy>
+                                                <from part="ASIN" variable="_ASTROBookStore_add"/>
+                                                <to variable="_local2_ASTROBookStore_add_ASIN"/>
+                                             </copy>
+                                          </assign>
+                                          <assign>
+                                             <copy>
+                                                <from part="quantity" variable="_ASTROBookStore_add"/>
+                                                <to variable="_local2_ASTROBookStore_add_quantity"/>
+                                             </copy>
+                                          </assign>
+                                          <assign>
+					  <copy>
+					  <from><literal>
+					  <ns0:CartAdd>
+						<ns0:Request>
+							<ns0:Items>
+					                    <ns0:Item>
+								<ns0:ASIN/>
+								<ns0:Quantity/>
+							    </ns0:Item>
+							</ns0:Items>
+						</ns0:Request>
+					  </ns0:CartAdd>
+					  </literal></from>
+					  <to variable="_ASTROBookCart_cartAdd" part="body"/>
+					 </copy>										  
+                                             <copy>
+                                                <from variable="_local2_ASTROBookStore_add_ASIN"/>
+                                                <to part="body" variable="_ASTROBookCart_cartAdd">
+                                                    <query>/ns0:CartAdd/ns0:Request/ns0:Items/ns0:Item/ns0:ASIN</query>
+                                                </to>
+                                             </copy>
+					     <copy> 
+					     <from><literal>
+						<ns0:CartAdd>
+						   <ns0:Request>
+							<ns0:Items>
+						           <ns0:Item>
+								<ns0:ASIN/>
+								<ns0:Quantity/>
+							    </ns0:Item>
+							</ns0:Items>
+						   </ns0:Request>
+						</ns0:CartAdd>
+					     </literal></from>
+					     <to variable="_ASTROBookCart_cartAdd" part="body"/>
+					     </copy>											 
+                                             <copy>
+                                                <from variable="_local2_ASTROBookStore_add_quantity"/>
+                                                <to part="body" variable="_ASTROBookCart_cartAdd">
+                                                    <query>/ns0:CartAdd/ns0:Request/ns0:Items/ns0:Item/ns0:Quantity</query>
+                                                </to>
+                                             </copy>
+                                          </assign>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookCart_cartAdd"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookCart_cartAdd" name="invoke_ASTROBookCart_cartAdd" operation="cartAdd" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/>
+                                             </correlations>
+                                          </invoke>
+                                          <pick>
+                                             <onMessage operation="cartAddErr" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartAddErr">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookCart_nop"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/>
+                                                      </correlations>
+                                                   </invoke>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookCart_nop"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                      </correlations>
+                                                   </invoke>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookSearch_logout"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                      <correlations>
+                                                         <correlation  pattern="request" set="_CS_ASTROBookSearch_PLT"/>
+                                                      </correlations>
+                                                   </invoke>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="error" variable="_ASTROBookCart_cartAddErr">
+                                                             <query>/ns0:Errors/ns0:Error/ns0:Message</query>
+                                                         </from>
+                                                         <to variable="_local2_ASTROBookStore_addError_error"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local2_ASTROBookStore_addError_error"/>
+                                                         <to part="error" variable="_ASTROBookStore_addError"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookStore_addError"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookStore_addError" name="invoke_ASTROBookStore_addError" operation="addError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                      </correlations>
+                                                   </invoke> 
+                                                   <empty/>
+                                                </sequence>
+                                             </onMessage>
+                                             <onMessage operation="cartAddResponse" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartAddResponse">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/> 
+                                                </correlations>
+                                                <sequence>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookCart_cartAddResponse">
+                                                             <query>/ns0:CartAddResponse/ns0:Cart/ns0:SubTotal/ns0:FormattedPrice</query>
+                                                         </from>
+                                                         <to variable="_local2_ASTROBookStore_addAck_SubTotal"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local2_ASTROBookStore_addAck_SubTotal"/>
+                                                         <to part="SubTotal" variable="_ASTROBookStore_addAck"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookStore_addAck"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookStore_addAck" name="invoke_ASTROBookStore_addAck" operation="addAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                      </correlations>
+                                                   </invoke>
+                                                </sequence>
+                                             </onMessage>
+                                          </pick> 
+                                       </sequence>
+                                    </onMessage>
+                                    <onMessage operation="checkout" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="checkoutMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookCart_nop"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                          </invoke>
+                                          <assign>
+                                             <copy>
+                                                <from>"key"</from>
+                                                <to part="key" variable="_ASTROBookStore_checkout"/>
+                                             </copy>
+                                          </assign>
+                                          <assign>
+                                             <copy>
+                                                <from part="key" variable="_ASTROBookStore_checkout"/>
+                                                <to part="key" variable="_ASTROBookCart_cartGet"/>
+                                             </copy>
+                                          </assign>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookCart_cartGet"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookCart_cartGet" name="invoke_ASTROBookCart_cartGet" operation="cartGet" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                          </invoke> 
+                                          <pick>
+                                             <onMessage operation="cartGetResponse" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartGetResponse">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <assign>
+                                                      <copy>
+                                                         <from>"ASTROBookStore@astroproject.org"</from>
+                                                         <to part="shopEmail" variable="_bankJPG_startTransaction"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="body" variable="_ASTROBookCart_cartGetResponse">
+                                                             <query>/ns0:CartGetResponse/ns0:Cart/ns0:SubTotal/ns0:FormattedPrice</query>
+                                                         </from>
+                                                         <to variable="_local_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                         <to variable="_local1_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                         <to variable="_local2_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local2_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                         <to part="amount" variable="_bankJPG_startTransaction"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from>"ASTROBookStore"</from>
+                                                         <to part="shopId" variable="_bankJPG_startTransaction"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from>"ASTROBookStore001"</from>
+                                                         <to part="shopDs" variable="_bankJPG_startTransaction"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from>"89234123abs"</from>
+                                                         <to part="customerIP" variable="_bankJPG_startTransaction"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_bankJPG_startTransaction"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_bankJPG_startTransaction" name="invoke_bankJPG_startTransaction" operation="startTransaction" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" initiate="yes" set="_CS_bankJPG_PLT"/> 
+                                                      </correlations>
+                                                   </invoke>
+                                                   <pick>
+                                                      <onMessage operation="startTransactionAck" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_startTransactionAck">
+                                                         <correlations>
+                                                            <correlation set="_CS_bankJPG_PLT"/>
+                                                         </correlations>
+                                                         <sequence>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from part="paymentURL" variable="_bankJPG_startTransactionAck"/>
+                                                                  <to part="paymentURL" variable="_ASTROBookStore_checkoutAck"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="_local1_ASTROBookStore_checkoutAck_SubTotal"/>
+                                                                  <to part="SubTotal" variable="_ASTROBookStore_checkoutAck"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="key"/>
+                                                                  <to part="key" variable="_ASTROBookStore_checkoutAck"/>
+                                                               </copy>
+                                                            </assign>
+                                                           <invoke inputVariable="_ASTROBookStore_checkoutAck" name="invoke_ASTROBookStore_checkoutAck" operation="checkoutAck" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                               </correlations>
+                                                            </invoke>
+                                                             <receive name="receive_ASTROBookStore_requestSubmitted" operation="requestSubmitted" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="_ASTROBookStore_requestSubmitted">
+                                                               <correlations>
+                                                                  <correlation set="_CS_ASTROBookStore_PLT"/>
+                                                               </correlations>
+                                                            </receive>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from part="transactionId" variable="_ASTROBookStore_requestSubmitted"/>
+                                                                  <to part="transactionId" variable="_bankJPG_requestSubmitted"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="key"/>
+                                                                  <to part="key" variable="_bankJPG_requestSubmitted"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <invoke inputVariable="_bankJPG_requestSubmitted" name="invoke_bankJPG_requestSubmitted" operation="requestSubmitted" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_bankJPG_PLT"/> 
+                                                               </correlations>
+                                                            </invoke>
+                                                            <pick>
+                                                               <onMessage operation="requestNotAvailable" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_requestNotAvailable">
+                                                                  <correlations>
+                                                                     <correlation set="_CS_bankJPG_PLT"/>
+                                                                  </correlations>
+                                                                  <sequence>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from part="errorDesc" variable="_bankJPG_requestNotAvailable"/>
+                                                                           <to part="error" variable="_ASTROBookStore_confirmError"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from variable="key"/>
+                                                                           <to part="key" variable="_ASTROBookCart_nop"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                                        </correlations>
+                                                                     </invoke>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from variable="key"/>
+                                                                           <to part="key" variable="_ASTROBookSearch_logout"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                                        </correlations>
+                                                                     </invoke>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from variable="key"/>
+                                                                           <to part="key" variable="_ASTROBookStore_confirmError"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <invoke inputVariable="_ASTROBookStore_confirmError" name="invoke_ASTROBookStore_confirmError" operation="confirmError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                                        </correlations>
+                                                                     </invoke>
+                                                                     <empty/>
+                                                                  </sequence>
+                                                               </onMessage>
+                                                              <onMessage operation="requestAvailable" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_requestAvailable">
+                                                                  <correlations>
+                                                                     <correlation set="_CS_bankJPG_PLT"/>
+                                                                  </correlations>
+                                                                  <sequence>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from>"AstroBookStore"</from>
+                                                                           <to part="shopId" variable="_bankJPG_confirm"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from>"AstroTransaction"</from>
+                                                                           <to part="transactionId" variable="_bankJPG_confirm"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <assign>
+                                                                        <copy>
+                                                                           <from variable="key"/>
+                                                                           <to part="key" variable="_bankJPG_confirm"/>
+                                                                        </copy>
+                                                                     </assign>
+                                                                     <invoke inputVariable="_bankJPG_confirm" name="invoke_bankJPG_confirm" operation="confirm" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                                        <correlations>
+                                                                           <correlation pattern="request" set="_CS_bankJPG_PLT"/> 
+                                                                        </correlations> 
+                                                                     </invoke>
+                                                                    <pick>
+                                                                        <onMessage operation="confirmAck" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_confirmAck">
+                                                                           <correlations>
+                                                                              <correlation set="_CS_bankJPG_PLT"/>
+                                                                           </correlations>
+                                                                           <sequence>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_bankJPG_requestAvailableAck"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                               <invoke inputVariable="_bankJPG_requestAvailableAck" name="invoke_bankJPG_requestAvailableAck" operation="requestAvailableAck" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_bankJPG_PLT"/> 
+                                                                                 </correlations>
+                                                                              </invoke>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from part="transactionDate" variable="_bankJPG_confirmAck"/>
+                                                                                    <to part="transactionDate" variable="_ASTROBookStore_sent"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_ASTROBookCart_clear"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <invoke inputVariable="_ASTROBookCart_clear" name="invoke_ASTROBookCart_clear" operation="clear" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                                                 </correlations>
+                                                                              </invoke>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from part="transactionTime" variable="_bankJPG_confirmAck"/>
+                                                                                    <to part="transactionTime" variable="_ASTROBookStore_sent"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_ASTROBookSearch_logout"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                                                 </correlations>
+                                                                              </invoke>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from part="transactionAuthorization" variable="_bankJPG_confirmAck"/>
+                                                                                    <to part="transactionAuthorization" variable="_ASTROBookStore_sent"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_ASTROBookStore_sent"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <invoke inputVariable="_ASTROBookStore_sent" name="invoke_ASTROBookStore_sent" operation="sent" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                                                 </correlations>
+                                                                              </invoke>
+                                                                              <empty/>
+                                                                             
+                                                                           </sequence>
+                                                                        </onMessage>
+                                                                        <onMessage operation="confirmErr" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_confirmErr">
+                                                                           <correlations>
+                                                                              <correlation set="_CS_bankJPG_PLT"/>
+                                                                           </correlations>
+                                                                           <sequence>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_ASTROBookCart_nop"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                                                 </correlations>
+                                                                              </invoke>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from part="errorDesc" variable="_bankJPG_confirmErr"/>
+                                                                                    <to part="error" variable="_ASTROBookStore_confirmError"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_ASTROBookSearch_logout"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                                                 </correlations> 
+                                                                              </invoke>
+                                                                              <assign>
+                                                                                 <copy>
+                                                                                    <from variable="key"/>
+                                                                                    <to part="key" variable="_ASTROBookStore_confirmError"/>
+                                                                                 </copy>
+                                                                              </assign>
+                                                                              <invoke inputVariable="_ASTROBookStore_confirmError" name="invoke_ASTROBookStore_confirmError" operation="confirmError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                                                 <correlations>
+                                                                                    <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                                                 </correlations>
+                                                                              </invoke>
+                                                                              <empty/>
+                                                                           </sequence>
+                                                                        </onMessage>
+                                                                     </pick>
+                                                                  </sequence>
+                                                               </onMessage>
+                                                            </pick>
+                                                         </sequence>
+                                                      </onMessage>
+                                                      <onMessage operation="startTransactionErr" partnerLink="bankJPG_PLT" portType="bankJPG:bankJPG_CallbackPT" variable="_bankJPG_startTransactionErr">
+                                                         <correlations>
+                                                            <correlation set="_CS_bankJPG_PLT"/>
+                                                         </correlations>
+                                                         <sequence>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from part="errorDesc" variable="_bankJPG_startTransactionErr"/>
+                                                                  <to variable="_local2_ASTROBookStore_checkoutError_error"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="key"/>
+                                                                  <to part="key" variable="_ASTROBookCart_nop"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                                               </correlations>
+                                                            </invoke>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="_local2_ASTROBookStore_checkoutError_error"/>
+                                                                  <to part="error" variable="_ASTROBookStore_checkoutError"/>
+                                                               </copy>
+                                                            </assign>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="key"/>
+                                                                  <to part="key" variable="_ASTROBookSearch_logout"/>
+                                                               </copy>
+                                                            </assign>
+                                                           <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                               </correlations>
+                                                            </invoke>
+                                                            <assign>
+                                                               <copy>
+                                                                  <from variable="key"/>
+                                                                  <to part="key" variable="_ASTROBookStore_checkoutError"/>
+                                                               </copy>
+                                                            </assign>
+                                                             <invoke inputVariable="_ASTROBookStore_checkoutError" name="invoke_ASTROBookStore_checkoutError" operation="checkoutError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                               <correlations>
+                                                                  <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                               </correlations>
+                                                            </invoke>
+                                                            <empty/>
+                                                         </sequence>
+                                                      </onMessage>
+                                                   </pick>
+                                                </sequence>
+                                             </onMessage>
+                                             <onMessage operation="cartGetErr" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_CallbackPT" variable="_ASTROBookCart_cartGetErr">
+                                                <correlations>
+                                                   <correlation set="_CS_ASTROBookCart_PLT"/>
+                                                </correlations>
+                                                <sequence>
+                                                   <assign>
+                                                      <copy>
+                                                         <from part="error" variable="_ASTROBookCart_cartGetErr">
+                                                             <query>/ns0:Errors/ns0:Error/ns0:Message</query>
+                                                         </from>
+                                                         <to variable="_local1_ASTROBookStore_checkoutError_error"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookSearch_logout"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                                      </correlations>
+                                                   </invoke>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local1_ASTROBookStore_checkoutError_error"/>
+                                                         <to variable="_local2_ASTROBookStore_checkoutError_error"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="_local2_ASTROBookStore_checkoutError_error"/>
+                                                         <to part="error" variable="_ASTROBookStore_checkoutError"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <assign>
+                                                      <copy>
+                                                         <from variable="key"/>
+                                                         <to part="key" variable="_ASTROBookStore_checkoutError"/>
+                                                      </copy>
+                                                   </assign>
+                                                   <invoke inputVariable="_ASTROBookStore_checkoutError" name="invoke_ASTROBookStore_checkoutError" operation="checkoutError" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_CallbackPT">
+                                                      <correlations>
+                                                         <correlation pattern="request" set="_CS_ASTROBookStore_PLT"/> 
+                                                      </correlations>
+                                                   </invoke>
+                                                   <empty/>
+                                                </sequence>
+                                             </onMessage>
+                                          </pick> 
+                                       </sequence>
+                                    </onMessage>
+                                    <onMessage operation="logout" partnerLink="ASTROBookStore_PLT" portType="ns1:ASTROBookStore_PT" variable="logoutMsg">
+                                       <correlations>
+                                          <correlation set="bookstore"/>
+                                       </correlations>
+                                       <sequence>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookCart_nop"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                          </invoke>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookCart_nop"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookCart_nop" name="invoke_ASTROBookCart_nop" operation="nop" partnerLink="ASTROBookCart_PLT" portType="ASTROBookCart:ASTROBookCart_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookCart_PLT"/> 
+                                             </correlations>
+                                          </invoke>
+                                          <assign>
+                                             <copy>
+                                                <from variable="key"/>
+                                                <to part="key" variable="_ASTROBookSearch_logout"/>
+                                             </copy>
+                                          </assign>
+                                          <invoke inputVariable="_ASTROBookSearch_logout" name="invoke_ASTROBookSearch_logout" operation="logout" partnerLink="ASTROBookSearch_PLT" portType="ASTROBookSearch:ASTROBookSearch_PT">
+                                             <correlations>
+                                                <correlation pattern="request" set="_CS_ASTROBookSearch_PLT"/> 
+                                             </correlations>
+                                          </invoke>
+                                          <empty/>
+                                       </sequence>
+                                    </onMessage>
+                                 </pick>
+                              </sequence>
+                            </sequence>
+                           </while>
+                        </sequence>
+                     </onMessage>
+                  </pick>
+               </sequence>
+            </sequence>
+         </onMessage> 
+      </pick>
+   </sequence>
+
+</process>

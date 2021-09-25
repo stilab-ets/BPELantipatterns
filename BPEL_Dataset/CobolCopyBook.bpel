@@ -1,0 +1,54 @@
+<process xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/file/CCBFileOutbound/"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/file/CCBFileInbound/"
+         xmlns:ns5="http://xmlns.oracle.com/pcbpel/demoSchema/ccb"
+         xmlns:client="http://xmlns.oracle.com/CobolCopyBook"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         name="CobolCopyBook"
+         targetNamespace="http://xmlns.oracle.com/CobolCopyBook">
+  <!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Partner Links Section
+  //////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks xmlns:plext="http://schemas.oracle.com/bpel/extension/partnerlink">
+    <partnerLink name="OutboundPL" partnerRole="Write_role"
+                 plext:wsdlloc="CCBFileOutbound.wsdl" plext:inbport="Write_ptt"
+                 plext:inbound="false" partnerLinkType="ns4:Write_plt"/>
+    <partnerLink myRole="Read_role" name="InboundPL"
+                 plext:wsdlloc="CCBFileInbound.wsdl" plext:inbport="Read_ptt"
+                 plext:inbound="true" partnerLinkType="ns3:Read_plt"/>
+  </partnerLinks>
+  <!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Process Variables Section
+  //////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <variable name="Receive_EBCDIC_Read_InputVariable"
+              messageType="ns3:Root-Element_msg"/>
+    <variable name="Invoke_ASCII_Write_InputVariable"
+              messageType="ns4:Root-Element_msg"/>
+  </variables>
+  <!--
+  //////////////////////////////////////////////////////////////////////////////
+  //  Activity Flow Section
+  //////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+    <receive name="Receive_EBCDIC" partnerLink="InboundPL"
+             portType="ns3:Read_ptt" operation="Read"
+             variable="Receive_EBCDIC_Read_InputVariable" createInstance="yes"/>
+    <assign name="PassThru">
+      <copy>
+        <from variable="Receive_EBCDIC_Read_InputVariable" part="Root-Element"/>
+        <to variable="Invoke_ASCII_Write_InputVariable" part="Root-Element"/>
+      </copy>
+    </assign>
+    <invoke name="Invoke_ASCII" partnerLink="OutboundPL"
+            portType="ns4:Write_ptt" operation="Write"
+            inputVariable="Invoke_ASCII_Write_InputVariable"/>
+  </sequence>
+</process>

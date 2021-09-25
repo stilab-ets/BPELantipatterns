@@ -1,0 +1,71 @@
+<process name="DIMERequester"
+		targetNamespace="http://samples.otn.com/DIMERequester"
+        suppressJoinFailure="yes"
+		xmlns:tns="http://samples.otn.com/DIMERequester"
+		xmlns:svc="http://example.com/DimeExample/Service/"
+		xmlns:svcmsg="http://example.com/DimeExample/Messages/"
+		xmlns:ora="http://schemas.oracle.com/xpath/extension"
+        xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/">
+
+  <!-- This process invokes an synchronous integer increment service -->
+  
+  <partnerLinks>
+    <partnerLink name="client"
+            partnerLinkType="tns:DIMERequester"
+            myRole="DIMERequesterProvider"
+            partnerRole="DIMERequesterRequester"/>
+    <partnerLink name="DIMEService"
+			partnerLinkType="svc:DIMEService"
+			partnerRole="DIMEServiceProvider"/>
+  </partnerLinks>
+  
+  <variables>
+    <variable name="input" messageType="tns:DIMERequesterRequestMessage"/>
+    <variable name="output" messageType="tns:DIMERequesterResultMessage"/>
+               
+    <variable name="request"
+               messageType="svc:PutCompanyInfo"/>
+  </variables>
+
+  <sequence>
+    
+    <!-- receive input from requestor -->
+    <receive name="receiveInput" partnerLink="client"
+             portType="tns:DIMERequester"
+             operation="initiate" variable="input"
+             createInstance="yes"/>
+             
+    <!-- initialize the input of DIMEService -->
+    <assign>
+    
+      <copy>
+        <from variable="input" part="payload" query="/tns:ticker"/>
+		<to variable="request" part="body" query="/svcmsg:PutCompanyInfo/svcmsg:tickerSymbol"/>
+      </copy>
+	  <copy>
+	    <from expression="ora:readBinaryFromFile('logo.gif')"/>
+		<to variable="request" part="body" query="/svcmsg:PutCompanyInfo/svcmsg:logo"/>
+      </copy>
+	  <copy>
+	    <from expression="ora:readBinaryFromFile('test.pdf')"/>
+		<to variable="request" part="body" query="/svcmsg:PutCompanyInfo/svcmsg:doc"/>
+      </copy>
+	  <copy>
+	    <from expression="ora:readBinaryFromFile('report.html')"/>
+		<to variable="request" part="body" query="/svcmsg:PutCompanyInfo/svcmsg:report"/>
+      </copy>
+      
+    </assign>              
+
+    
+    <invoke name="invoke" partnerLink="DIMEService"
+            portType="svc:PortType"
+			operation="PutCompanyInfo" inputVariable="request"/>
+
+    <invoke name="replyOutput" partnerLink="client"
+            portType="tns:DIMERequesterCallback"
+            operation="onResult" inputVariable="output"/>        
+
+  </sequence>
+
+</process>

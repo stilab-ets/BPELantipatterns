@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<process
+    name="SeleccionarServiciosStep"
+    targetNamespace="http://enterprise.netbeans.org/bpel/ContratarHotelMainProcess/SeleccionarServiciosStep"
+    xmlns:tns="http://enterprise.netbeans.org/bpel/ContratarHotelMainProcess/SeleccionarServiciosStep"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:sxt="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Trace" 
+    xmlns:sxed="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor"
+    xmlns:sxeh="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/ErrorHandling" xmlns:sxed2="http://www.sun.com/wsbpel/2.0/process/executable/SUNExtension/Editor2" xmlns:ns0="http://xml.netbeans.org/schema/SchemaCommon">
+    <import namespace="http://j2ee.netbeans.org/wsdl/ContratarHotelMainProcess/SeleccionarServiciosStep" location="SeleccionarServiciosStep.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/MainInteraction/ServiceInteraction" location="ServiceInteraction.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://j2ee.netbeans.org/wsdl/MainInteraction/StepInteraction" location="StepInteraction.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+        <partnerLink name="VerServicios" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/ServiceInteraction" partnerLinkType="tns:ServiceInteraction" partnerRole="ServiceInteractionPortTypeRole"/>
+        <partnerLink name="PartnerLink2" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/StepInteraction" partnerLinkType="tns:StepInteraction" partnerRole="StepInteractionPortTypeRole"/>
+        <partnerLink name="PartnerLink1" xmlns:tns="http://j2ee.netbeans.org/wsdl/ContratarHotelMainProcess/SeleccionarServiciosStep" partnerLinkType="tns:SeleccionarServiciosStep" myRole="SeleccionarServiciosStepPortTypeRole"/>
+    </partnerLinks>
+    <variables>
+        <variable name="returnOut" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/StepInteraction" messageType="tns:StepInteractionOperationResponse"/>
+        <variable name="returnIn" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/StepInteraction" messageType="tns:StepInteractionOperationRequest"/>
+        <variable name="verServiciosOut" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/ServiceInteraction" messageType="tns:ServiceInteractionOperationResponse"/>
+        <variable name="verServiciosIn" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/ServiceInteraction" messageType="tns:ServiceInteractionOperationRequest"/>
+        <variable name="SeleccionarServiciosStepOperationOut" xmlns:tns="http://j2ee.netbeans.org/wsdl/ContratarHotelMainProcess/SeleccionarServiciosStep" messageType="tns:SeleccionarServiciosStepOperationResponse"/>
+        <variable name="SeleccionarServiciosStepOperationIn" xmlns:tns="http://j2ee.netbeans.org/wsdl/ContratarHotelMainProcess/SeleccionarServiciosStep" messageType="tns:SeleccionarServiciosStepOperationRequest"/>
+    </variables>
+    <sequence>
+        <receive name="Receive1" createInstance="yes" partnerLink="PartnerLink1" operation="SeleccionarServiciosStepOperation" xmlns:tns="http://j2ee.netbeans.org/wsdl/ContratarHotelMainProcess/SeleccionarServiciosStep" portType="tns:SeleccionarServiciosStepPortType" variable="SeleccionarServiciosStepOperationIn"/>
+        <assign name="init">
+            <copy>
+                <from>$SeleccionarServiciosStepOperationIn.part1/ns0:sessionId</from>
+                <to>$SeleccionarServiciosStepOperationOut.part1/ns0:sessionId</to>
+            </copy>
+            <copy>
+                <from>'SeleccionarServiciosStep'</from>
+                <to>$SeleccionarServiciosStepOperationOut.part1/ns0:id</to>
+            </copy>
+            <copy>
+                <from>$SeleccionarServiciosStepOperationIn.part1/ns0:parameters</from>
+                <to>$SeleccionarServiciosStepOperationOut.part1/ns0:parameters</to>
+            </copy>
+        </assign>
+        <assign name="Assign1">
+            <copy>
+                <from>$SeleccionarServiciosStepOperationIn.part1/ns0:sessionId</from>
+                <to>$verServiciosIn.part1/ns0:sessionId</to>
+            </copy>
+            <copy>
+                <from>'service'</from>
+                <to>$verServiciosIn.part1/ns0:type</to>
+            </copy>
+            <copy>
+                <from>'verServicios'</from>
+                <to>$verServiciosIn.part1/ns0:id</to>
+            </copy>
+            <copy>
+                <from>concat($SeleccionarServiciosStepOperationIn.part1/ns0:nesting, ',', $SeleccionarServiciosStepOperationIn.part1/ns0:id)</from>
+                <to>$verServiciosIn.part1/ns0:nesting</to>
+            </copy>
+            <copy>
+                <from>'about:blank'</from>
+                <to>$verServiciosIn.part1/ns0:url</to>
+            </copy>
+            <copy>
+                <from>$SeleccionarServiciosStepOperationIn.part1/ns0:parameters</from>
+                <to>$verServiciosIn.part1/ns0:parameters</to>
+            </copy>
+        </assign>
+        <invoke name="InvokeVerServicios" partnerLink="VerServicios" operation="ServiceInteractionOperation" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/ServiceInteraction" portType="tns:ServiceInteractionPortType" inputVariable="verServiciosIn" outputVariable="verServiciosOut"/>
+        <assign name="AssignReturn">
+            <copy>
+                <from>$SeleccionarServiciosStepOperationIn.part1/ns0:sessionId</from>
+                <to>$returnIn.part1/ns0:sessionId</to>
+            </copy>
+            <copy>
+                <from>'return'</from>
+                <to>$returnIn.part1/ns0:type</to>
+            </copy>
+            <copy>
+                <from>'return'</from>
+                <to>$returnIn.part1/ns0:id</to>
+            </copy>
+            <copy>
+                <from>concat($SeleccionarServiciosStepOperationIn.part1/ns0:nesting, ',', $SeleccionarServiciosStepOperationIn.part1/ns0:id)</from>
+                <to>$returnIn.part1/ns0:nesting</to>
+            </copy>
+            <copy>
+                <from>'debug'</from>
+                <to>$returnIn.part1/ns0:url</to>
+            </copy>
+        </assign>
+        <invoke name="Invoke1" partnerLink="PartnerLink2" operation="StepInteractionOperation" xmlns:tns="http://j2ee.netbeans.org/wsdl/MainInteraction/StepInteraction" portType="tns:StepInteractionPortType" inputVariable="returnIn" outputVariable="returnOut"/>
+        <reply name="Reply1" partnerLink="PartnerLink1" operation="SeleccionarServiciosStepOperation" xmlns:tns="http://j2ee.netbeans.org/wsdl/ContratarHotelMainProcess/SeleccionarServiciosStep" portType="tns:SeleccionarServiciosStepPortType" variable="SeleccionarServiciosStepOperationOut"/>
+    </sequence>
+</process>
+
+
+
+
+

@@ -1,0 +1,85 @@
+<!-- AmazonFlow BPEL Process -->
+<process name="AmazonFlow"
+		targetNamespace="http://xmlns.oracle.com/AmazonFlow"
+		xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+		xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+		xmlns:ns1="http://soap.amazon.com"
+		xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap"
+		xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+		xmlns:client="http://xmlns.oracle.com/AmazonFlow"
+		xmlns:ora="http://schemas.oracle.com/xpath/extension"
+		xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"
+		>
+
+  <!-- List of services participating in this BPEL process -->
+  <partnerLinks>
+  <!-- 
+    The 'client' role represents the requester of this service. It is 
+    used for callback. The location and correlation information associated
+    with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="client"
+    			partnerLinkType="client:AmazonFlow"
+    			myRole="AmazonFlowProvider"
+    			partnerRole="AmazonFlowRequester"/>
+    <partnerLink name="AmazonSearchService"
+    			partnerRole="AmazonSearchPort_Role"
+    			partnerLinkType="ns1:AmazonSearchPort_PL"/>
+  </partnerLinks>
+
+  <!-- List of messages and XML documents used as part of this BPEL process -->
+  
+  <variables>
+  	<!-- Reference to the message passed as input during initiation -->
+    	<variable name="inputVariable"
+    			messageType="client:AmazonFlowRequestMessage"/>
+    	<!-- Reference to the message that will be sent back to the requester during callback -->
+    	<variable name="outputVariable"
+    			messageType="client:AmazonFlowResponseMessage"/>
+    	<variable name="request"
+    			messageType="ns1:AsinSearchRequest"/>
+    	<variable name="response"
+    			messageType="ns1:AsinSearchResponse"/>
+  </variables>
+  
+  <!-- ORCHESTRATION LOGIC -->
+  
+  <!-- Set of activities coordinating the flow of messages across the    -->
+  <!-- services integrated within this business process                  -->
+  <sequence name="main">
+  	<!-- Receive input from requestor. 
+  	Note: This maps to operation defined in AmazonFlow.wsdl
+  	-->
+    	<receive name="receiveInput"
+    			partnerLink="client"
+    			portType="client:AmazonFlow"
+    			operation="initiate"
+    			variable="inputVariable"
+    			createInstance="yes"/>
+	<assign name="Create_Request">
+	  <copy>
+	    <from variable="inputVariable" part="payload"/>
+	    <to variable="request" part="AsinSearchRequest"/>
+	  </copy>
+	</assign>
+	<invoke name="invoke"
+			partnerLink="AmazonSearchService"
+			portType="ns1:AmazonSearchPort"
+			operation="AsinSearchRequest"
+			inputVariable="request"
+			outputVariable="response"/>
+	<assign name="Get_Response">
+	  <copy>
+	    <from variable="response" part="return"/>
+	    <to variable="outputVariable" part="payload"/>
+	  </copy>
+	</assign>
+    	<!-- Asynchronous callback to the requester.
+     	Note: the callback location and correlation id is transparently handled 
+     	using WS-addressing.
+     	-->
+      <invoke name="callbackClient" partnerLink="client" portType="client:AmazonFlowCallback" operation="onResult" inputVariable="outputVariable"/>
+   </sequence>
+</process>

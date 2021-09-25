@@ -1,0 +1,73 @@
+<!--
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+  // Oracle JDeveloper BPEL Designer 
+  // 
+  // Created: Tue Mar 29 11:17:33 PST 2005
+  // Author:  lililiu
+  // Purpose: Empty BPEL Process
+  ///////////////////////////////////////////////////////////////////////////////////////////// 
+-->
+<process name="MulticonsumerOutbound" targetNamespace="http://xmlns.oracle.com/MulticonsumerOutbound" xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20" xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/aq/inbound/" xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns5="http://xmlns.oracle.com/xdb/SCOTT" xmlns:client="http://xmlns.oracle.com/MulticonsumerOutbound" xmlns:ora="http://schemas.oracle.com/xpath/extension" xmlns:ns6="http://xmlns.oracle.com/pcbpel/adapter/aq/outbound/" xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/aq/Enqueue100KOrLess/" xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/aq/DequeuePurchaseOrder/" xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/aq/EnqueueGreaterThan100K/" xmlns:bpelx="http://schemas.oracle.com/bpel/extension" xmlns:orcl="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"><!-- ================================================================= --><!-- PARTNERLINKS                                                      --><!-- List of services participating in this BPEL process               --><!-- ================================================================= -->
+  <partnerLinks>
+    <partnerLink name="Enqueue100KOrLess" partnerRole="Enqueue_role" partnerLinkType="ns1:Enqueue_plt"/>
+    <partnerLink name="EnqueueGreaterThan100K" partnerRole="Enqueue_role" partnerLinkType="ns2:Enqueue_plt"/>
+    <partnerLink myRole="Dequeue_role" name="DequeuePurchaseOrder" partnerLinkType="ns3:Dequeue_plt"/>
+  </partnerLinks><!-- ================================================================= --><!-- VARIABLES                                                         --><!-- List of messages and XML documents used within this BPEL process  --><!-- ================================================================= -->
+  <variables>
+    <variable name="Receive_1_Dequeue_InputVariable" messageType="ns3:PURCHASEORDER_TYPE_msg"/>
+    <variable name="receiver_header" messageType="ns4:Header"/>
+    <variable name="InvokeGreaterThan100k_Enqueue_InputVariable" messageType="ns2:PURCHASEORDER_TYPE_msg"/>
+    <variable name="InvokerGreaterThan100k_header" messageType="ns6:Header"/>
+    <variable name="Invoke100KOrLess_Enqueue_InputVariable" messageType="ns1:PURCHASEORDER_TYPE_msg"/>
+    <variable name="Invoke100KOrLess_header" messageType="ns6:Header"/>
+  </variables><!-- ================================================================= --><!-- ORCHESTRATION LOGIC                                               --><!-- Set of activities coordinating the flow of messages across the    --><!-- services integrated within this business process                  --><!-- ================================================================= -->
+  <sequence name="main">
+    <receive name="Receive_1" partnerLink="DequeuePurchaseOrder" portType="ns3:Dequeue_ptt" operation="Dequeue" variable="Receive_1_Dequeue_InputVariable" createInstance="yes" bpelx:headerVariable="receiver_header"/>
+    <switch name="Switch_1">
+      <case condition="bpws:getVariableData('Receive_1_Dequeue_InputVariable' ,'PURCHASEORDER_TYPE','/ns5:PURCHASEORDER_TYPE /ORDERINFO/TOTALAMOUNT') &gt; 100000">
+        <sequence name="Sequence_1">
+          <assign name="AssignPayloadGreaterThan100K">
+            <copy>
+              <from variable="Receive_1_Dequeue_InputVariable" part="PURCHASEORDER_TYPE" query="/ns5:PURCHASEORDER_TYPE"/>
+              <to variable="InvokeGreaterThan100k_Enqueue_InputVariable" part="PURCHASEORDER_TYPE" query="/ns5:PURCHASEORDER_TYPE"/>
+            </copy>
+          </assign>
+          <switch name="Switch_2">
+            <case condition="bpws:getVariableData('Receive_1_Dequeue_InputVariable' ,'PURCHASEORDER_TYPE','/ns5:PURCHASEORDER_TYPE /ORDERINFO/TOTALAMOUNT') &gt; 150000">
+              <assign name="OverrideRecipientForAbove150K">
+                <copy>
+                  <from expression="string('Mary')"/>
+                  <to variable="InvokerGreaterThan100k_header" part="Header" query="/ns6:Header/ns6:RecipientList"/>
+                </copy>
+              </assign>
+            </case>
+            <otherwise/>
+          </switch>
+          <invoke name="InvokeGreaterThan100k" partnerLink="EnqueueGreaterThan100K" portType="ns2:Enqueue_ptt" operation="Enqueue" inputVariable="InvokeGreaterThan100k_Enqueue_InputVariable" bpelx:inputHeaderVariable="InvokerGreaterThan100k_header"/>
+        </sequence>
+      </case>
+      <otherwise>
+        <sequence name="Sequence_2">
+          <assign name="AssignOtherPayload">
+            <copy>
+              <from variable="Receive_1_Dequeue_InputVariable" part="PURCHASEORDER_TYPE" query="/ns5:PURCHASEORDER_TYPE"/>
+              <to variable="Invoke100KOrLess_Enqueue_InputVariable" part="PURCHASEORDER_TYPE" query="/ns5:PURCHASEORDER_TYPE"/>
+            </copy>
+          </assign>
+          <switch name="Switch_3">
+            <case condition="bpws:getVariableData('Receive_1_Dequeue_InputVariable' ,'PURCHASEORDER_TYPE','/ns5:PURCHASEORDER_TYPE /ORDERINFO/TOTALAMOUNT') &gt; 50000">
+              <assign name="OverrideRecipientGreaterThan50K">
+                <copy>
+                  <from expression="string('Fred')"/>
+                  <to variable="Invoke100KOrLess_header" part="Header" query="/ns6:Header/ns6:RecipientList"/>
+                </copy>
+              </assign>
+            </case>
+            <otherwise/>
+          </switch>
+          <invoke name="Invoke100KOrLess" partnerLink="Enqueue100KOrLess" portType="ns1:Enqueue_ptt" operation="Enqueue" inputVariable="Invoke100KOrLess_Enqueue_InputVariable" bpelx:inputHeaderVariable="Invoke100KOrLess_header"/>
+        </sequence>
+      </otherwise>
+    </switch>
+  </sequence>
+</process>
