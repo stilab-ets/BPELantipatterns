@@ -1,10 +1,10 @@
 nsga2:
     Hypervolume: 
-        Min: 0.0
-        Median: 0.03846153846153844
-        Max: 1.0
+        Min: 0.24846880134823254
+        Median: 0.5337751978329808
+        Max: 0.7911955759757485
         Count: 310
-        Indifferent: [spea2, ibea, nsga3]
+        Indifferent: [nsga3]
     GenerationalDistance: 
         Min: 0.0
         Median: 0.0
@@ -12,15 +12,15 @@ nsga2:
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     InvertedGenerationalDistance: 
-        Min: 0.2919372468685104
-        Median: 0.3379292740460301
-        Max: 0.9445341515737004
+        Min: 0.06821615517228141
+        Median: 0.10111278627471457
+        Max: 0.22536022271332154
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     AdditiveEpsilonIndicator: 
-        Min: 0.0
-        Median: 0.8333333333333334
-        Max: 1.0
+        Min: 0.22399749373433575
+        Median: 0.3633952254641913
+        Max: 0.6773148148148148
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     MaximumParetoFrontError: 
@@ -31,41 +31,41 @@ nsga2:
         Indifferent: [spea2, ibea, nsga3]
     Spacing: 
         Min: 0.0
-        Median: 0.0
-        Max: 0.0
+        Median: 0.09149012015379167
+        Max: 0.1785035024434536
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     Contribution: 
-        Min: 8.064516129032258E-4
-        Median: 0.1153225806451613
-        Max: 0.225
+        Min: 0.011952809686432786
+        Median: 0.042145296491772746
+        Max: 0.11719962744489289
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     R1Indicator: 
-        Min: 9.98003992015968E-4
-        Median: 9.98003992015968E-4
-        Max: 9.98003992015968E-4
+        Min: 0.998003992015968
+        Median: 0.998003992015968
+        Max: 0.998003992015968
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     R2Indicator: 
-        Min: 5.0
-        Median: 10.0
-        Max: 11.0
+        Min: -0.09019845072990651
+        Median: -0.09019845072990651
+        Max: -0.09019845072990651
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
     R3Indicator: 
-        Min: 4.999999999999997
-        Median: 9.999999999999995
-        Max: 10.999999999999998
+        Min: -0.10261741515990293
+        Median: -0.10261741515990293
+        Max: -0.10261741515990293
         Count: 310
         Indifferent: [spea2, ibea, nsga3]
 spea2:
     Hypervolume: 
-        Min: 0.0
-        Median: 0.03846153846153844
-        Max: 1.0
+        Min: 0.3551984369672187
+        Median: 0.5493572873368746
+        Max: 0.7921958202867914
         Count: 310
-        Indifferent: [nsga2, ibea, nsga3]
+        Indifferent: [ibea, nsga3]
     GenerationalDistance: 
         Min: 0.0
         Median: 0.0
@@ -73,15 +73,15 @@ spea2:
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     InvertedGenerationalDistance: 
-        Min: 0.2919372468685104
-        Median: 0.3379292740460301
-        Max: 0.9445341515737004
+        Min: 0.06714225104597282
+        Median: 0.10032697249490485
+        Max: 0.2048002099374158
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     AdditiveEpsilonIndicator: 
-        Min: 0.0
-        Median: 0.8333333333333334
-        Max: 1.0
+        Min: 0.22399749373433575
+        Median: 0.3633952254641913
+        Max: 0.4919565609228548
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     MaximumParetoFrontError: 
@@ -92,41 +92,41 @@ spea2:
         Indifferent: [nsga2, ibea, nsga3]
     Spacing: 
         Min: 0.0
-        Median: 0.0
-        Max: 0.0
+        Median: 0.09630145198185709
+        Max: 0.17325529044846566
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     Contribution: 
-        Min: 0.004032258064516129
-        Median: 0.1153225806451613
-        Max: 0.225
+        Min: 0.019714374417882645
+        Median: 0.04315429990686122
+        Max: 0.11254268860602297
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     R1Indicator: 
-        Min: 9.98003992015968E-4
-        Median: 9.98003992015968E-4
-        Max: 9.98003992015968E-4
+        Min: 0.998003992015968
+        Median: 0.998003992015968
+        Max: 0.998003992015968
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     R2Indicator: 
-        Min: 5.0
-        Median: 10.0
-        Max: 11.0
+        Min: -0.09019845072990651
+        Median: -0.09019845072990651
+        Max: -0.09019845072990651
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
     R3Indicator: 
-        Min: 4.999999999999997
-        Median: 9.999999999999995
-        Max: 10.999999999999998
+        Min: -0.10261741515990293
+        Median: -0.10261741515990293
+        Max: -0.10261741515990293
         Count: 310
         Indifferent: [nsga2, ibea, nsga3]
 ibea:
     Hypervolume: 
-        Min: 0.0
-        Median: 0.03846153846153844
-        Max: 1.0
+        Min: 0.16863829364790484
+        Median: 0.5531198341360124
+        Max: 0.7938458113974298
         Count: 310
-        Indifferent: [nsga2, spea2, nsga3]
+        Indifferent: [spea2]
     GenerationalDistance: 
         Min: 0.0
         Median: 0.0
@@ -134,15 +134,15 @@ ibea:
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     InvertedGenerationalDistance: 
-        Min: 0.2919372468685104
-        Median: 0.3379292740460301
-        Max: 0.9445341515737004
+        Min: 0.06635225418566108
+        Median: 0.10132075317783767
+        Max: 0.3127438743320619
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     AdditiveEpsilonIndicator: 
-        Min: 0.0
-        Median: 0.8333333333333334
-        Max: 1.0
+        Min: 0.22399749373433575
+        Median: 0.3633952254641913
+        Max: 0.8286423841059604
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     MaximumParetoFrontError: 
@@ -153,41 +153,41 @@ ibea:
         Indifferent: [nsga2, spea2, nsga3]
     Spacing: 
         Min: 0.0
-        Median: 0.0
-        Max: 0.0
+        Median: 0.09073285038843537
+        Max: 0.17380959781589564
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     Contribution: 
-        Min: 8.064516129032258E-4
-        Median: 0.1153225806451613
-        Max: 0.225
+        Min: 0.013970816516609749
+        Median: 0.04237814343371624
+        Max: 0.11906240298044085
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     R1Indicator: 
-        Min: 9.98003992015968E-4
-        Median: 9.98003992015968E-4
-        Max: 9.98003992015968E-4
+        Min: 0.998003992015968
+        Median: 0.998003992015968
+        Max: 0.998003992015968
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     R2Indicator: 
-        Min: 5.0
-        Median: 10.0
-        Max: 11.0
+        Min: -0.09019845072990651
+        Median: -0.09019845072990651
+        Max: -0.09019845072990651
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
     R3Indicator: 
-        Min: 4.999999999999997
-        Median: 9.999999999999995
-        Max: 10.999999999999998
+        Min: -0.10261741515990293
+        Median: -0.10261741515990293
+        Max: -0.10261741515990293
         Count: 310
         Indifferent: [nsga2, spea2, nsga3]
 nsga3:
     Hypervolume: 
-        Min: 0.0
-        Median: 0.03846153846153844
-        Max: 1.0
+        Min: 0.19709118591753333
+        Median: 0.5377676553722086
+        Max: 0.7902990399727343
         Count: 310
-        Indifferent: [nsga2, spea2, ibea]
+        Indifferent: [nsga2, spea2]
     GenerationalDistance: 
         Min: 0.0
         Median: 0.0
@@ -195,15 +195,15 @@ nsga3:
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     InvertedGenerationalDistance: 
-        Min: 0.2919372468685104
-        Median: 0.3379292740460301
-        Max: 0.9445341515737004
+        Min: 0.06904738781365613
+        Median: 0.10135772522739722
+        Max: 0.26251575568048474
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     AdditiveEpsilonIndicator: 
-        Min: 0.0
-        Median: 0.8333333333333334
-        Max: 1.0
+        Min: 0.22825793078586842
+        Median: 0.3633952254641913
+        Max: 0.7965517241379312
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     MaximumParetoFrontError: 
@@ -214,31 +214,31 @@ nsga3:
         Indifferent: [nsga2, spea2, ibea]
     Spacing: 
         Min: 0.0
-        Median: 0.0
-        Max: 0.0
+        Median: 0.09187847558733644
+        Max: 0.18339287855439868
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     Contribution: 
-        Min: 0.004032258064516129
-        Median: 0.1153225806451613
-        Max: 0.225
+        Min: 0.01723067370381869
+        Median: 0.04284383731760323
+        Max: 0.11875194039118286
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     R1Indicator: 
-        Min: 9.98003992015968E-4
-        Median: 9.98003992015968E-4
-        Max: 9.98003992015968E-4
+        Min: 0.998003992015968
+        Median: 0.998003992015968
+        Max: 0.998003992015968
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     R2Indicator: 
-        Min: 5.0
-        Median: 10.0
-        Max: 11.0
+        Min: -0.09019845072990651
+        Median: -0.09019845072990651
+        Max: -0.09019845072990651
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
     R3Indicator: 
-        Min: 4.999999999999997
-        Median: 9.999999999999995
-        Max: 10.999999999999998
+        Min: -0.10261741515990293
+        Median: -0.10261741515990293
+        Max: -0.10261741515990293
         Count: 310
         Indifferent: [nsga2, spea2, ibea]
