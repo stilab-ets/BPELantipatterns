@@ -1,0 +1,385 @@
+ scenario <- readScenario(filename = "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/scenario.txt",scenario = defaultScenario())
+> checkIraceScenario(scenario = scenario)
+# 2022-06-19 20:21:52 CEST: Checking scenario
+## irace scenario:
+scenarioFile = "./scenario.txt"
+parameterFile = "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/parameters.txt"
+execDir = "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/exec-dir -Lost_F1"
+logFile = "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/exec-dir -Lost_F1/irace.Rdata"
+recoveryFile = NULL
+instances = c("f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10")
+initConfigurations = NULL
+trainInstancesDir = ""
+trainInstancesFile = "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/instances.txt"
+configurationsFile = ""
+forbiddenExps = NULL = expression()
+forbiddenFile = ""
+targetRunner = "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/target-runner-moea-lost.exe"
+targetRunnerRetries = 0
+targetRunnerData = ""
+targetRunnerParallel = NULL
+targetEvaluator = NULL
+maxExperiments = 1000
+maxTime = 0
+budgetEstimation = 0.02
+digits = 4
+debugLevel = 2
+nbIterations = 0
+nbExperimentsPerIteration = 0
+sampleInstances = TRUE
+testType = "t.bonferroni"
+firstTest = 5
+eachTest = 1
+minNbSurvival = 0
+nbConfigurations = 0
+mu = 5
+confidence = 0.95
+deterministic = FALSE
+seed = NA_character_
+parallel = 0
+loadBalancing = TRUE
+mpi = FALSE
+batchmode = "0"
+softRestart = TRUE
+softRestartThreshold = 1e-04
+testInstancesDir = ""
+testInstancesFile = ""
+testInstances = NULL
+testNbElites = 1
+testIterationElites = FALSE
+elitist = TRUE
+elitistNewInstances = 1
+elitistLimit = 2
+repairConfiguration = NULL
+capping = FALSE
+cappingType = "median"
+boundType = "candidate"
+boundMax = NULL
+boundDigits = 0
+boundPar = 1
+boundAsTimeout = TRUE
+postselection = 0
+aclib = FALSE
+## end of irace scenario
+# 2022-06-19 20:21:52 CEST: Reading parameter file 'C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/parameters.txt'.
+# --- Parameters Hierarchy ---
+[1] "pop"    "gener"  "pcross" "pmut"  
+   pop  gener pcross   pmut 
+     1      1      1      1 
+   pop  gener pcross   pmut 
+    ""     ""     ""     "" 
+  Parameter Level Depends.on
+1       pop     1           
+2     gener     1           
+3    pcross     1           
+4      pmut     1           
+
+# ------------------------
+$names
+[1] "pop"    "gener"  "pcross" "pmut"  
+
+$types
+   pop  gener pcross   pmut 
+   "o"    "o"    "r"    "r" 
+
+$switches
+   pop  gener pcross   pmut 
+    ""     ""     ""     "" 
+
+$domain
+$domain$pop
+[1] "20"  "40"  "60"  "80"  "100"
+
+$domain$gener
+ [1] "100"  "200"  "300"  "400"  "500"  "600"  "700"  "800"  "900"  "1000"
+
+$domain$pcross
+[1] 0 1
+
+$domain$pmut
+[1] 0 1
+
+
+$conditions
+$conditions$pop
+[1] TRUE
+
+$conditions$gener
+[1] TRUE
+
+$conditions$pcross
+[1] TRUE
+
+$conditions$pmut
+[1] TRUE
+
+
+$isFixed
+   pop  gener pcross   pmut 
+ FALSE  FALSE  FALSE  FALSE 
+
+$transform
+$transform$pop
+[1] ""
+
+$transform$gener
+[1] ""
+
+$transform$pcross
+[1] ""
+
+$transform$pmut
+[1] ""
+
+
+$depends
+$depends$pop
+character(0)
+
+$depends$gener
+character(0)
+
+$depends$pcross
+character(0)
+
+$depends$pmut
+character(0)
+
+
+$hierarchy
+   pop  gener pcross   pmut 
+     1      1      1      1 
+
+$nbParameters
+[1] 4
+
+$nbFixed
+[1] 0
+
+$nbVariable
+[1] 4
+
+# 2022-06-19 20:21:52 CEST: Checking target execution.
+# Executing targetRunner ( 2 times)...
+# 2022-06-19 20:21:52 CEST: C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/target-runner-moea-lost.exe testConfig1 4 1234567 f4   80 200 0.4659 0.3569
+# 2022-06-19 20:22:15 CEST: DONE (testConfig1) Elapsed wall-clock seconds: 22.25
+-0.41062903315572763
+
+# 2022-06-19 20:22:15 CEST: C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/target-runner-moea-lost.exe testConfig2 4 1234567 f4   100 800 0.5685 0.452
+# 2022-06-19 20:22:34 CEST: DONE (testConfig2) Elapsed wall-clock seconds: 18.79
+-0.38230456209169156
+
+# targetRunner returned:
+[[1]]
+[[1]]$cost
+[1] -0.410629033155728
+
+[[1]]$time
+[1] NA
+
+[[1]]$error
+NULL
+
+[[1]]$outputRaw
+[1] "-0.41062903315572763" ""                    
+
+[[1]]$call
+[1] "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/target-runner-moea-lost.exe testConfig1 4 1234567 f4   80 200 0.4659 0.3569"
+
+
+[[2]]
+[[2]]$cost
+[1] -0.382304562091692
+
+[[2]]$time
+[1] NA
+
+[[2]]$error
+NULL
+
+[[2]]$outputRaw
+[1] "-0.38230456209169156" ""                    
+
+[[2]]$call
+[1] "C:/Users/Prince/Documents/R/win-library/4.0/irace/tuning/target-runner-moea-lost.exe testConfig2 4 1234567 f4   100 800 0.5685 0.452"
+
+
+# 2022-06-19 20:22:34 CEST: Check succesful.
+[1] TRUE
+> irace.main(scenario = scenario)
+# 2022-06-19 20:23:17 CEST: Initialization
+# Elitist race
+# Elitist new instances: 1
+# Elitist limit: 2
+# nbIterations: 4
+# minNbSurvival: 4
+# nbParameters: 4
+# seed: 1069033161
+# confidence level: 0.95
+# budget: 1000
+# mu: 5
+# deterministic: FALSE
+
+# 2022-06-19 20:23:17 CEST: Iteration 1 of 4
+# experimentsUsedSoFar: 0
+# remainingBudget: 1000
+# currentBudget: 250
+# nbConfigurations: 41
+# Markers:
+     x No test is performed.
+     c Configurations are discarded only due to capping.
+     - The test is performed and some configurations are discarded.
+     = The test is performed but no configuration is discarded.
+     ! The test is performed and configurations could be discarded but elite configurations are preserved.
+     . All alive configurations are elite and nothing is discarded
+
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+| |   Instance|      Alive|       Best|      Mean best| Exp so far|  W time|  rho|KenW|  Qvar|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+|x|          1|         41|          6|  -0.5478702816|         41|00:14:55|   NA|  NA|    NA|
+|x|          2|         41|          6|  -0.4756019942|         82|00:14:16|-0.15|0.42|1.1891|
+|x|          3|         41|         37|  -0.4374574377|        123|00:14:11|+0.06|0.37|0.9583|
+|x|          4|         41|         37|  -0.4345533029|        164|00:16:33|+0.03|0.27|0.9398|
+|-|          5|         40|         37|  -0.4411682791|        205|00:12:53|+0.07|0.26|0.9132|
+|=|          6|         40|          2|  -0.4390942722|        245|00:15:01|+0.03|0.19|0.9628|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+Best-so-far configuration:           2    mean value:   -0.4390942722
+Description of the best-so-far configuration:
+  .ID. pop gener pcross   pmut .PARENT.
+2    2  60   800  0.406 0.3906       NA
+
+# 2022-06-19 21:51:08 CEST: Elite configurations (first number is the configuration ID; listed from best to worst according to the mean value):
+   pop gener pcross   pmut
+2   60   800 0.4060 0.3906
+37  20   600 0.7706 0.0353
+7   20   500 0.7587 0.9709
+29  40  1000 0.9766 0.9260
+# 2022-06-19 21:51:08 CEST: Iteration 2 of 4
+# experimentsUsedSoFar: 245
+# remainingBudget: 755
+# currentBudget: 251
+# nbConfigurations: 39
+# Markers:
+     x No test is performed.
+     c Configurations are discarded only due to capping.
+     - The test is performed and some configurations are discarded.
+     = The test is performed but no configuration is discarded.
+     ! The test is performed and configurations could be discarded but elite configurations are preserved.
+     . All alive configurations are elite and nothing is discarded
+
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+| |   Instance|      Alive|       Best|      Mean best| Exp so far|  W time|  rho|KenW|  Qvar|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+|x|          7|         39|         68|  -0.4495607616|         39|00:14:44|   NA|  NA|    NA|
+|x|          4|         39|         76|  -0.4419311527|         74|00:15:30|+0.06|0.53|0.9296|
+|x|          1|         39|         51|  -0.4551594762|        109|00:11:29|+0.06|0.38|0.9176|
+|x|          3|         39|         76|  -0.4309128061|        144|00:12:54|+0.00|0.25|0.9995|
+|=|          5|         39|         76|  -0.4519741867|        179|00:13:03|+0.03|0.23|0.9445|
+|=|          2|         39|         76|  -0.4622122662|        214|00:12:29|+0.08|0.24|0.8895|
+|=|          6|         39|         76|  -0.4361744279|        249|00:12:09|+0.03|0.17|0.9292|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+Best-so-far configuration:          76    mean value:   -0.4361744279
+Description of the best-so-far configuration:
+   .ID. pop gener pcross   pmut .PARENT.
+76   76  20   900 0.8762 0.0925       37
+
+# 2022-06-19 23:23:30 CEST: Elite configurations (first number is the configuration ID; listed from best to worst according to the mean value):
+   pop gener pcross   pmut
+76  20   900 0.8762 0.0925
+67  20   600 0.8777 0.0249
+37  20   600 0.7706 0.0353
+2   60   800 0.4060 0.3906
+# 2022-06-19 23:23:30 CEST: Iteration 3 of 4
+# experimentsUsedSoFar: 494
+# remainingBudget: 506
+# currentBudget: 253
+# nbConfigurations: 35
+# Markers:
+     x No test is performed.
+     c Configurations are discarded only due to capping.
+     - The test is performed and some configurations are discarded.
+     = The test is performed but no configuration is discarded.
+     ! The test is performed and configurations could be discarded but elite configurations are preserved.
+     . All alive configurations are elite and nothing is discarded
+
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+| |   Instance|      Alive|       Best|      Mean best| Exp so far|  W time|  rho|KenW|  Qvar|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+|x|          8|         35|         83|  -0.5423066449|         35|00:10:45|   NA|  NA|    NA|
+|x|          5|         35|         77|  -0.5091520342|         66|00:10:38|+0.27|0.64|0.7527|
+|x|          7|         35|         89|  -0.4896479806|         97|00:10:07|+0.04|0.36|0.9690|
+|x|          1|         35|         89|  -0.4714435959|        128|00:10:19|-0.03|0.23|1.0175|
+|=|          2|         35|        106|  -0.4722460192|        159|00:10:13|+0.02|0.21|0.9606|
+|=|          6|         35|        106|  -0.4718374674|        190|00:10:36|+0.01|0.17|0.9689|
+|=|          3|         35|         77|  -0.4574536948|        221|00:12:06|+0.01|0.15|0.9672|
+|-|          4|         34|         77|  -0.4713504559|        252|00:12:15|+0.02|0.15|0.9380|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+Best-so-far configuration:          77    mean value:   -0.4713504559
+Description of the best-so-far configuration:
+   .ID. pop gener pcross   pmut .PARENT.
+77   77  20   900 0.8545 0.1747       76
+
+# 2022-06-20 00:50:34 CEST: Elite configurations (first number is the configuration ID; listed from best to worst according to the mean value):
+    pop gener pcross   pmut
+77   20   900 0.8545 0.1747
+101  20   800 0.9581 0.0859
+89   20  1000 0.7905 0.0258
+106  20   900 0.8113 0.2324
+# 2022-06-20 00:50:34 CEST: Iteration 4 of 4
+# experimentsUsedSoFar: 746
+# remainingBudget: 254
+# currentBudget: 254
+# nbConfigurations: 31
+# Markers:
+     x No test is performed.
+     c Configurations are discarded only due to capping.
+     - The test is performed and some configurations are discarded.
+     = The test is performed but no configuration is discarded.
+     ! The test is performed and configurations could be discarded but elite configurations are preserved.
+     . All alive configurations are elite and nothing is discarded
+
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+| |   Instance|      Alive|       Best|      Mean best| Exp so far|  W time|  rho|KenW|  Qvar|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+|x|          9|         31|        101|  -0.5078731787|         31|00:10:30|   NA|  NA|    NA|
+|x|          3|         31|        108|  -0.4751882405|         58|00:09:19|-0.21|0.39|1.0700|
+|x|          8|         31|        108|  -0.4766056436|         85|00:08:51|+0.05|0.37|0.8679|
+|x|          6|         31|        101|  -0.4748270222|        112|00:08:34|+0.03|0.27|0.9214|
+|=|          5|         31|        109|  -0.4675250001|        139|00:08:13|+0.05|0.24|0.9005|
+|=|          2|         31|        116|  -0.4669838324|        166|00:07:57|+0.04|0.20|0.9065|
+|=|          7|         31|        113|  -0.4567723753|        193|00:08:54|-0.00|0.14|0.9391|
+|-|          4|         30|        101|  -0.4662656084|        220|00:10:28|+0.01|0.14|0.9250|
+|=|          1|         30|        101|  -0.4670825028|        246|00:10:50|+0.02|0.13|0.9301|
++-+-----------+-----------+-----------+---------------+-----------+--------+-----+----+------+
+Best-so-far configuration:         101    mean value:   -0.4670825028
+Description of the best-so-far configuration:
+    .ID. pop gener pcross   pmut .PARENT.
+101  101  20   800 0.9581 0.0859       76
+
+# 2022-06-20 02:14:14 CEST: Elite configurations (first number is the configuration ID; listed from best to worst according to the mean value):
+    pop gener pcross   pmut
+101  20   800 0.9581 0.0859
+109  20   800 0.9148 0.0742
+77   20   900 0.8545 0.1747
+117  20   800 0.8110 0.1783
+# 2022-06-20 02:14:14 CEST: Stopped because there is not enough budget left to race more than the minimum (4)
+# You may either increase the budget or set 'minNbSurvival' to a lower value
+# Iteration: 5
+# nbIterations: 5
+# experimentsUsedSoFar: 992
+# timeUsed: 0
+# remainingBudget: 8
+# currentBudget: 8
+# number of elites: 4
+# nbConfigurations: 4
+# Best configurations (first number is the configuration ID; listed from best to worst according to the mean value):
+    pop gener pcross   pmut
+101  20   800 0.9581 0.0859
+109  20   800 0.9148 0.0742
+77   20   900 0.8545 0.1747
+117  20   800 0.8110 0.1783
+# Best configurations as commandlines (first number is the configuration ID; same order as above):
+101  20 800 0.9581 0.0859
+109  20 800 0.9148 0.0742
+77   20 900 0.8545 0.1747
+117  20 800 0.811 0.1783
